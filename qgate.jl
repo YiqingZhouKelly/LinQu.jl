@@ -1,33 +1,54 @@
-using ITensors
+using ITensors,LinearAlgebra, Statistics
 struct QGate 
-	gate::ITensor
-	pos::Vector{Int}
+	gate::Vector{Number}
+	numqubits::Int # 1 - single qubit gate; 2- two qubit gate etc
 end
 
-SingleQubitGate(array::Vector{Number},pos) = QGate(ITensor(array, Index(2), Index(2)),pos)
-IGate(pos::Vector{Int}) = SingleQubitGate([1.,0.,0.,1.],pos)
-XGate(pos::Vector{Int}) = SingleQubitGate([0.,1.,1.,0.],pos)
-YGate(pos::Vector{Int}) = SingleQubitGate([0.,-1.0im, 1.0im, 0.],pos)
-ZGate(pos::Vector{Int}) = SingleQubitGate([1.,0.,0.,-1.],pos)
-TGate(pos::Vector{Int}) = SingleQubitGate([1.,0.,0.,exp(-1im*π/4)], pos)
+# == sigle quibit gates == 
+IGate() = QGate([1.,0.,0.,1.],1)
+XGate() = QGate([0.,1.,1.,0.],1)
+YGate() = QGate([0.,-1.0im, 1.0im, 0.],1)
+ZGate() = QGate([1.,0.,0.,-1.],1)
+TGate() = QGate([1.,0.,0.,exp(-1im*π/4)],1)
+HGate() = QGate((1/√2)*[1,1,1,-1],1) # H could be decomposed in to XY / YZ gates
+SGate() = QGate([1.,0.,0.,1.0im],1)
+function Rx(θ::Number)
+	c = cos(θ/2.)
+	s = -1.0im*sim(θ/2.)
+	QGate([c,s,s,c],1)
+end
 
-IGate(pos::Int) = IGate([pos])
-XGate(pos::Int) = XGate([pos])
-YGate(pos::Int) = YGate([pos])
-ZGate(pos::Int) = ZGate([pos])
-TGate(pos::Int) = TGate([pos])
-#TODO: error here, two quibit gate should take two pos
-TwoQubitGate(array::Vector{Number},pos) = QGate(ITensor(array,Index(2),Index(2), Index(2),Index(2)),pos)
-SwapGate(pos::Vector{Int}) = TwoQubitGate([1.,0.,0.,0.,
-								   0.,0.,1.,0.,
-								   0.,1.,0.,0.,
-								   0.,0.,0.,1.],pos)
-CNOTGate(pos::Vector{Int}) = TwoQubitGate([1.,0.,0.,0.,
-								   0.,1.,0.,0.,
-								   0.,0.,0.,1.,
-								   0.,0.,1.,0.],pos)
+function Ry(θ::Number)
+	c = cos(θ/2.)
+	s = sin(θ/2.)
+	QGate([c,-s,s,c],1)
+end
+
+function Rz(θ::Number)
+	exponent_ = θ/2.
+	QGate([exp(-exponent_),0.,0.,exp(exponent_)],1)
+end
+
+
+# == two qubit gates ==
+SwapGate() = QGate([1.,0.,0.,0.,
+				    0.,0.,1.,0.,
+				    0.,1.,0.,0.,
+				    0.,0.,0.,1.],2)
+CNOTGate() = QGate([1.,0.,0.,0.,
+				    0.,1.,0.,0.,
+				    0.,0.,0.,1.,
+				    0.,0.,1.,0.],2)
+CZGate() = QGate(Diagonal([1.,1.,1.,-1.]),2) #check diagonal working??
+CRGate(θ::Number) = QGate(Diagonal([1.,1.,1.,exp(1.0im*θ))]),2)
+CRkGate(k::Number) = CRGate()
 
 # Toffoli 
-
+function ToffoliGate()
+	mat = diagm(0 =>push!(ones(6),0.,0.))
+	mat[7,8] = 1.
+	mat[8,7] = 1.
+	QGate(mat, 3)
+end 
 
 

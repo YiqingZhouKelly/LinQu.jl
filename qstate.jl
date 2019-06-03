@@ -1,7 +1,7 @@
 using ITensors
 import ITensors.linkind,
-	   ITensors.getindex
-	   ITensors.all
+	   ITensors.getindex,
+	   MPS.length
 
 
 abstract type QState end
@@ -46,7 +46,7 @@ end #struct
 
 # getindex(st::MPSState,n::Int) = getindex(st.s,n)
 # setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
-# length(m::MPSState) = m.s.N_
+# length(m::MPSState) = length(m.s) #is this needed?
 # copy(st::MPSState) = copy(st.s)
 
 getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
@@ -64,7 +64,8 @@ getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
 initstate = rand(Float64,2)
 # initstate/=norm(initstate)
 # print("norm = ", norm(initstate))
-print(MPSState(8,initstate))
+m = MPSState(8,initstate)
+print(length(m))
 
 
 
