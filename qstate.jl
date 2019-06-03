@@ -49,20 +49,7 @@ end #struct
 # length(m::MPSState) = m.s.N_
 # copy(st::MPSState) = copy(st.s)
 
-
-# function freeind(st::MPSState,j::Integer)
-# 	link =[]
-# 	if j<length(st)
-# 		push!(link,linkind(st.s,j)) #linkind not exported
-# 	end
-# 	if j>1
-# 		push!(link,linkind(st.s,j-1))
-# 	end
-# 	# print("get diff")
-# 	setdiff(inds(getindex(st,j)), link)
-# end 
-
-
+getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
 
 # struct MixedState <: QState
 # 	s::MPS
