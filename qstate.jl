@@ -1,8 +1,10 @@
 using ITensors
 import ITensors.linkind,
 	   ITensors.getindex,
-	   MPS.length
-
+	   Base.length,
+	   Base.copy,
+	   ITensors.noprime!
+# Move to a module later...
 
 abstract type QState end
 
@@ -18,12 +20,12 @@ struct MPSState <: QState
 		linklist = Index[]
 		freelist = Index[]
 		itensorlist = ITensor[]
-		if length(init)!=2
-			error("init dim error")
-		end
-		if norm(init)!== 1.0 
-			error("init wrong norm")
-		end
+		# if length(init)!=2
+		# 	error("init dim error")
+		# end
+		# if norm(init)!== 1.0 
+		# 	error("init wrong norm",norm(init)) #?? comparison not working as expected
+		# end
 		for i = 1 : N 
 			push!(freelist,Index(2))
 			if i < N
@@ -41,15 +43,34 @@ struct MPSState <: QState
 		new(m,freelist)
 	end
 
-	MPSState(N::Int) = MPSState(N,[1.,0.])
+	MPSState(N::Int) = MPSState(N,[1.,0.]) #initialize to |0> state
 end #struct
 
 # getindex(st::MPSState,n::Int) = getindex(st.s,n)
 # setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
-# length(m::MPSState) = length(m.s) #is this needed?
-# copy(st::MPSState) = copy(st.s)
 
+length(m::MPSState) = length(m.s)
+
+# copy(st::MPSState) = MPSState(copy(st.s), ) # Need to think about how to get the free list...
+getfreelist(m::MPSState) = m.freelist
 getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
+
+function noprime!(A::ITensor)
+	noprime!(IndexSet(A))
+	A
+end
+
+function applygate!(qs::MPSState, gate::Tuple{Vector{Float64},Vector{Int}})
+	data,pos = gate
+	freeinds = IndexSet([getfree(qs,ii) for ii ∈ pos])
+	print("inds:", inds)
+	product = ITensor(data,IndexSet(freeinds,prime(freeinds)))
+	print("good so far")
+	for ii ∈ pos
+		product*=qs.s[ii]
+	end
+	noprime!(product)
+end	
 
 # struct MixedState <: QState
 # 	s::MPS
@@ -60,12 +81,12 @@ getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
 # end 
 
 # ===== mini test ====
-
 initstate = rand(Float64,2)
-# initstate/=norm(initstate)
+initstate/=norm(initstate)
 # print("norm = ", norm(initstate))
-m = MPSState(8,initstate)
-print(length(m))
-
+m = MPSState(3,initstate)
+print(m)
+gate = ([0.,1.,1.,0.],[2])
+print(applygate!(m,gate))
 
 

@@ -1,31 +1,45 @@
 struct QCircuit
-	initstate::QState
-	currstate::QState
-	gatelist::Vector{QGate}
+	# initstate::QState
+	state::QState
+	gatelist::Vector{(Vector{Number},Vector{Number})}
 	evalpos::Int
 	outgoing:: Vector{Index}
-	# poslist::Vector{Int}
+	# QCircuit(numqubits::Int) = new(MPSStates(numqubits),QGate[], 0, )
+	function QCircuit(numqubits::Int)
+		mps = MPSState(numqubits)
+		outgoing = getfreelist(mps)
+		new(mps,QGate[],0,outgoing) 
+	end
+	QCircuit(mps::MPSState) = new(mps,QGate[],0,getfreelist(mps))
+
 end
 
-function preprocess!(qc::QCircuit)::QCircuit 
-
+function addgate(qc::QCircuit, gate::Vector{Number}, pos::Vector{Int})
+	push!(qc.gatelist,(gate,pos))
 end
+
+# function preprocess!(qc::QCircuit)::QCircuit 
+
+# end
 
 function runcircuit!(qc::QCircuit)    
+	for i = 1:length(qc.gatelist)
+		applygate!(qc.state,gatelist[i])
 
+	end
 end 
 
-function runcircuit!(qc::Qcircuit, step::Int)
+# function runcircuit!(qc::Qcircuit, step::Int)
 
-end
+# end
 
-function measure(qc::QCircuit, pos::Integer)
+# function measure(qc::QCircuit, pos::Integer)
 
-end
+# end
 
-function connect!(qc::QCircuit)
-	for ii = 1 to length(gatelist)
+# function connect!(qc::QCircuit)
+# 	for ii = 1 to length(gatelist)
 		
-	end
-end
+# 	end
+# end
 
