@@ -7,8 +7,9 @@ import ITensors.linkind,
 	   ITensors.svd,
 	   ITensors.position!,
 	   ITensors.setindex!,
-	   ITensors.svd.
-	   ITensors.commonindex
+	   ITensors.svd,
+	   ITensors.commonindex,
+	   ITensors.linkind
 # Move to a module later...
 
 abstract type QState end
@@ -17,7 +18,7 @@ abstract type QState end
 
 struct MPSState <: QState
 	s::MPS
-	freelist:: Vector{Index} #?? is it really needed
+	# freelist:: Vector{Index} #?? is it really needed
 
 	# MPSState() = new(MPS())
 
@@ -25,12 +26,6 @@ struct MPSState <: QState
 		linklist = Index[]
 		freelist = Index[]
 		itensorlist = ITensor[]
-		# if length(init)!=2
-		# 	error("init dim error")
-		# end
-		# if norm(init)!== 1.0 
-		# 	error("init wrong norm",norm(init)) #?? comparison not working as expected
-		# end
 		for i = 1 : N 
 			push!(freelist,Index(2))
 			if i < N
@@ -44,21 +39,30 @@ struct MPSState <: QState
 				push!(itensorlist,ITensor(init,linklist[i-1],linklist[i],freelist[i]))
 			end
 		end
-		m = MPS(N,itensorlist,0,N+1)
-		new(m,freelist)
+		new(MPS(N,itensorlist,0,N+1))
 	end
 
 	MPSState(N::Int) = MPSState(N,[1.,0.]) #initialize to |0> state
 end #struct
 
-getindex(st::MPSState,n::Int) = getindex(st.s,n)
-setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
-MPS(qs::MPSState) = qs.s
+getindex(st::MPSState,n::Int) = getindex(st.s,n) # ::ITensor
+setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n) 
+MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 
+
 # copy(st::MPSState) = MPSState(copy(st.s), ) # Need to think about how to get the free list...
-getfreelist(m::MPSState) = m.freelist
-getfree(m::MPSState,j::Int) = getindex(m.freelist,j)
+getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
+
+function getfree(qs::MPSState,j::Int)
+	links = Index[]
+	i>1 && push!(links, getlink(qs,j-1))
+	i<length(qs) && push!(links,getlink(qs,j))
+	allinds = IndexSet(qs[j]) 
+end
+
+
+
 
 function noprime!(A::ITensor)
 	noprime!(IndexSet(A))
