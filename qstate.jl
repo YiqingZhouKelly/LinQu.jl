@@ -3,7 +3,12 @@ import ITensors.linkind,
 	   ITensors.getindex,
 	   Base.length,
 	   Base.copy,
-	   ITensors.noprime!
+	   ITensors.noprime!,
+	   ITensors.svd,
+	   ITensors.position!,
+	   ITensors.setindex!,
+	   ITensors.svd.
+	   ITensors.commonindex
 # Move to a module later...
 
 abstract type QState end
@@ -46,9 +51,9 @@ struct MPSState <: QState
 	MPSState(N::Int) = MPSState(N,[1.,0.]) #initialize to |0> state
 end #struct
 
-# getindex(st::MPSState,n::Int) = getindex(st.s,n)
-# setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
-
+getindex(st::MPSState,n::Int) = getindex(st.s,n)
+setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
+MPS(qs::MPSState) = qs.s
 length(m::MPSState) = length(m.s)
 
 # copy(st::MPSState) = MPSState(copy(st.s), ) # Need to think about how to get the free list...
@@ -60,17 +65,75 @@ function noprime!(A::ITensor)
 	A
 end
 
+function applygate!(qs::MPSState, qg::QGate)
+	movegauge!(qs,pos)
+	igate_ = igate(qs,qg)
+	# == contraction goes here ==
+	product = contractgate!(igate_,[qs[i] for i ∈ pos(qg)]) # TODO:check site continuity
+	itensor_vector = toMPS(product,range(qg))
+	replacesites!(qs,itensor_vector,pos(qg))
+end
+
+function movegauge(qs::MPSState, qg::QGate)
+	#TODO: optimization - find the shortest way to move the guage
+	position!(MPS(qs),pos(qg)[1])
+end
+
+function igate(qs::MPSState, qg::QGate)
+	inds = [getfree(qs,i) for i ∈ pos(qg)]
+	inds = IndexSet(inds, prime(inds))
+	igate_ = ITensor(gatematrix(qg), inds)
+end
+
+function contractgate!(igate_:: ITensor, sites:: Vector{ITensor})
+	for site ∈ sites
+		igate_*= site
+	end
+	return igate_
+end
+
+function toMPS(exact::ITensor, N::Int; kwargs...)
+	# TODO: how to detect left indices??
+	toreturn = ITensor[]
+	leftIndex = Index(2) # need fix
+	remain = copy(exact)
+	for i = 1:N-1
+		U,S,V,u,v = svd(remain,leftIndex; kwargs...)
+		push!(toreturn,U)
+		leftIndex = commonindex(U,S) #wrong... should also include the phyiscal bond
+		remain = S*V
+	end 
+	push!(toreturn,remain)
+	return toreturn
+end
+
+function replacesites!(qs::MPSState,newsites::Vector{ITensor}, pos::Vector{Int})
+	for i = 1: length(pos)
+		qs[pos[i]] = newsites[i]
+	end
+	return qs
+end		
+"""
 function applygate!(qs::MPSState, gate::Tuple{Vector{Float64},Vector{Int}})
-	data,pos = gate
+	(data,pos) = gate
+	# position!(...) #Move the gauge
 	freeinds = IndexSet([getfree(qs,ii) for ii ∈ pos])
 	print("inds:", inds)
 	product = ITensor(data,IndexSet(freeinds,prime(freeinds)))
-	print("good so far")
 	for ii ∈ pos
 		product*=qs.s[ii]
 	end
 	noprime!(product)
+	#get back to mps format 
+	itensors = tsvd(product, length(pos))
 end	
+
+function toMPS(A::ITensor, N::Int)
+	for i = 1:N
+
+	end
+end
+"""
 
 # struct MixedState <: QState
 # 	s::MPS

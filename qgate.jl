@@ -1,9 +1,12 @@
 using ITensors,LinearAlgebra, Statistics
 struct QGate 
 	gate::Vector{Number}
-	numqubits::Int # 1 - single qubit gate; 2- two qubit gate etc
+	# numqubits::Int # 1 - single qubit gate; 2- two qubit gate etc/\
+	pos::Vector{Int}
 end
-
+pos(g::QGate) = g.pos
+range(g::QGate) = length(g.pos)
+gatematrix(g::QGate) = g.gate
 # == sigle quibit gates == 
 IGate() = QGate([1.,0.,0.,1.],1)
 XGate() = QGate([0.,1.,1.,0.],1)
