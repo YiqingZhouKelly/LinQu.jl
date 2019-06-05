@@ -1,4 +1,5 @@
 using ITensors
+include("./helper.jl")
 import ITensors.linkind,
 	   ITensors.getindex,
 	   Base.length,
@@ -12,34 +13,36 @@ import ITensors.linkind,
 	   ITensors.linkind
 # Move to a module later...
 
+# == helpers that should not belong here == 
+function noprime!(A::ITensor)
+	""" set prime level of all Indices connected to A to 0"""
+	noprime!(IndexSet(A))
+	A
+end 
+# == helpers that should not belong to here end == 
 abstract type QState end
 
 # error check no valid subclass function fits the call
 
 struct MPSState <: QState
 	s::MPS
-	# freelist:: Vector{Index} #?? is it really needed
-
-	# MPSState() = new(MPS())
-
 	function MPSState(N::Int, init::Vector{T}) where {T}
-		linklist = Index[]
-		freelist = Index[]
-		itensorlist = ITensor[]
-		for i = 1 : N 
-			push!(freelist,Index(2))
-			if i < N
-				push!(linklist,Index(1))
-			end
-			if i == 1
-				push!(itensorlist, ITensor(init, linklist[i],freelist[i]))
+		itensors = ITensor[]
+		rightlink,leftlink
+		for i =1:N
+			global rightlink, leftlink
+			if i ==1
+				rightlink = Index(1)
+				push!(itensors, ITensor(init, rightlink,Index(2)))
 			elseif i == N
-				push!(itensorlist,ITensor(init, linklist[i-1],freelist[i]))
+				push!(itensors, ITensor(init, leftlink, Index(2)))
 			else
-				push!(itensorlist,ITensor(init,linklist[i-1],linklist[i],freelist[i]))
+				rightlink = Index(1)
+				push!(itensors, ITensor(init, leftlink, rightlink, Index(2)))
 			end
+			leftlink = rightlink
 		end
-		new(MPS(N,itensorlist,0,N+1))
+		new(MPS(N,itensors,0,N+1))
 	end
 
 	MPSState(N::Int) = MPSState(N,[1.,0.]) #initialize to |0> state
@@ -50,94 +53,33 @@ setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
 MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 
-
-# copy(st::MPSState) = MPSState(copy(st.s), ) # Need to think about how to get the free list...
 getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
-
-function getfree(qs::MPSState,j::Int)
+function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a Array{Index,1} o.w.
 	links = Index[]
-	i>1 && push!(links, getlink(qs,j-1))
-	i<length(qs) && push!(links,getlink(qs,j))
-	allinds = IndexSet(qs[j]) 
-end
-
-
-
-
-function noprime!(A::ITensor)
-	noprime!(IndexSet(A))
-	A
-end
-
-function applygate!(qs::MPSState, qg::QGate)
-	movegauge!(qs,pos)
-	igate_ = igate(qs,qg)
-	# == contraction goes here ==
-	product = contractgate!(igate_,[qs[i] for i ∈ pos(qg)]) # TODO:check site continuity
-	itensor_vector = toMPS(product,range(qg))
-	replacesites!(qs,itensor_vector,pos(qg))
-end
-
-function movegauge(qs::MPSState, qg::QGate)
-	#TODO: optimization - find the shortest way to move the guage
-	position!(MPS(qs),pos(qg)[1])
-end
-
-function igate(qs::MPSState, qg::QGate)
-	inds = [getfree(qs,i) for i ∈ pos(qg)]
-	inds = IndexSet(inds, prime(inds))
-	igate_ = ITensor(gatematrix(qg), inds)
-end
-
-function contractgate!(igate_:: ITensor, sites:: Vector{ITensor})
-	for site ∈ sites
-		igate_*= site
+	j>1 && push!(links, getlink(qs,j-1))
+	j<length(qs) && push!(links,getlink(qs,j))
+	freeset = setdiff(IndexSet(qs[j]),links)  
+	if length(freeset)==1
+		return freeset[1]
 	end
-	return igate_
+	freeset
 end
 
-function toMPS(exact::ITensor, N::Int; kwargs...)
-	# TODO: how to detect left indices??
-	toreturn = ITensor[]
-	leftIndex = Index(2) # need fix
-	remain = copy(exact)
-	for i = 1:N-1
-		U,S,V,u,v = svd(remain,leftIndex; kwargs...)
-		push!(toreturn,U)
-		leftIndex = commonindex(U,S) #wrong... should also include the phyiscal bond
-		remain = S*V
-	end 
-	push!(toreturn,remain)
-	return toreturn
-end
+leftLim(m::MPSState) = leftLim(m.s)
+rightLim(m::MPSState) = rightLim(m.s)
 
-function replacesites!(qs::MPSState,newsites::Vector{ITensor}, pos::Vector{Int})
-	for i = 1: length(pos)
-		qs[pos[i]] = newsites[i]
-	end
-	return qs
-end		
-"""
-function applygate!(qs::MPSState, gate::Tuple{Vector{Float64},Vector{Int}})
-	(data,pos) = gate
-	# position!(...) #Move the gauge
-	freeinds = IndexSet([getfree(qs,ii) for ii ∈ pos])
-	print("inds:", inds)
-	product = ITensor(data,IndexSet(freeinds,prime(freeinds)))
-	for ii ∈ pos
-		product*=qs.s[ii]
-	end
-	noprime!(product)
-	#get back to mps format 
-	itensors = tsvd(product, length(pos))
-end	
 
-function toMPS(A::ITensor, N::Int)
-	for i = 1:N
+# print("\n===test contract===\n")
+# inds = Index[]
+# for i =1:2
+# 	push!(inds,Index(2))
+# end
+# A = randomITensor(Float64,inds)
+# print(A)
+# U,S,V,u,v = svd(A,inds[1])
+# print(contractall(U,S,V))	
+# print("\n====end=====\n")
 
-	end
-end
-"""
 
 # struct MixedState <: QState
 # 	s::MPS
@@ -148,12 +90,20 @@ end
 # end 
 
 # ===== mini test ====
-initstate = rand(Float64,2)
-initstate/=norm(initstate)
-# print("norm = ", norm(initstate))
-m = MPSState(3,initstate)
-print(m)
-gate = ([0.,1.,1.,0.],[2])
-print(applygate!(m,gate))
+# initstate = rand(Float64,2)
+# initstate/=norm(initstate)
+# # print("norm = ", norm(initstate))
+# m = MPSState(3,initstate)
+# print(m)
+# print("\nthe free in dex at pos 1:\n")
+# print(getfree(m,2))
+inds = Index[]
+
+for i =1:4
+	push!(inds,Index(2))
+end
+A = randomITensor(Float64,inds)
+B = exact_MPS(A,inds)
+print(B)
 
 
