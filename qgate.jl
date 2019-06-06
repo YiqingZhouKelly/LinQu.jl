@@ -51,6 +51,10 @@ function ToffoliGate()
 	mat[7,8] = 1.
 	mat[8,7] = 1.
 	QGate(mat, 3)
-end 
+end
+
+# === new added====
+qgate_itensor(qg::QGate, inds::IndexSet) = ITensor(qg.data, IndexSet(inds,prime(inds)))
+
 
 

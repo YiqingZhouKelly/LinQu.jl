@@ -69,6 +69,21 @@ leftLim(m::MPSState) = leftLim(m.s)
 rightLim(m::MPSState) = rightLim(m.s)
 
 
+MPS_exact(mps::MPS) = contractall(mps.A_)
+MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
+position!(qs::MPSState, pos::Int) = position!(qs.s,pos)
+
+movegauge(qs::MPSState, pos::Int)=position!(qs.s,pos)
+function movegauge(qs::MPSState, pos::Vector{Int})
+	#now assume 2 quibit gate
+	l = leftLim(qs)
+	r = rightLim(qs)
+	sort!(pos)
+	position!(qs,optpos(l,r,pos))
+end
+
+
+
 # print("\n===test contract===\n")
 # inds = Index[]
 # for i =1:2
@@ -97,13 +112,21 @@ rightLim(m::MPSState) = rightLim(m.s)
 # print(m)
 # print("\nthe free in dex at pos 1:\n")
 # print(getfree(m,2))
-inds = Index[]
 
-for i =1:4
-	push!(inds,Index(2))
-end
-A = randomITensor(Float64,inds)
-B = exact_MPS(A,inds)
-print(B)
+
+# inds = Index[]
+
+# for i =1:4
+# 	push!(inds,Index(2))
+# end
+# A = randomITensor(Float64,inds)
+# B = exact_MPS(A,inds)
+# print(B)
+
+
+llim = 1
+rlim = 10
+targets = [11,8,9]
+print(optpos(llim,rlim,targets))
 
 

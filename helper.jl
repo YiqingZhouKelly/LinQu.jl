@@ -1,4 +1,5 @@
 # export contractall
+using ITensors
 function contractall(net::Vector{ITensor})
 	product = net[1]
 	for i =2:length(net)
@@ -36,20 +37,18 @@ function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;
 	return resultMPS
 end
 
-MPS_exact(mps::MPS) = contractall(mps.A_)
-MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
-
-qgate_itensor(qg::QGate, inds::IndexSet) = ITensor(qg.data, IndexSet(inds,prime(inds)))
-
-function movegauge(qs::MPSState, pos::Int) = position!(qs.s,pos)
-function movegauge(qs::MPSState, pos::Vector{Int})
-	#now assume 2 quibit gate
-	l = leftLim(qs)
-	r = rightLim(qs)
-	sort!(pos)
+function stepsize(llim::Int, rlim::Int, target::Int)
+	if target<llim
+		distance = rlim-target
+	elseif target<rlim
+		distance = (target-llim)+ (rlim-target)
+	else
+		distance = target-llim
+	end
+	return distance
 end
 
-function minstep(llim::Int, rlim::Int, target::Int)
-	# target<llim && (opt=)
-	#unfinished
+function optpos(llim::Int, rlim::Int, targets::Vector{Int})
+	distances = stepsize.(llim,rlim,targets) #not sure if the not operator is working
+	return targets[argmin(distances)]
 end
