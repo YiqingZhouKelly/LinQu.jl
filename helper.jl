@@ -1,6 +1,5 @@
-# export contractall
-using ITensors
 
+using ITensors
 
 function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1

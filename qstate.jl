@@ -1,3 +1,4 @@
+
 using ITensors
 include("./helper.jl")
 import ITensors.linkind,
@@ -90,54 +91,5 @@ function movegauge!(qs::MPSState, pos::Vector{Int})
 	position!(qs,center)
 	return center
 end
-
-
-
-
-
-# print("\n===test contract===\n")
-# inds = Index[]
-# for i =1:2
-# 	push!(inds,Index(2))
-# end
-# A = randomITensor(Float64,inds)
-# print(A)
-# U,S,V,u,v = svd(A,inds[1])
-# print(contractall(U,S,V))	
-# print("\n====end=====\n")
-
-
-# struct MixedState <: QState
-# 	s::MPS
-# end 
-
-# struct ExactState <: QState
-# 	s:: MPS
-# end 
-
-# ===== mini test ====
-# initstate = rand(Float64,2)
-# initstate/=norm(initstate)
-# # print("norm = ", norm(initstate))
-# m = MPSState(3,initstate)
-# print(m)
-# print("\nthe free in dex at pos 1:\n")
-# print(getfree(m,2))
-
-
-# inds = Index[]
-
-# for i =1:4
-# 	push!(inds,Index(2))
-# end
-# A = randomITensor(Float64,inds)
-# B = exact_MPS(A,inds)
-# print(B)
-
-
-llim = 1
-rlim = 10
-targets = [11,8,9]
-print(optpos(llim,rlim,targets))
 
 

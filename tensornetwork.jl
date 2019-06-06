@@ -6,7 +6,10 @@ import Base.push!,
 	   Base.setindex!,
 	   Base.copy,
 	   ITensors.copy,
-	   Base.deleteat!
+	   Base.deleteat!,
+	   Base.findfirst,
+	   Base.findall
+# the above shuld be moved into a module later...
 struct ITensorNet
 	net:: Vector{ITensor}
 	ITensorNet(m::Vector{ITensor}) = new(m)
@@ -19,13 +22,27 @@ struct ITensorNet
 		new(net)
 	end
 end
+# ==== basics ====
 getindex(N::ITensorNet, j::Int64) = getindex(N.net,j)
 setindex!(N::ITensorNet,j::Int,A::ITensor) = setindex!(N.net,j,A)
 length(N::ITensorNet) = length(N.net)
 push!(N::ITensorNet, A::ITensor) = push!(N.net,A)
 copy(N::ITensorNet) = ITensorNet(copy.(N.net))
+
+
+findfirst(N::ITensorNet, A::ITensor) = findfirst(x->x==A,N.net)
+findall(N::ITensorNet, A::ITensor) = findall(x->x==A,N.net)
+#TODO maybe add next
+deleteat!(N::ITensorNet, j::Int) = deleteat!(N.net,j)
+delete!(N::ITensorNet, A::ITensor) = deleteat!(N,findfirst(N,A))
+function delete!(N::ITensorNet, A...)
+	for tensor ∈ A
+		typeof(tensor)==ITensor && delete!(N,tensor)
+	end
+end
 # TODO: add iterator
 
+# === advanced ops ===
 # TODO: check repeated tensor maybe?
 function push!(N::ITensorNet, A::ITensor, B...)
 	push!(N,A)
@@ -40,6 +57,7 @@ function push!(N1:: ITensorNet, N2::ITensorNet)
 	return N1
 end
 push!(N::ITensorNet, list::Vector{ITensor}) = push!(N,ITensorNet(list))
+
 function contractall(N::ITensorNet)
 	#TODO: possible optimization in contraction order
 	product = N.net[1]
@@ -49,10 +67,6 @@ function contractall(N::ITensorNet)
 	end
 	return product
 end
-findfirst(N::ITensorNet, A::ITensor) = findfirst(N.net, A)
-#TODO maybe add next
-deleteat!(N::ITensorNet, j::Int) = deleteat!(N.net,j)
-delete!(N::ITensorNet, A::ITensor) = deleteat!(N,findfirst(N,A))
 
 function contractall(A::ITensor,B::ITensor,C...)
 	net = ITensor[]
@@ -63,21 +77,39 @@ function contractall(A::ITensor,B::ITensor,C...)
 	contractall(net)
 end
 
-# # == test ==
-inds = Index[]
-
-for i =1:1
-	push!(inds,Index(2))
+function contractsubset!(N::ITensorNet, A::ITensor, B::ITensor, C...)
+	result = A*B
+	delete!(N,A,B)
+	for tensor ∈ C
+		result*= tensor
+	end
+	delete!(N,C)
+	push!(N,result)
+	return N
 end
-A = randomITensor(Float64,inds)
-B = randomITensor(Float64,inds)
-C = randomITensor(Float64,inds)
-D = randomITensor(Float64,inds)
-N1 = ITensorNet(A,B,C)
-N2 = copy(N1)
-push!(N1,N2)
-print("\n=====before delete:=====\n")
-print(N1)
-print("\n=======after delete ======\n")
-deleteat!(N1,1)	
-print(N1)
+
+
+
+
+# # == test ==
+
+# inds = Index[]
+# for i =1:1
+# 	push!(inds,Index(2))
+# end
+# A = randomITensor(Float64,inds)
+# B = randomITensor(Float64,inds)
+# C = randomITensor(Float64,inds)
+# D = randomITensor(Float64,inds)
+# N1 = ITensorNet(A,B,C)
+# N2 = copy(N1)
+# push!(N1,N2)
+# print(N1)
+# print("\n===== delete:=====\n")
+# contractsubset!(N1,N1[1], N1[2])
+# print(N1)
+
+# print(N1)
+# print("\n=======after delete ======\n")
+# deleteat!(N1,1)	
+# print(N1)
