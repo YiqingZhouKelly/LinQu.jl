@@ -1,22 +1,6 @@
 # export contractall
 using ITensors
-function contractall(net::Vector{ITensor})
-	product = net[1]
-	for i =2:length(net)
-		# global product
-		product*=net[i]
-	end
-	return product
-end
 
-function contractall(A::ITensor,B::ITensor,C...)
-	net = ITensor[]
-	push!(net,A,B)
-	for tensor ∈ C
-		push!(net,tensor)
-	end
-	contractall(net)
-end
 
 function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1

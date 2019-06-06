@@ -1,3 +1,5 @@
+include("./qstate.jl")
+include(".qgate.jl")
 struct QCircuit
 	# initstate::QState
 	state::QState
@@ -18,16 +20,14 @@ function addgate(qc::QCircuit, gate::Vector{Number}, pos::Vector{Int})
 	push!(qc.gatelist,(gate,pos))
 end
 
+function applygate!(qs::MPSState,qg::QGate)
+	center = movegauge!(qs,pos(qg))
+	net = ITensor[]
+end
+
 # function preprocess!(qc::QCircuit)::QCircuit 
 
 # end
-
-function runcircuit!(qc::QCircuit)    
-	for i = 1:length(qc.gatelist)
-		applygate!(qc.state,gatelist[i])
-
-	end
-end 
 
 # function runcircuit!(qc::Qcircuit, step::Int)
 

@@ -73,14 +73,25 @@ MPS_exact(mps::MPS) = contractall(mps.A_)
 MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
 position!(qs::MPSState, pos::Int) = position!(qs.s,pos)
 
-movegauge(qs::MPSState, pos::Int)=position!(qs.s,pos)
-function movegauge(qs::MPSState, pos::Vector{Int})
-	#now assume 2 quibit gate
+function movegauge!(qs::MPSState, pos::Int)
+	position!(qs.s,pos)
+	return pos
+end
+
+function movegauge!(qs::MPSState, pos::Vector{Int})
+	if length(pos) == 1
+		return movegauge!(qs,pos[1])
+	end
+	#2 quibit gate
 	l = leftLim(qs)
 	r = rightLim(qs)
 	sort!(pos)
-	position!(qs,optpos(l,r,pos))
+	center = optpos(l,r,pos)
+	position!(qs,center)
+	return center
 end
+
+
 
 
 
