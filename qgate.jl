@@ -2,6 +2,7 @@ using ITensors,LinearAlgebra, Statistics
 struct QGate 
 	data::Vector{Number} 
 	pos::Vector{Int}
+	QGate(data::Vector{Number},pos::Vector{Int}) = new()
 end
 pos(g::QGate) = g.pos
 range(g::QGate) = length(g.pos)

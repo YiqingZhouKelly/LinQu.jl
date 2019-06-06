@@ -6,6 +6,7 @@ struct QCircuit
 	gatelist::Vector{(Vector{Number},Vector{Number})}
 	evalpos::Int
 	outgoing:: Vector{Index}
+	# TODO: store truncation criterion
 	# QCircuit(numqubits::Int) = new(MPSStates(numqubits),QGate[], 0, )
 	function QCircuit(numqubits::Int)
 		mps = MPSState(numqubits)
@@ -13,17 +14,25 @@ struct QCircuit
 		new(mps,QGate[],0,outgoing) 
 	end
 	QCircuit(mps::MPSState) = new(mps,QGate[],0,getfreelist(mps))
-
-end
+end #struct
 
 function addgate(qc::QCircuit, gate::Vector{Number}, pos::Vector{Int})
 	push!(qc.gatelist,(gate,pos))
 end
 
-function applygate!(qs::MPSState,qg::QGate)
+function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 	center = movegauge!(qs,pos(qg))
-	net = ITensor[]
+	llink,rlink = getfree(qs, pos(qg))
+	wires = IndexSet(getfree(qs,pos(qg)))
+	net = ITensorNet(qgate_itensor(qg,wires))
+	for i =1:length(pos(qg))
+		push!(net,qs[i])
+	end
+	exact = noprime!(contractall(net))
+	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
+	replace!(qs, approx, pos(qg))
 end
+
 
 # function preprocess!(qc::QCircuit)::QCircuit 
 

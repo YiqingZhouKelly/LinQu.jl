@@ -35,3 +35,9 @@ function optpos(llim::Int, rlim::Int, targets::Vector{Int})
 	distances = stepsize.(llim,rlim,targets) #not sure if the not operator is working
 	return targets[argmin(distances)]
 end
+
+function noprime!(A::ITensor)
+	""" set prime level of all Indices connected to A to 0"""
+	noprime!(IndexSet(A))
+	A
+end 

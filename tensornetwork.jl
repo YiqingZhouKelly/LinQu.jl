@@ -21,7 +21,7 @@ struct ITensorNet
 		end
 		new(net)
 	end
-end
+end #struct
 # ==== basics ====
 getindex(N::ITensorNet, j::Int64) = getindex(N.net,j)
 setindex!(N::ITensorNet,j::Int,A::ITensor) = setindex!(N.net,j,A)
@@ -87,9 +87,6 @@ function contractsubset!(N::ITensorNet, A::ITensor, B::ITensor, C...)
 	push!(N,result)
 	return N
 end
-
-
-
 
 # # == test ==
 

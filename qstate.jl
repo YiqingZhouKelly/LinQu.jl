@@ -15,11 +15,7 @@ import ITensors.linkind,
 # Move to a module later...
 
 # == helpers that should not belong here == 
-function noprime!(A::ITensor)
-	""" set prime level of all Indices connected to A to 0"""
-	noprime!(IndexSet(A))
-	A
-end 
+
 # == helpers that should not belong to here end == 
 abstract type QState end
 
@@ -55,6 +51,15 @@ MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 
 getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
+function getlink(qs::MPSState, pos::Vector{Int})
+	sortedpos = sort(pos)
+	leftend = sortedpos[1]
+	rightend = sortedpos[length(sortedpos)]
+	leftlink,rightlink = Nothing
+	leftend !=1 && (leftlink=getfree(qs,leftend-1))
+	rightend != length(qs) && (rightlink = getlink(qs, rightend))
+	return leftlink, rightlink
+end	
 function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a Array{Index,1} o.w.
 	links = Index[]
 	j>1 && push!(links, getlink(qs,j-1))
@@ -65,6 +70,8 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	end
 	freeset
 end
+getfree(qs::MPSState, pos::Vector{Int}) = getfree.(qs,pos)
+
 
 leftLim(m::MPSState) = leftLim(m.s)
 rightLim(m::MPSState) = rightLim(m.s)
@@ -86,10 +93,17 @@ function movegauge!(qs::MPSState, pos::Vector{Int})
 	#2 quibit gate
 	l = leftLim(qs)
 	r = rightLim(qs)
-	sort!(pos)
+	# TODO: check whether sort!(pos) is needed
 	center = optpos(l,r,pos)
 	position!(qs,center)
 	return center
 end
+
+function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int}) 
+	for i =1 : length(pos)
+		qs[i] = new[i]
+	end
+end
+	#TODO: meybe check if it is still a valid MPS
 
 
