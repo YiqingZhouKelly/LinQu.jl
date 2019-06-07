@@ -1,17 +1,19 @@
-
 using ITensors
 include("./helper.jl")
+include("./qgate.jl")
 import ITensors.linkind,
 	   ITensors.getindex,
 	   Base.length,
 	   Base.copy,
-	   ITensors.noprime!,
+	   ITensors.noprime,
+	   ITensors.prime,
 	   ITensors.svd,
 	   ITensors.position!,
 	   ITensors.setindex!,
 	   ITensors.svd,
 	   ITensors.commonindex,
-	   ITensors.linkind
+	   ITensors.linkind,
+	   ITensors.findtags
 # Move to a module later...
 
 # == helpers that should not belong here == 
@@ -79,14 +81,18 @@ rightLim(m::MPSState) = rightLim(m.s)
 
 MPS_exact(mps::MPS) = contractall(mps.A_)
 MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
-position!(qs::MPSState, pos::Int) = position!(qs.s,pos)
-
-function movegauge!(qs::MPSState, pos::Int)
+function position!(qs::MPSState, pos::Int) 
+	# print("\n in position!\n")
 	position!(qs.s,pos)
+end
+function movegauge!(qs::MPSState, pos::Int)
+	# print("\nmovegauge for single qubit gate")
+	position!(qs,pos)
 	return pos
 end
 
 function movegauge!(qs::MPSState, pos::Vector{Int})
+	print("here")
 	if length(pos) == 1
 		return movegauge!(qs,pos[1])
 	end
@@ -104,6 +110,28 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 		qs[i] = new[i]
 	end
 end
+
+function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
+	center = movegauge!(qs,pos(qg))	
+	# print("\ncheckpoint0\n")
+	llink,rlink = getfree(qs, pos(qg))
+	wires = IndexSet(getfree(qs,pos(qg)))
+	net = ITensorNet(qgate_itensor(qg,wires))
+	# print("\ncheckpoint1\n")
+	for i =1:length(pos(qg))
+		push!(net,qs[i])
+	end
+	# print("\ncheckpoint2\n")
+	exact = noprime(contractall(net))
+	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
+	replace!(qs, approx, pos(qg))
+end
+
+initialstate = MPSState(4)
+gate = XGate(3)
+print(applylocalgate!(initialstate,gate))
+
+
 	#TODO: meybe check if it is still a valid MPS
 
 
