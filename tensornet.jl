@@ -1,21 +1,11 @@
-using ITensors
-import Base.push!,
-	   Base.length,
-	   ITensors.push!,
-	   Base.getindex,
-	   Base.setindex!,
-	   Base.copy,
-	   ITensors.copy,
-	   Base.deleteat!,
-	   Base.findfirst,
-	   Base.findall
-# the above shuld be moved into a module later...
+
 struct ITensorNet
 	net:: Vector{ITensor}
 	ITensorNet(m::Vector{ITensor}) = new(m)
 	function ITensorNet(A::ITensor, B::ITensor, C...)
 		net = ITensor[]
 		push!(net, A, B)
+		print("warning\n")
 		for tensor ∈ C
 			typeof(tensor)==ITensor && push!(net,tensor)
 		end
@@ -36,9 +26,12 @@ findall(N::ITensorNet, A::ITensor) = findall(x->x==A,N.net)
 deleteat!(N::ITensorNet, j::Int) = deleteat!(N.net,j)
 delete!(N::ITensorNet, A::ITensor) = deleteat!(N,findfirst(N,A))
 function delete!(N::ITensorNet, A...)
-	for tensor ∈ A
-		typeof(tensor)==ITensor && delete!(N,tensor)
+	for i = 1: length(A)
+		typeof(A[i]) == ITensor && delete!(N,A[i])
 	end
+	# for tensor ∈ A
+	# 	typeof(tensor)==ITensor && delete!(N,tensor)
+	# end
 end
 # TODO: add iterator
 
@@ -88,25 +81,3 @@ function contractsubset!(N::ITensorNet, A::ITensor, B::ITensor, C...)
 	return N
 end
 
-# # == test ==
-
-# inds = Index[]
-# for i =1:1
-# 	push!(inds,Index(2))
-# end
-# A = randomITensor(Float64,inds)
-# B = randomITensor(Float64,inds)
-# C = randomITensor(Float64,inds)
-# D = randomITensor(Float64,inds)
-# N1 = ITensorNet(A,B,C)
-# N2 = copy(N1)
-# push!(N1,N2)
-# print(N1)
-# print("\n===== delete:=====\n")
-# contractsubset!(N1,N1[1], N1[2])
-# print(N1)
-
-# print(N1)
-# print("\n=======after delete ======\n")
-# deleteat!(N1,1)	
-# print(N1)
