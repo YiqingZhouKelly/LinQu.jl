@@ -1,14 +1,14 @@
 
 include("/Users/yzhou/work/ITensors_fork/src/ITensors.jl")
-using Main.ITensors
-include("./helper.jl")
-include("./qgate.jl")
 
+using Main.ITensors
 import Main.ITensors.linkind,
 	   Main.ITensors.getindex,
 	   Base.length,
 	   Base.copy,
+	   Base.push!,
 	   Main.ITensors.noprime,
+	   Main.ITensors.noprime!,
 	   Main.ITensors.prime,
 	   Main.ITensors.svd,
 	   Main.ITensors.position!,
@@ -19,6 +19,9 @@ import Main.ITensors.linkind,
 	   Main.ITensors.leftLim,
 	   Main.ITensors.rightLim,
 	   Main.ITensors.iterate
+include("./helper.jl")
+include("./qgate.jl")
+include("tensornet.jl")
 # Move to a module later...
 
 # == helpers that should not belong here == 
@@ -62,8 +65,9 @@ function getlink(qs::MPSState, pos::Vector{Int})
 	sortedpos = sort(pos)
 	leftend = sortedpos[1]
 	rightend = sortedpos[length(sortedpos)]
-	leftlink,rightlink = Nothing
-	leftend !=1 && (leftlink=getfree(qs,leftend-1))
+	leftlink = Nothing 
+	rightlink= Nothing
+	leftend !=1 && (leftlink=getlink(qs,leftend-1))
 	rightend != length(qs) && (rightlink = getlink(qs, rightend))
 	return leftlink, rightlink
 end	
@@ -77,7 +81,15 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	end
 	freeset
 end
-getfree(qs::MPSState, pos::Vector{Int}) = getfree.(qs,pos)
+function getfree(qs::MPSState, pos::Vector{Int})
+	toreturn = Index[] 
+	# print(typeof(pos))
+	for i =1:length(pos)
+		push!(toreturn,getfree(qs,pos[i]))
+	end
+	print("good here\n")
+	return toreturn
+end
 
 
 leftLim(m::MPSState) = leftLim(m.s)
@@ -147,21 +159,23 @@ end
 
 function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int}) 
 	for i =1 : length(pos)
-		qs[i] = new[i]
+		qs[pos[i]] = new[i]
 	end
 end
 
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 	center = movegauge!(qs,pos(qg))	
-	llink,rlink = getfree(qs, pos(qg))
+	llink,rlink = getlink(qs, pos(qg))
 	wires = IndexSet(getfree(qs,pos(qg)))
 	net = ITensorNet(qgate_itensor(qg,wires))
-	for i =1:length(pos(qg))
-		push!(net,qs[i])
+	for i ∈ pos(qg)
+		push!(net, qs[i])
 	end
-	exact = noprime(contractall(net))
+	exact = noprime!(contractall(net))
+	print(exact,"<<<\n")
 	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
 	replace!(qs, approx, pos(qg))
+	return qs
 end
 
 initialstate = MPSState(4)

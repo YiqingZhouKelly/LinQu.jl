@@ -1,6 +1,6 @@
 # using ITensors,LinearAlgebra, Statistics
 struct QGate 
-	data::Vector{Number} 
+	data::Vector{Float64} 
 	pos::Vector{Int}
 	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{NUmber} breaks the code
 		numqubit = Int(log2(length(data))/2)

@@ -2,12 +2,10 @@
 struct ITensorNet
 	net:: Vector{ITensor}
 	ITensorNet(m::Vector{ITensor}) = new(m)
-	function ITensorNet(A::ITensor, B::ITensor, C...)
+	function ITensorNet(A::ITensor...)
 		net = ITensor[]
-		push!(net, A, B)
-		print("warning\n")
-		for tensor ∈ C
-			typeof(tensor)==ITensor && push!(net,tensor)
+		for tensor ∈ A
+			push!(net,tensor)
 		end
 		new(net)
 	end
@@ -54,7 +52,7 @@ push!(N::ITensorNet, list::Vector{ITensor}) = push!(N,ITensorNet(list))
 function contractall(N::ITensorNet)
 	#TODO: possible optimization in contraction order
 	product = N.net[1]
-	for i = 2:length(net)
+	for i = 2:length(N)
 		# global product
 		product*=N.net[i]
 	end
