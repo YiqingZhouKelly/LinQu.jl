@@ -23,6 +23,10 @@ findall(N::ITensorNet, A::ITensor) = findall(x->x==A,N.net)
 #TODO maybe add next
 deleteat!(N::ITensorNet, j::Int) = deleteat!(N.net,j)
 delete!(N::ITensorNet, A::ITensor) = deleteat!(N,findfirst(N,A))
+
+size(N::ITensorNet) = size(N.net)
+iterate(N::ITensorNet,state::Int=1) = iterate(N.net,state)
+
 function delete!(N::ITensorNet, A...)
 	for i = 1: length(A)
 		typeof(A[i]) == ITensor && delete!(N,A[i])

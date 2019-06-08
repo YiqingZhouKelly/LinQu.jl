@@ -36,5 +36,5 @@ include("qgate.jl")
 include("qgateset.jl")
 include("qcircuit.jl")
 include("helper.jl")
-end
+end #module
 

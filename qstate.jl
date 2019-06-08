@@ -1,5 +1,5 @@
 
-include("/Users/yzhou/work/ITensors_fork/src/ITensors.jl")
+include("./../ITensors/src/ITensors.jl")
 
 using Main.ITensors
 import Main.ITensors.linkind,
@@ -22,6 +22,7 @@ import Main.ITensors.linkind,
 include("./helper.jl")
 include("./qgate.jl")
 include("tensornet.jl")
+include("qgateset.jl")
 # Move to a module later...
 
 # == helpers that should not belong here == 
@@ -172,17 +173,53 @@ function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 		push!(net, qs[i])
 	end
 	exact = noprime!(contractall(net))
-	print(exact,"<<<\n")
 	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
 	replace!(qs, approx, pos(qg))
 	return qs
 end
 
-initialstate = MPSState(4)
-gate = XGate(3)
-print(applylocalgate!(initialstate,gate))
+function applylocalgate!(qs::MPSState, qg::QGateSet; kwargs...) 
+	# TODO: Need to define iterate() for QGateSet, not tested
+	for gate ∈ qgate
+		applylocalgate!(qs,gate;kwargs...)
+	end
+	return qs
+end
+
+function applynonlocalgate!(qs::MPSState,qgate::QGate; kwargs...)
+	# TODO: not implemented
+	error("NO implementation\n")
+end
+
+function nonlocal_local(qg::QGate) #:: QGateSet
+#TODO : not implemented
+	error("NO implementation\n")
+end
+function checklocal(pos::Vector{Int})
+	if length(pos) ==1
+		return true
+	else
+		for i =2:length(pos)
+			if pos[i] != pos[i-1]+1
+				return false
+			end
+			return true
+		end
+	end
+end
+checklocal(qg::QGate) = checklocal(pos(qg))
 
 
-	#TODO: meybe check if it is still a valid MPS
+# initialstate = MPSState(4)
+# gate = XGate(3)
+# gate2 = YGate(5)
+# gs = QGateSet([gate,gate2])
+# for i ∈ gs
+# 	print("test\n")
+# end
+# print(checklocal([5,4]))
+# print(applylocalgate!(initialstate,gate))
+
+#TODO: meybe check if it is still a valid MPS
 
 

@@ -5,7 +5,7 @@
 
 ### TODO:
 - [x] Get dependence working
-- [ ] Get basic gate application working
+- [x] Get basic gate application working
 - [ ] Design algm to support non-local gates (using SWAP gates)
 - [ ] Measurement (Need to read more literature to understand what is needed)
 - [ ] Build YQ Module, clean up dependency
