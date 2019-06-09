@@ -20,6 +20,26 @@ end
 pos(g::QGate) = g.pos
 range(g::QGate) = length(g.pos)
 gate_tensor(g::QGate) = g.data
+
+function checklocal(pos::Vector{Int})
+	if length(pos) ==1
+		return true
+	else
+		for i =2:length(pos)
+			if pos[i] != pos[i-1]+1
+				return false
+			end
+			return true
+		end
+	end
+end
+checklocal(qg::QGate) = checklocal(pos(qg))
+
+function nonlocal_local(qg::QGate) #:: QGateSet
+#TODO : not implemented
+	error("NO implementation\n")	
+end
+
 # == sigle quibit gates == 
 IGate(pos::Vector{Int}) = QGate([1.,0.,0.,1.],pos)
 XGate(pos::Vector{Int}) = QGate([0.,1.,1.,0.],pos)

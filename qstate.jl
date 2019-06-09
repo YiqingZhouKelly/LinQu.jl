@@ -186,28 +186,11 @@ function applylocalgate!(qs::MPSState, qg::QGateSet; kwargs...)
 	return qs
 end
 
-function applynonlocalgate!(qs::MPSState,qgate::QGate; kwargs...)
-	# TODO: not implemented
-	error("NO implementation\n")
-end
+# function applynonlocalgate!(qs::MPSState,qgate::QGate; kwargs...)
+# 	# TODO: not implemented
+# 	error("NO implementation\n")
+# end
 
-function nonlocal_local(qg::QGate) #:: QGateSet
-#TODO : not implemented
-	error("NO implementation\n")
-end
-function checklocal(pos::Vector{Int})
-	if length(pos) ==1
-		return true
-	else
-		for i =2:length(pos)
-			if pos[i] != pos[i-1]+1
-				return false
-			end
-			return true
-		end
-	end
-end
-checklocal(qg::QGate) = checklocal(pos(qg))
 
 
 # initialstate = MPSState(4)
