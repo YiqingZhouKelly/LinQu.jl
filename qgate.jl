@@ -1,44 +1,67 @@
-# using ITensors,LinearAlgebra, Statistics
-struct QGate 
+
+mutable struct QGate 
 	data::Vector{Number} 
 	pos::Vector{Int}
-	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{NUmber} breaks the code
+	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{Number} breaks the code
 		numqubit = Int(log2(length(data))/2)
 		if numqubit != length(pos)
 			error("A $(numqubit) qubit gate should act on $(numqubit) sites!")
 		end
 		new(data,pos)
 	end
-	function QGate(data, pos::Int...)
-		positinarr = Int[]
-		for i in pos
-			push!(positinarr, i)
-		end
-		QGate(data, positinarr)
-	end
-end
+	QGate(data, pos::Int...) = QGate(data,_tuple_array(pos))
+end # struct
+
 pos(g::QGate) = g.pos
 range(g::QGate) = length(g.pos)
 gate_tensor(g::QGate) = g.data
+copy(qg::QGate) = QGate(copy(gate_tensor(qg)), copy(pos(qg)))
 
 function checklocal(pos::Vector{Int})
-	if length(pos) ==1
-		return true
-	else
-		for i =2:length(pos)
-			if pos[i] != pos[i-1]+1
-				return false
-			end
-			return true
-		end
+	length(pos) == 1 && return true
+	sorted = sort(pos)
+	for i =2:length(pos)
+		(sorted[i] != sorted[i-1]+1) && (return false)
 	end
+	return true
 end
 checklocal(qg::QGate) = checklocal(pos(qg))
 
 function nonlocal_local(qg::QGate) #:: QGateSet
-#TODO : not implemented
-	error("NO implementation\n")	
+	#TODO : Could do optimization here
+	position = pos(qg)
+	if length(position)>2
+		error("currently only support 2 qubit gates\n")
+	end
+	localgates = QGate[]
+	curr = position[2]
+	#TODO: Now assume always move to the first index 
+	while abs(curr-position[1])>1
+		if curr < position[1]
+			push!(localgates,SwapGate(curr,curr+1))
+			curr +=1
+		else
+			push!(localgates, SwapGate(curr,curr-1))
+			curr-=1
+		end
+	end
+	swapback = reverse(localgates)
+	localqg = movegate(qg,position[1], curr)
+	push!(localgates,localqg)
+	localgates = vcat(localgates, swapback)
+	return QGateSet(localgates)
 end
+
+function movegate!(qg::QGate, p::Vector{Int})
+	if length(p) != range(qg)
+		error(" Got wron gnumber of qubits to act on\n")
+	end
+	qg.pos = p
+	return qg
+end
+movegate!(qg::QGate, p::Int...) = movegate!(qg, _tuple_array(p))
+movegate(qg::QGate, p::Vector{Int}) = movegate!(copy(qg), p)
+movegate(qg::QGate, p::Int...)= movegate!(copy(qg), p...)
 
 # == sigle quibit gates == 
 IGate(pos::Vector{Int}) = QGate([1.,0.,0.,1.],pos)
@@ -49,47 +72,49 @@ TGate(pos::Vector{Int}) = QGate([1.,0.,0.,exp(-1im*π/4)],pos)
 HGate(pos::Vector{Int}) = QGate((1/√2)*[1,1,1,-1],pos) # H could be decomposed in to XY / YZ gates
 SGate(pos::Vector{Int}) = QGate([1.,0.,0.,1.0im],pos)
 
-IGate(pos::Int...) = QGate([1.,0.,0.,1.],_tuple_array(pos))
-XGate(pos::Int...) = QGate([0.,1.,1.,0.],_tuple_array(pos))
-YGate(pos::Int...) = QGate([0.,-1.0im, 1.0im, 0.],_tuple_array(pos))
-ZGate(pos::Int...) = QGate([1.,0.,0.,-1.],_tuple_array(pos))
-TGate(pos::Int...) = QGate([1.,0.,0.,exp(-1im*π/4)],_tuple_array(pos))
-HGate(pos::Int...) = QGate((1/√2)*[1,1,1,-1],_tuple_array(pos)) # H could be decomposed in to XY / YZ gates
-SGate(pos::Int...) = QGate([1.,0.,0.,1.0im],_tuple_array(pos))
+IGate(pos::Int...) = IGate(_tuple_array(pos))
+XGate(pos::Int...) = XGate(_tuple_array(pos))
+YGate(pos::Int...) = YGate(_tuple_array(pos))
+ZGate(pos::Int...) = ZGate(_tuple_array(pos))
+TGate(pos::Int...) = TGate(_tuple_array(pos))
+HGate(pos::Int...) = HGate(_tuple_array(pos)) # H could be decomposed in to XY / YZ gates
+SGate(pos::Int...) = SGate(_tuple_array(pos))
 
-function _tuple_array(T)
-	Tarr = [t for t in T]
-	return Tarr
+
+
+function Rx(θ::Number, pos::Vector{Int})
+	c = cos(θ/2.)
+	s = -1.0im*sim(θ/2.)
+	QGate([c,s,s,c],pos)
 end
 
-# function Rx(θ::Number)
-# 	c = cos(θ/2.)
-# 	s = -1.0im*sim(θ/2.)
-# 	QGate([c,s,s,c],1)
-# end
+function Ry(θ::Number, pos::Vector{Int})
+	c = cos(θ/2.)
+	s = sin(θ/2.)
+	QGate([c,-s,s,c],pos)
+end
 
-# function Ry(θ::Number)
-# 	c = cos(θ/2.)
-# 	s = sin(θ/2.)
-# 	QGate([c,-s,s,c],1)
-# end
+function Rz(θ::Number, pos::Vector{Int})
+	exponent_ = θ/2.
+	QGate([exp(-exponent_),0.,0.,exp(exponent_)],pos)
+end
 
-# function Rz(θ::Number)
-# 	exponent_ = θ/2.
-# 	QGate([exp(-exponent_),0.,0.,exp(exponent_)],1)
-# end
+Rx(θ::Number, pos::Int...) = Rx(θ, _tuple_array(pos))
+Ry(θ::Number, pos::Int...) = Ry(θ, _tuple_array(pos))
+Rz(θ::Number, pos::Int...) = Rz(θ, _tuple_array(pos))
 
-
-# # == two qubit gates ==
-# SwapGate() = QGate([1.,0.,0.,0.,
-# 				    0.,0.,1.,0.,
-# 				    0.,1.,0.,0.,
-# 				    0.,0.,0.,1.],2)
-# CNOTGate() = QGate([1.,0.,0.,0.,
-# 				    0.,1.,0.,0.,
-# 				    0.,0.,0.,1.,
-# 				    0.,0.,1.,0.],2)
-# CZGate() = QGate(Diagonal([1.,1.,1.,-1.]),2) #check diagonal working??
+# == two qubit gates ==
+SwapGate(pos::Vector{Int}) = QGate([1.,0.,0.,0.,
+									0.,0.,1.,0.,
+									0.,1.,0.,0.,
+									0.,0.,0.,1.],pos)
+SwapGate(pos::Int...) = SwapGate(_tuple_array(pos))
+CNOTGate(pos::Vector{Int}) = QGate([1.,0.,0.,0.,
+								    0.,1.,0.,0.,
+								    0.,0.,0.,1.,
+								    0.,0.,1.,0.],pos)
+CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
+# CZGate() = QGate(Diagonal([1.,1.,1.,-1.]),2) # TODO: check diagonal working??
 # CRGate(θ::Number) = QGate(Diagonal([1.,1.,1.,exp(1.0im*θ))]),2)
 # CRkGate(k::Number) = CRGate()
 
@@ -102,7 +127,12 @@ end
 # end
 
 # === new added====
-qgate_itensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
-
+ITensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
+isswap(qg::QGate) = (gate_tensor(qg)== [1.,0.,0.,0.,
+										0.,0.,1.,0.,
+										0.,1.,0.,0.,
+										0.,0.,0.,1.])
+sameposition(A::QGate, B::QGate) = (sort(pos(A)) == sort(pos(B)))
+repeatedswap(A::QGate, B::QGate) = (isswap(A) && isswap(B) && sameposition(A,B))
 
 

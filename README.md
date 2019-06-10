@@ -11,6 +11,3 @@
 - [ ] Build YQ Module, clean up dependency
 - [ ] Add user-friendly interface
 - [ ] Sample quantum algorithms
-
-## Design Thoughts:
-* For non-local gate, apply swap gate on both side to move them to the center (e.g. if apply on qubit 5 and 10, swap both 5 and 10 toward ~7)

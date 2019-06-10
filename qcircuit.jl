@@ -1,41 +1,45 @@
-# using ITensors
-include("./qstate.jl")
-include("qgate.jl")
-include("qgateset.jl")
-struct QCircuit
-	# initstate::QState
+
+mutable struct QCircuit
 	state::QState
-	gatelist::QGateSet
+	gates::QGateSet
 	evalpos::Int
 	outgoing:: Vector{Index}
 	# TODO: store truncation criterion
-	# QCircuit(numqubits::Int) = new(MPSStates(numqubits),QGate[], 0, )
-	function QCircuit(numqubits::Int)
-		mps = MPSState(numqubits)
+	function QCircuit(N::Int)
+		mps = MPSState(N)
 		outgoing = getfreelist(mps)
 		new(mps,QGate[],0,outgoing) 
 	end
 	QCircuit(mps::MPSState) = new(mps,QGate[],0,getfreelist(mps))
 end #struct
-# push!(qc::QCircuit, obj) = push!(qc.gatelist,obj)
-# addgate(qc::QCircuit, qg::QGate) = push!(qc,qg)
+
+gates(qc::QCircuit) = qc.gates
+state(qc::QCircuit) = qc.state
+push!(qc:: QCircuit, qg::QGate) = push!(gates(qc), qg)
+# iterate(qc::QCircuit,state::Int=1) = iterate(qc.gates,state)
+# size(qc::QCircuit) = size(QGateSet)
 
 
-# function preprocess!(qc::QCircuit)::QCircuit 
+function localize(qc::QCircuit)
+	localized = QGateSet()
+	for gate ∈ gates(qc)
+		if checklocal(gate)
+			push!(localized, gate)
+		else
+			push!(localized, nonlocal_local(gate))
+		end
+	end
+	return localized
+end
 
-# end
-
-# function runcircuit!(qc::Qcircuit, step::Int)
-
-# end
-
-# function measure(qc::QCircuit, pos::Integer)
-
-# end
-
-# function connect!(qc::QCircuit)
-# 	for ii = 1 to length(gatelist)
-		
-# 	end
-# end
-
+function minswap(qc::QCircuit)
+	optimized = [IGate(1)] # TODO: may be better way 
+	for curr ∈ gates(qc)
+		prev = pop!(optimized)
+		if !repeatedswap(prev, curr)
+			push!(optimized, prev)
+			push!(optimized, curr)
+		end
+	end
+	return optimized
+end

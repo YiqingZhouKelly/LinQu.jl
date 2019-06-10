@@ -1,33 +1,4 @@
 
-include("./../ITensors/src/ITensors.jl")
-
-using Main.ITensors
-import Main.ITensors.linkind,
-	   Main.ITensors.getindex,
-	   Base.length,
-	   Base.copy,
-	   Base.push!,
-	   Main.ITensors.noprime,
-	   Main.ITensors.noprime!,
-	   Main.ITensors.prime,
-	   Main.ITensors.svd,
-	   Main.ITensors.position!,
-	   Main.ITensors.setindex!,
-	   Main.ITensors.svd,
-	   Main.ITensors.commonindex,
-	   Main.ITensors.linkind,
-	   Main.ITensors.leftLim,
-	   Main.ITensors.rightLim,
-	   Main.ITensors.iterate
-include("./helper.jl")
-include("./qgate.jl")
-include("tensornet.jl")
-include("qgateset.jl")
-# Move to a module later...
-
-# == helpers that should not belong here == 
-
-# == helpers that should not belong to here end == 
 abstract type QState end
 
 # error check no valid subclass function fits the call
@@ -80,16 +51,14 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	if length(freeset)==1
 		return freeset[1]
 	end
-	freeset
+	IndexSet(freeset)
 end
 function getfree(qs::MPSState, pos::Vector{Int})
 	toreturn = Index[] 
-	# print(typeof(pos))
 	for i =1:length(pos)
 		push!(toreturn,getfree(qs,pos[i]))
 	end
-	print("good here\n")
-	return toreturn
+	return IndexSet(toreturn)
 end
 
 
@@ -135,11 +104,6 @@ function position!(qs::MPSState, j::Int)
 	psi.rlim_ = j+1
 end
 
-# function position!(psi::MPS,
-#                    j::Integer)
-
-# end
-
 function movegauge!(qs::MPSState, pos::Int)
 	position!(qs,pos)
 	return pos
@@ -164,11 +128,22 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 	end
 end
 
+function applysinglegate(qs::MPSState, qg::QGate)
+	if length(pos(qg))!=1
+		error("Calling applysinglegate with a non single qubit gate.\n")
+	end
+	site = pos(qg)[1]
+	position!(qs, site)
+	newsite = noprime!(ITensor(qg, getfree(qs, site))* qs[site])
+	qs[site] = newsite
+	return qs
+end
+
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 	center = movegauge!(qs,pos(qg))	
-	llink,rlink = getlink(qs, pos(qg))
-	wires = IndexSet(getfree(qs,pos(qg)))
-	net = ITensorNet(qgate_itensor(qg,wires))
+	(llink,rlink) = getlink(qs, pos(qg))
+	wires = getfree(qs,pos(qg))
+	net = ITensorNet(ITensor(qg,wires))
 	for i ∈ pos(qg)
 		push!(net, qs[i])
 	end
@@ -177,32 +152,5 @@ function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 	replace!(qs, approx, pos(qg))
 	return qs
 end
-
-function applylocalgate!(qs::MPSState, qg::QGateSet; kwargs...) 
-	# TODO: Need to define iterate() for QGateSet, not tested
-	for gate ∈ qgate
-		applylocalgate!(qs,gate;kwargs...)
-	end
-	return qs
-end
-
-# function applynonlocalgate!(qs::MPSState,qgate::QGate; kwargs...)
-# 	# TODO: not implemented
-# 	error("NO implementation\n")
-# end
-
-
-
-# initialstate = MPSState(4)
-# gate = XGate(3)
-# gate2 = YGate(5)
-# gs = QGateSet([gate,gate2])
-# for i ∈ gs
-# 	print("test\n")
-# end
-# print(checklocal([5,4]))
-# print(applylocalgate!(initialstate,gate))
-
-#TODO: meybe check if it is still a valid MPS
 
 

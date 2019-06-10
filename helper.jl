@@ -1,14 +1,10 @@
 
-# using ITensors
-
 function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1
 	leftlink!=Nothing && (iter-=1)
 	rightlink!=Nothing && (iter-=1)
-	print("check1\n")
 	remain = copy(exact) # TODO: How to avoid the copy?
 	resultMPS = ITensor[]
-	print("check2\n")
 	for  i = 1:iter
 		if leftlink !=Nothing
 			U,S,V,leftlink,v = svd(remain,IndexSet(leftlink,indexorder[i]);kwargs...)
@@ -19,7 +15,6 @@ function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;
 		remain = S*V
 	end
 	push!(resultMPS,remain)
-	print("============= exact_MPS ==========\n")
 	return resultMPS
 end
 
@@ -35,7 +30,7 @@ function stepsize(llim::Int, rlim::Int, target::Int)
 end
 
 function optpos(llim::Int, rlim::Int, targets::Vector{Int})
-	distances = stepsize.(llim,rlim,targets) #not sure if the not operator is working
+	distances = stepsize.(llim,rlim,targets) #not sure if the dot operator is working
 	return targets[argmin(distances)]
 end
 
@@ -44,3 +39,8 @@ function noprime!(A::ITensor)
 	noprime!(IndexSet(A))
 	A
 end 
+
+function _tuple_array(T)
+	Tarr = [t for t in T]
+	return Tarr
+end

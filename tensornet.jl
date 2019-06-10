@@ -1,17 +1,12 @@
 
 struct ITensorNet
 	net:: Vector{ITensor}
+	ITensorNet() = new(ITensor[])
 	ITensorNet(m::Vector{ITensor}) = new(m)
-	function ITensorNet(A::ITensor...)
-		net = ITensor[]
-		for tensor ∈ A
-			push!(net,tensor)
-		end
-		new(net)
-	end
+	ITensorNet(A::ITensor...) = ITensorNet(_tuple_array(A))
 end #struct
 # ==== basics ====
-getindex(N::ITensorNet, j::Int64) = getindex(N.net,j)
+getindex(N::ITensorNet, j::Int) = getindex(N.net,j)
 setindex!(N::ITensorNet,j::Int,A::ITensor) = setindex!(N.net,j,A)
 length(N::ITensorNet) = length(N.net)
 push!(N::ITensorNet, A::ITensor) = push!(N.net,A)
@@ -27,16 +22,14 @@ delete!(N::ITensorNet, A::ITensor) = deleteat!(N,findfirst(N,A))
 size(N::ITensorNet) = size(N.net)
 iterate(N::ITensorNet,state::Int=1) = iterate(N.net,state)
 
-function delete!(N::ITensorNet, A...)
-	for i = 1: length(A)
-		typeof(A[i]) == ITensor && delete!(N,A[i])
-	end
-	# for tensor ∈ A
-	# 	typeof(tensor)==ITensor && delete!(N,tensor)
+function delete!(N::ITensorNet, A::ITensor...)
+	# for i = 1: length(A)
+	# 	typeof(A[i]) == ITensor && delete!(N,A[i])
 	# end
+	for tensor ∈ A
+		typeof(tensor)==ITensor && delete!(N,tensor)
+	end
 end
-# TODO: add iterator
-
 # === advanced ops ===
 # TODO: check repeated tensor maybe?
 function push!(N::ITensorNet, A::ITensor, B...)

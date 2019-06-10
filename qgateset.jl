@@ -1,14 +1,14 @@
 
-# for repeated blocks in a circuit
 struct QGateSet
 	set::Vector{QGate}
-	function QGateSet(gates::QGate...)
+	function QGateSet(gates::Vector{QGate})
 		set = QGate[]
 		for gate ∈ gates
 			push!(set, gate)
 		end
 		new(set)
 	end
+	QGateSet(gates::QGate...) = QGateSet(_tuple_array(gates))
 end #struct
 
 getindex(gs::QGateSet, j::Int) = getindex(gq.set, j)
@@ -26,3 +26,12 @@ end
 size(qgs::QGateSet) = size(qgs.set)
 iterate(qgs::QGateSet,state::Int=1) = iterate(qgs.set,state)
 #copy should not be needed
+QGate(qgs::QGateSet) = length(qgs)==1 ? qgs[1] : error("Cannot convert QGateSet of length >1 to a QGate\n")
+
+function applylocalgate!(qs::MPSState, qg::QGateSet; kwargs...) 
+	# TODO: Need to define iterate() for QGateSet, not tested
+	for gate ∈ qgate
+		applylocalgate!(qs,gate;kwargs...)
+	end
+	return qs
+end

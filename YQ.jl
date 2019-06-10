@@ -1,29 +1,63 @@
 
 module YQ
-include("/Users/yzhou/work/ITensors_fork/src/ITensors.jl")
-using Main.ITensors
+
+include("./../ITensors_fork/src/ITensors.jl")
+
+using .ITensors
 import Base.length,
 	   Base.copy,
 	   Base.push!,
+	   Base.isless,
+	   Base.delete!,
+	   Base.getindex,
+	   Base.setindex!,
+	   Base.findfirst,
 	   Base.deleteat!,
-	   Main.ITensors.linkind,
-	   Main.ITensors.getindex,
-	   Main.ITensors.noprime,
-	   Main.ITensors.prime,
-	   Main.ITensors.svd,
-	   Main.ITensors.position!,
-	   Main.ITensors.setindex!,
-	   Main.ITensors.svd,
-	   Main.ITensors.commonindex,
-	   Main.ITensors.linkind
-## Types
+	   .ITensors.linkind,
+	   .ITensors.getindex,
+	   .ITensors.noprime,
+	   .ITensors.noprime!,
+	   .ITensors.prime,
+	   .ITensors.svd,
+	   .ITensors.position!,
+	   .ITensors.setindex!,
+	   .ITensors.svd,
+	   .ITensors.commonindex,
+	   .ITensors.linkind,
+	   .ITensors.leftLim,
+	   .ITensors.rightLim,
+	   .ITensors.iterate,
+	   .ITensors.ITensor,
+	   .ITensors.Index
+
+# functions from Base, ITensors
+export linkind,
+	   getindex,
+	   noprime,
+	   noprime!,
+	   prime,
+	   svd,
+	   position!,
+	   setindex!,
+	   svd,
+	   commonindex,
+	   linkind,
+	   leftLim,
+	   rightLim,
+	   iterate,
+	   ITensor,
+	   Index,
+	   randomITensor
+# Types
 export  QState,
 		QGate,
+		QGateSet,
 		QCircuit,
 		ITensorNet
 
-include("tensornetwork.jl")
-export  delete!,
+include("tensornet.jl")
+export  TensorNet,
+		delete!,
 		push!,
 		contractall,
 		contractsubset!,
@@ -31,10 +65,70 @@ export  delete!,
 		getindex,
 		setindex!,
 		copy
-include("qstate.jl")
-include("qgate.jl")
-include("qgateset.jl")
-include("qcircuit.jl")
+
 include("helper.jl")
+export exact_MPS,
+	   stepsize,
+	   optpos,
+	   noprime!
+
+include("qgate.jl")
+export QGate,
+	   gate_tensor,
+	   copy,
+	   checklocal,
+	   nonlocal_local,
+	   movegate!,
+	   movegate,
+	   IGate,
+	   XGate,
+	   YGate,
+	   ZGate,
+	   TGate,
+	   HGate,
+	   SGate,
+	   Rx,
+	   Ry,
+	   Rz,
+	   SwapGate,
+	   CNOTGate,
+	   ITensor,
+	   isswap,
+	   sameposition,
+	   repeatedswap
+
+include("qstate.jl")
+export QState,
+       MPSState,
+       length,
+       getindex,
+       setindex!,
+       getlink,
+       getfree,
+       leftLim,
+       rightLim,
+       MPS_exact,
+       position!,
+       movegauge!,
+       replace!,
+       applylocalgate!
+
+
+
+include("qgateset.jl")
+export QGateSet,
+	   applylocalgate!,
+	   QGate,
+	   length,
+	   setindex!,
+	   getindex
+
+include("qcircuit.jl")
+export QCircuit,
+	   gates,
+	   state,
+	   push!,
+	   localize,
+	   minswap
 end #module
 
