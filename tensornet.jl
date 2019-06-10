@@ -23,24 +23,20 @@ size(N::ITensorNet) = size(N.net)
 iterate(N::ITensorNet,state::Int=1) = iterate(N.net,state)
 
 function delete!(N::ITensorNet, A::ITensor...)
-	# for i = 1: length(A)
-	# 	typeof(A[i]) == ITensor && delete!(N,A[i])
-	# end
 	for tensor ∈ A
 		typeof(tensor)==ITensor && delete!(N,tensor)
 	end
 end
 # === advanced ops ===
 # TODO: check repeated tensor maybe?
-function push!(N::ITensorNet, A::ITensor, B...)
-	push!(N,A)
-	for i=1:length(N)
-		typeof(N[i])==ITensor && push!(N,N[i])
+function push!(N::ITensorNet, A::ITensor...)
+	for tensor ∈ A
+		push!(N,tensor)
 	end
 end
 function push!(N1:: ITensorNet, N2::ITensorNet)
-	for i = 1:length(N2)
-		push!(N1, N2[i])
+	for tensor ∈ N2
+		push!(N1,tensor)
 	end
 	return N1
 end

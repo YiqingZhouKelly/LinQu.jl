@@ -20,7 +20,7 @@ push!(qc:: QCircuit, qg::QGate) = push!(gates(qc), qg)
 # size(qc::QCircuit) = size(QGateSet)
 
 
-function localize(qc::QCircuit)
+function localize(qc::QCircuit) #::QGateSet
 	localized = QGateSet()
 	for gate ∈ gates(qc)
 		if checklocal(gate)
@@ -31,9 +31,14 @@ function localize(qc::QCircuit)
 	end
 	return localized
 end
+function localize!(qc::QCircuit)
+	gates(qc) = localize(qc)
+	return qc
+end
 
 function minswap(qc::QCircuit)
-	optimized = [IGate(1)] # TODO: may be better way 
+	# TODO: Currenly using a sentinel
+	optimized = [IGate(1)] 
 	for curr ∈ gates(qc)
 		prev = pop!(optimized)
 		if !repeatedswap(prev, curr)
@@ -43,3 +48,10 @@ function minswap(qc::QCircuit)
 	end
 	return optimized
 end
+function minswap!(qc::QCircuit)
+	optimized = minswap(qc)
+	gates(qc) = optimized
+	return qc
+end
+
+minswap_localize!(qc::QCircuit) = minswap!(localize!(qc))

@@ -1,5 +1,7 @@
 
-function exact_MPS(exact::ITensor,indexorder,leftlink=Nothing,rightlink=Nothing;kwargs...) #::Array{ITensor,1}
+function exact_MPS(exact::ITensor,indexorder,
+				   leftlink=Nothing,rightlink=Nothing;
+				   kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1
 	leftlink!=Nothing && (iter-=1)
 	rightlink!=Nothing && (iter-=1)
@@ -34,11 +36,7 @@ function optpos(llim::Int, rlim::Int, targets::Vector{Int})
 	return targets[argmin(distances)]
 end
 
-function noprime!(A::ITensor)
-	""" set prime level of all Indices connected to A to 0"""
-	noprime!(IndexSet(A))
-	A
-end 
+noprime!(A::ITensor) = noprime!(IndexSet(A))
 
 function _tuple_array(T)
 	Tarr = [t for t in T]
