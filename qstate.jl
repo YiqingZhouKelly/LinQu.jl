@@ -44,21 +44,19 @@ function getlink(qs::MPSState, pos::Vector{Int})
 	return leftlink, rightlink
 end	
 function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a Array{Index,1} o.w.
-	print("regular get free at index $(j)\n")
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	print("push! √\n")
 	freeset = setdiff(IndexSet(qs[j]),links)  
-	print("regular get free √\n")
 	# if length(freeset)==1
 	# 	return freeset[1]
 	# end
 	# freeset
+	print(IndexSet(qs[j]),"XXX",links)
+	print("\nthe free index is:",freeset[1])
 	freeset[1]
 end
 function getfree(qs::MPSState, pos::Vector{Int})
-	print("get free set !\n")
 	toreturn = Index[] 
 	for i =1:length(pos)
 		push!(toreturn,getfree(qs,pos[i]))
@@ -115,7 +113,6 @@ function movegauge!(qs::MPSState, pos::Int)
 end
 
 function movegauge!(qs::MPSState, pos::Vector{Int})
-	# print("start movegauge...\n")
 	if length(pos) == 1
 		return movegauge!(qs,pos[1])
 	end
@@ -125,7 +122,6 @@ function movegauge!(qs::MPSState, pos::Vector{Int})
 	# TODO: check whether sort!(pos) is needed
 	center = optpos(l,r,pos)
 	position!(qs,center)
-	# print("end start movegauge...\n")
 	return center
 end
 
@@ -147,16 +143,21 @@ function applysinglegate!(qs::MPSState, qg::QGate)
 end
 
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	center = movegauge!(qs,pos(qg))	
+	# print("\n>>>>>>>>>>>>>before moving the gauge:\n",qs)
+	# center = movegauge!(qs,pos(qg))	
+
+	# print("\n >>>>>>>>>>before forming the net:\n",qs)
 	(llink,rlink) = getlink(qs, pos(qg))
 	wires = IndexSet(getfree(qs,pos(qg)))
-	igate = ITensor(qg,wires)
-	print(igate)
-	net = ITensorNet(igate)
+	net = ITensorNet(ITensor(qg,wires))
 	for i ∈ pos(qg)
+		print("pushing\n", qs[i])
 		push!(net, qs[i])
 	end
+	print("\n>>>>>>>net:", net)
+	print("\n\n")
 	exact = noprime!(contractall(net))
+	print("exact: ", exact)
 	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
 	replace!(qs, approx, pos(qg))
 	return qs

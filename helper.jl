@@ -3,8 +3,8 @@ function exact_MPS(exact::ITensor,indexorder,
 				   leftlink=Nothing,rightlink=Nothing;
 				   kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1
-	leftlink!=Nothing  && (iter-=1)
-	rightlink!=Nothing && (iter-=1)
+	leftlink != Nothing  && (iter-=1)
+	rightlink != Nothing && (iter-=1)
 	remain = copy(exact) # TODO: How to avoid the copy?
 	resultMPS = ITensor[]
 	for  i = 1:iter

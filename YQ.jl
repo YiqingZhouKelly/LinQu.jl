@@ -51,7 +51,8 @@ export linkind,
 	   ITensor,
 	   Index,
 	   randomITensor,
-	   qr
+	   qr,
+	   IndexSet
 # Types
 export  QState,
 		QGate,
@@ -100,7 +101,8 @@ export QGate,
 	   ITensor,
 	   isswap,
 	   sameposition,
-	   repeatedswap
+	   repeatedswap,
+	   ITensor
 
 include("qstate.jl")
 export QState,

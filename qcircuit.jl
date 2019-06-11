@@ -3,11 +3,9 @@ mutable struct QCircuit
 	state::QState
 	gates::QGateSet
 	evalpos::Int
-	# outgoing:: Vector{Index}
 	# TODO: store truncation criterion
 	function QCircuit(N::Int)
 		mps = MPSState(N)
-		# outgoing = getfree(mps)
 		new(mps,QGateSet(),0) 
 	end
 	QCircuit(mps::MPSState) = new(mps,QGateSet(),0)
@@ -19,9 +17,7 @@ push!(qc:: QCircuit, qg::QGate) = push!(gates(qc), qg)
 # iterate(qc::QCircuit,state::Int=1) = iterate(qc.gates,state)
 # size(qc::QCircuit) = size(QGateSet)
 function runlocal!(qc::QCircuit)
-	print("running local...\n")
 	for gate ∈ gates(qc)
-		print("\napply gate...\n", gate)
 		# if range(gate) ==1
 		# 	applysinglegate!(qc.state, gate)
 		# else
@@ -79,8 +75,6 @@ function show(io::IO, qc::QCircuit)
 	for gate ∈ gates(qc)
 		print(io,gate,"\n")
 	end
-	print(io,"=====================\n")
-	print(qc.evalpos)
 	print(io,"=====================\n")
 end
 

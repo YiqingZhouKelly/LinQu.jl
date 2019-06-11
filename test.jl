@@ -21,8 +21,9 @@ elseif test == "naive_local"
 	qc  =QCircuit(5)
 	print(qc)
 	# push!(qc, SwapGate(1,2))
-	push!(qc, CNOTGate(4,1))
-	minswap_localize!(qc)
+	push!(qc, XGate(1))
+	push!(qc, CNOTGate(1,2))
+	# minswap_localize!(qc)
 	runlocal!(qc)
 elseif test == "contraction"
 	m = MPSState(3)
@@ -35,6 +36,14 @@ elseif test == "contraction"
 	print(">>>>>>>>>>>>>>>>>>applying CNOT on 1,2...\n")
 	applylocalgate!(m, cnot)
 	print(m)
+elseif test == "dim"
+	mps = MPSState(3)
+	H =HGate(2)
+	CNOT = CNOTGate(1,2)
+	applylocalgate!(mps, H)
+	print(mps)
+	applylocalgate!(mps,CNOT)
+	print(mps)
 else
 	print("No test named $(test) is found...\n")
 end
