@@ -1,6 +1,6 @@
 
 mutable struct QGate 
-	data::Vector{Number} 
+	data::Vector{Float64} 
 	pos::Vector{Int}
 	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{Number} breaks the code
 		numqubit = Int(log2(length(data))/2)
@@ -34,19 +34,18 @@ function nonlocal_local(qg::QGate) #:: QGateSet
 		error("currently only support 2 qubit gates\n")
 	end
 	localgates = QGate[]
-	curr = position[2]
+	left = min(position...)
+	right = max(position...)
 	#TODO: Now assume always move to the first index 
-	while abs(curr-position[1])>1
-		if curr < position[1]
-			push!(localgates,SwapGate(curr,curr+1))
-			curr +=1
-		else
-			push!(localgates, SwapGate(curr,curr-1))
-			curr-=1
-		end
+	while right > left+1
+		push!(localgates, SwapGate(right-1, right))
+		right-=1
+	end
+	if position[1]>position[2] # control to the right of target
+		push!(localgates, SwapGate(left, right))
 	end
 	swapback = reverse(localgates)
-	localqg = movegate(qg,position[1], curr)
+	localqg = movegate(qg,left, right)
 	push!(localgates,localqg)
 	localgates = vcat(localgates, swapback)
 	return QGateSet(localgates)
@@ -128,6 +127,7 @@ CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
 
 # === new added====
 ITensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
+ITensor(qg::QGate, ind::Index...) = ITensor(qg, IndexSet(_tuple_array(ind)))
 isswap(qg::QGate) = (gate_tensor(qg)== [1.,0.,0.,0.,
 										0.,0.,1.,0.,
 										0.,1.,0.,0.,

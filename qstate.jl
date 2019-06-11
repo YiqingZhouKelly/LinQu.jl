@@ -44,21 +44,26 @@ function getlink(qs::MPSState, pos::Vector{Int})
 	return leftlink, rightlink
 end	
 function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a Array{Index,1} o.w.
-	links = Index[]
+	print("regular get free at index $(j)\n")
+	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
+	print("push! √\n")
 	freeset = setdiff(IndexSet(qs[j]),links)  
-	if length(freeset)==1
-		return freeset[1]
-	end
-	IndexSet(freeset)
+	print("regular get free √\n")
+	# if length(freeset)==1
+	# 	return freeset[1]
+	# end
+	# freeset
+	freeset[1]
 end
 function getfree(qs::MPSState, pos::Vector{Int})
+	print("get free set !\n")
 	toreturn = Index[] 
 	for i =1:length(pos)
 		push!(toreturn,getfree(qs,pos[i]))
 	end
-	return IndexSet(toreturn)
+	return toreturn
 end
 
 
@@ -86,7 +91,7 @@ function position!(qs::MPSState, j::Int)
 		psi[ll+1] *= R
 		psi.llim_ += 1
 	end
-
+	# print("hit mid\n")
 	while rightLim(psi) > (j+1)
 		rl = rightLim(psi)-1
 		s = getfree(qs,rl)
@@ -110,6 +115,7 @@ function movegauge!(qs::MPSState, pos::Int)
 end
 
 function movegauge!(qs::MPSState, pos::Vector{Int})
+	# print("start movegauge...\n")
 	if length(pos) == 1
 		return movegauge!(qs,pos[1])
 	end
@@ -119,6 +125,7 @@ function movegauge!(qs::MPSState, pos::Vector{Int})
 	# TODO: check whether sort!(pos) is needed
 	center = optpos(l,r,pos)
 	position!(qs,center)
+	# print("end start movegauge...\n")
 	return center
 end
 
@@ -128,7 +135,7 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 	end
 end
 
-function applysinglegate(qs::MPSState, qg::QGate)
+function applysinglegate!(qs::MPSState, qg::QGate)
 	if length(pos(qg))!=1
 		error("Calling applysinglegate with a non single qubit gate.\n")
 	end
@@ -142,8 +149,10 @@ end
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
 	center = movegauge!(qs,pos(qg))	
 	(llink,rlink) = getlink(qs, pos(qg))
-	wires = getfree(qs,pos(qg))
-	net = ITensorNet(ITensor(qg,wires))
+	wires = IndexSet(getfree(qs,pos(qg)))
+	igate = ITensor(qg,wires)
+	print(igate)
+	net = ITensorNet(igate)
 	for i ∈ pos(qg)
 		push!(net, qs[i])
 	end

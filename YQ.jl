@@ -13,12 +13,15 @@ import Base.length,
 	   Base.setindex!,
 	   Base.findfirst,
 	   Base.deleteat!,
+	   Base.print,
+	   Base.show,
 	   .ITensors.linkind,
 	   .ITensors.getindex,
 	   .ITensors.noprime,
 	   .ITensors.noprime!,
 	   .ITensors.prime,
 	   .ITensors.svd,
+	   .ITensors.qr,
 	   .ITensors.position!,
 	   .ITensors.setindex!,
 	   .ITensors.svd,
@@ -47,13 +50,15 @@ export linkind,
 	   iterate,
 	   ITensor,
 	   Index,
-	   randomITensor
+	   randomITensor,
+	   qr
 # Types
 export  QState,
 		QGate,
 		QGateSet,
 		QCircuit,
-		ITensorNet
+		ITensorNet,
+		MPSState
 
 include("tensornet.jl")
 export  TensorNet,
@@ -111,7 +116,8 @@ export QState,
        position!,
        movegauge!,
        replace!,
-       applylocalgate!
+       applylocalgate!,
+       applysinglegate!
 
 
 
@@ -129,6 +135,13 @@ export QCircuit,
 	   state,
 	   push!,
 	   localize,
-	   minswap
+	   localize!,
+	   minswap,
+	   minswap!,
+	   minswap_localize!,
+	   print,
+	   show,
+	   runlocal!,
+	   cleargates!
 end #module
 

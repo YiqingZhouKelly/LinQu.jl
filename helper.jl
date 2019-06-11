@@ -3,7 +3,7 @@ function exact_MPS(exact::ITensor,indexorder,
 				   leftlink=Nothing,rightlink=Nothing;
 				   kwargs...) #::Array{ITensor,1}
 	iter = order(exact)-1
-	leftlink!=Nothing && (iter-=1)
+	leftlink!=Nothing  && (iter-=1)
 	rightlink!=Nothing && (iter-=1)
 	remain = copy(exact) # TODO: How to avoid the copy?
 	resultMPS = ITensor[]
@@ -36,8 +36,10 @@ function optpos(llim::Int, rlim::Int, targets::Vector{Int})
 	return targets[argmin(distances)]
 end
 
-noprime!(A::ITensor) = noprime!(IndexSet(A))
-
+function noprime!(A::ITensor) 
+	noprime!(IndexSet(A))
+	return A
+end
 function _tuple_array(T)
 	Tarr = [t for t in T]
 	return Tarr

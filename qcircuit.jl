@@ -3,14 +3,14 @@ mutable struct QCircuit
 	state::QState
 	gates::QGateSet
 	evalpos::Int
-	outgoing:: Vector{Index}
+	# outgoing:: Vector{Index}
 	# TODO: store truncation criterion
 	function QCircuit(N::Int)
 		mps = MPSState(N)
-		outgoing = getfreelist(mps)
-		new(mps,QGate[],0,outgoing) 
+		# outgoing = getfree(mps)
+		new(mps,QGateSet(),0) 
 	end
-	QCircuit(mps::MPSState) = new(mps,QGate[],0,getfreelist(mps))
+	QCircuit(mps::MPSState) = new(mps,QGateSet(),0)
 end #struct
 
 gates(qc::QCircuit) = qc.gates
@@ -18,8 +18,19 @@ state(qc::QCircuit) = qc.state
 push!(qc:: QCircuit, qg::QGate) = push!(gates(qc), qg)
 # iterate(qc::QCircuit,state::Int=1) = iterate(qc.gates,state)
 # size(qc::QCircuit) = size(QGateSet)
-
-
+function runlocal!(qc::QCircuit)
+	print("running local...\n")
+	for gate ∈ gates(qc)
+		print("\napply gate...\n", gate)
+		# if range(gate) ==1
+		# 	applysinglegate!(qc.state, gate)
+		# else
+			applylocalgate!(qc.state, gate)
+		# end
+		print("\n>>>>>>>>>>",qc)
+		qc.evalpos+=1
+	end
+end
 function localize(qc::QCircuit) #::QGateSet
 	localized = QGateSet()
 	for gate ∈ gates(qc)
@@ -32,7 +43,7 @@ function localize(qc::QCircuit) #::QGateSet
 	return localized
 end
 function localize!(qc::QCircuit)
-	gates(qc) = localize(qc)
+	qc.gates = localize(qc)
 	return qc
 end
 
@@ -46,12 +57,34 @@ function minswap(qc::QCircuit)
 			push!(optimized, curr)
 		end
 	end
-	return optimized
+	return QGateSet(optimized)
 end
+
 function minswap!(qc::QCircuit)
-	optimized = minswap(qc)
-	gates(qc) = optimized
+	qc.gates = minswap(qc)
 	return qc
 end
 
 minswap_localize!(qc::QCircuit) = minswap!(localize!(qc))
+
+function show(io::IO, qc::QCircuit)
+	print("-------\n")
+	print("|State|\n")
+	print("-------\n")
+	print(io,"=====================\n")
+	print(io,state(qc),"\n")
+	print("-------\n")
+	print("|Gates|\n")
+	print("-------\n")
+	for gate ∈ gates(qc)
+		print(io,gate,"\n")
+	end
+	print(io,"=====================\n")
+	print(qc.evalpos)
+	print(io,"=====================\n")
+end
+
+function cleargates!(qc::QCircuit)
+	qc.gates = QGateSet()
+	return qc
+end

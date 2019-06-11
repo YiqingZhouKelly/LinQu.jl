@@ -1,17 +1,13 @@
 
 struct QGateSet
 	set::Vector{QGate}
-	function QGateSet(gates::Vector{QGate})
-		set = QGate[]
-		for gate ∈ gates
-			push!(set, gate)
-		end
-		new(set)
-	end
+
+	QGateSet() = new(QGate[])
+	QGateSet(gates::Vector{QGate}) = new(gates)
 	QGateSet(gates::QGate...) = QGateSet(_tuple_array(gates))
 end #struct
 
-getindex(gs::QGateSet, j::Int) = getindex(gq.set, j)
+getindex(gs::QGateSet, j::Int) = getindex(gs.set, j)
 setindex!(gs::QGateSet, gate::QGate, j::Int) = setindex!(gs.set, gate,j)
 length(qgset::QGateSet) = length(qgset.set)
 
