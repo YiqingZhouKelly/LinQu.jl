@@ -34,9 +34,7 @@ elseif test == "contraction"
 	X = XGate(1)
 	cnot = CNOTGate(1,2)
 	applylocalgate!(m, X)
-	print(">>>>>>>>>>>>>>>>>>applying X on 1...\n")
 	print(m)
-	print(">>>>>>>>>>>>>>>>>>applying CNOT on 1,2...\n")
 	applylocalgate!(m, cnot)
 	print(m)
 elseif test == "dim"
@@ -48,6 +46,24 @@ elseif test == "dim"
 	applylocalgate!(mps,CNOT)
 	# applylocalgate!(mps, CNOT)	
 	print(mps)
+elseif test == "simple"
+	qc = QCircuit(5)
+	push!(qc, HGate(2))
+	push!(qc, HGate(3))
+	push!(qc, HGate(4))
+	push!(qc, CNOTGate(1,4))
+	minswap_localize!(qc)
+	runlocal!(qc)
+	print(qc)
+elseif test == "control_target"
+	qc = QCircuit(3)
+	push!(qc, XGate(2))
+	print(qc)
+	print("\n==============split =============\n")
+	push!(qc, SwapGate(1,2))
+	# push!(qc, CNOTGate(1,2))
+	runlocal!(qc)
+	print(qc)
 else
 	print("No test named $(test) is found...\n")
 end

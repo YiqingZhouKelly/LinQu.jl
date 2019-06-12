@@ -47,34 +47,16 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeset = IndexSetdiff(IndexSet(qs[j]),links)  
-	# if length(freeset)==1
-	# 	return freeset[1]
-	# end
-	# freeset
-	freeset
-end
-
-function IndexSetdiff(A::IndexSet, B:: IndexSet)
-	if length(B)>length(A)
-		temp = A
-		A = B
-		B =temp
-	end
-	for ind ∈ A
-		if !(ind ∈ B)
-			return ind
-		end
-	end
-	error("no difference was found!\n")
+	freeindex = IndexSetdiff(IndexSet(qs[j]),links)
+	return freeindex
 end
 
 function getfree(qs::MPSState, pos::Vector{Int})
-	toreturn = Index[] 
-	for i =1:length(pos)
-		push!(toreturn,getfree(qs,pos[i]))
+	freeinds = Index[] 
+	for i ∈ pos
+		push!(freeinds,getfree(qs,i))
 	end
-	return toreturn
+	return freeinds
 end
 
 
@@ -131,7 +113,6 @@ function movegauge!(qs::MPSState, pos::Vector{Int})
 	#2 quibit gate
 	l = leftLim(qs)
 	r = rightLim(qs)
-	# TODO: check whether sort!(pos) is needed
 	center = optpos(l,r,pos)
 	position!(qs,center)
 	return center
@@ -143,32 +124,31 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 	end
 end
 
-function applysinglegate!(qs::MPSState, qg::QGate)
-	if length(pos(qg))!=1
-		error("Calling applysinglegate with a non single qubit gate.\n")
-	end
-	site = pos(qg)[1]
-	position!(qs, site)
-	qs[site] = noprime!(ITensor(qg, getfree(qs, site))* qs[site])
-	return qs
-end
-
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	# center = movegauge!(qs,pos(qg))	
-	(llink,rlink) = getlink(qs, pos(qg))
-	wires = IndexSet(getfree(qs,pos(qg)))
+	center = movegauge!(qs,pos(qg))	
+	positions = pos(qg)
+	(llink,rlink) = getlink(qs, positions)
+	wires = IndexSet(getfree(qs,positions))
 	net = ITensorNet(ITensor(qg,wires))
-	for i ∈ pos(qg)
+	for i ∈ positions
 		push!(net, qs[i])
 	end
 	exact = noprime!(contractall(net))
-	if range(qg) == 1
+	if range(qg) == 1 # for single qubit gate
 		qs[pos(qg)[1]] = exact 
 	else 
 		approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
-		replace!(qs, approx, pos(qg))
+		replace!(qs, approx, positions)
 	end
+	changelims!(qs,positions)
 	return qs
 end
 
+function changelims!(qs::MPSState, pos::Vector{Int})
+	sorted = sort(pos)
+	sorted != pos && error("local gate not have ordered pos input\n")
+	MPS(qs).llim_ = pos[1]-1
+	MPS(qs).rlim_ = pos[length(pos)]+1
+	return qs
+end
 

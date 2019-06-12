@@ -120,8 +120,7 @@ export QState,
        position!,
        movegauge!,
        replace!,
-       applylocalgate!,
-       applysinglegate!
+       applylocalgate!
 
 
 
