@@ -48,11 +48,11 @@ elseif test == "dim"
 	print(mps)
 elseif test == "simple"
 	qc = QCircuit(5)
-	push!(qc, HGate(2))
-	push!(qc, HGate(3))
-	push!(qc, HGate(4))
-	push!(qc, CNOTGate(1,4))
-	minswap_localize!(qc)
+	# push!(qc, HGate(2))
+	# push!(qc, HGate(3))
+	# push!(qc, HGate(4))
+	push!(qc, CNOTGate(1,2))
+	# minswap_localize!(qc)
 	runlocal!(qc)
 	print(qc)
 elseif test == "control_target"
@@ -62,6 +62,11 @@ elseif test == "control_target"
 	print("\n==============split =============\n")
 	push!(qc, SwapGate(1,2))
 	# push!(qc, CNOTGate(1,2))
+	runlocal!(qc)
+	print(qc)
+elseif test == "YGate"
+	qc = QCircuit(3)
+	push!(qc, YGate(3))
 	runlocal!(qc)
 	print(qc)
 else

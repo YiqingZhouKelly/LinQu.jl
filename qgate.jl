@@ -1,6 +1,6 @@
 
 mutable struct QGate 
-	data::Vector{Float64} 
+	data::Vector{Complex{Float64}} #where T
 	pos::Vector{Int}
 	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{Number} breaks the code
 		numqubit = Int(log2(length(data))/2)
@@ -63,13 +63,13 @@ movegate(qg::QGate, p::Vector{Int}) = movegate!(copy(qg), p)
 movegate(qg::QGate, p::Int...)= movegate!(copy(qg), p...)
 
 # == sigle quibit gates == 
-IGate(pos::Vector{Int}) = QGate([1.,0.,0.,1.],pos)
-XGate(pos::Vector{Int}) = QGate([0.,1.,1.,0.],pos)
-YGate(pos::Vector{Int}) = QGate([0.,-1.0im, 1.0im, 0.],pos)
-ZGate(pos::Vector{Int}) = QGate([1.,0.,0.,-1.],pos)
-TGate(pos::Vector{Int}) = QGate([1.,0.,0.,exp(-1im*π/4)],pos)
-HGate(pos::Vector{Int}) = QGate((1/√2)*[1,1,1,-1],pos) # H could be decomposed in to XY / YZ gates
-SGate(pos::Vector{Int}) = QGate([1.,0.,0.,1.0im],pos)
+IGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,1.]),pos)
+XGate(pos::Vector{Int}) = QGate(complex([0.,1.,1.,0.]),pos)
+YGate(pos::Vector{Int}) = QGate(complex([0.,-1.0im, 1.0im, 0.]),pos)
+ZGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,-1.]),pos)
+TGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,exp(-1im*π/4)]),pos)
+HGate(pos::Vector{Int}) = QGate(complex((1/√2)*[1,1,1,-1]),pos) # H could be decomposed in to XY / YZ gates
+SGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,1.0im]),pos)
 
 IGate(pos::Int...) = IGate(_tuple_array(pos))
 XGate(pos::Int...) = XGate(_tuple_array(pos))
@@ -84,7 +84,7 @@ SGate(pos::Int...) = SGate(_tuple_array(pos))
 function Rx(θ::Number, pos::Vector{Int})
 	c = cos(θ/2.)
 	s = -1.0im*sim(θ/2.)
-	QGate([c,s,s,c],pos)
+	QGate(complex([c,s,s,c]),pos)
 end
 
 function Ry(θ::Number, pos::Vector{Int})
@@ -103,15 +103,15 @@ Ry(θ::Number, pos::Int...) = Ry(θ, _tuple_array(pos))
 Rz(θ::Number, pos::Int...) = Rz(θ, _tuple_array(pos))
 
 # == two qubit gates ==
-SwapGate(pos::Vector{Int}) = QGate([1.,0.,0.,0.,
+SwapGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,0.,
 									0.,0.,1.,0.,
 									0.,1.,0.,0.,
-									0.,0.,0.,1.],pos)
+									0.,0.,0.,1.]),pos)
 SwapGate(pos::Int...) = SwapGate(_tuple_array(pos))
-CNOTGate(pos::Vector{Int}) = QGate([1.,0.,0.,0.,
+CNOTGate(pos::Vector{Int}) = QGate(complex([1.,0.,0.,0.,
 								    0.,1.,0.,0.,
 								    0.,0.,0.,1.,
-								    0.,0.,1.,0.],pos)
+								    0.,0.,1.,0.]),pos)
 CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
 # CZGate() = QGate(Diagonal([1.,1.,1.,-1.]),2) # TODO: check diagonal working??
 # CRGate(θ::Number) = QGate(Diagonal([1.,1.,1.,exp(1.0im*θ))]),2)
@@ -129,10 +129,10 @@ CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
 ITensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
 ITensor(qg::QGate, ind::Index...) = ITensor(qg, IndexSet(_tuple_array(ind)))
 # TODO: better way to recognize a swap gate?
-isswap(qg::QGate) = (gate_tensor(qg)== [1.,0.,0.,0.,
+isswap(qg::QGate) = (gate_tensor(qg)== complex([1.,0.,0.,0.,
 										0.,0.,1.,0.,
 										0.,1.,0.,0.,
-										0.,0.,0.,1.])
+										0.,0.,0.,1.]))
 sameposition(A::QGate, B::QGate) = (sort(pos(A)) == sort(pos(B)))
 repeatedswap(A::QGate, B::QGate) = (isswap(A) && isswap(B) && sameposition(A,B))
 

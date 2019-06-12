@@ -6,6 +6,7 @@ abstract type QState end
 struct MPSState <: QState
 	s::MPS
 	function MPSState(N::Int, init::Vector{T}) where {T}
+		init = complex(init)
 		itensors = ITensor[]
 		rightlink,leftlink
 		for i =1:N
