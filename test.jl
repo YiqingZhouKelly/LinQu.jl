@@ -20,11 +20,14 @@ if test== "delete!"
 elseif test == "naive_local"
 	qc  =QCircuit(5)
 	print(qc)
-	# push!(qc, SwapGate(1,2))
+	push!(qc, SwapGate(1,2))
 	push!(qc, XGate(1))
+	push!(qc, HGate(2))
 	push!(qc, CNOTGate(1,2))
-	# minswap_localize!(qc)
+	push!(qc, CNOTGate(2,3))
+	minswap_localize!(qc)
 	runlocal!(qc)
+	print(qc)
 elseif test == "contraction"
 	m = MPSState(3)
 	print(m)
@@ -43,6 +46,7 @@ elseif test == "dim"
 	applylocalgate!(mps, H)
 	print(mps)
 	applylocalgate!(mps,CNOT)
+	# applylocalgate!(mps, CNOT)	
 	print(mps)
 else
 	print("No test named $(test) is found...\n")

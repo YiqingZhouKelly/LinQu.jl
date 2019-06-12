@@ -47,15 +47,28 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeset = setdiff(IndexSet(qs[j]),links)  
+	freeset = IndexSetdiff(IndexSet(qs[j]),links)  
 	# if length(freeset)==1
 	# 	return freeset[1]
 	# end
 	# freeset
-	print(IndexSet(qs[j]),"XXX",links)
-	print("\nthe free index is:",freeset[1])
-	freeset[1]
+	freeset
 end
+
+function IndexSetdiff(A::IndexSet, B:: IndexSet)
+	if length(B)>length(A)
+		temp = A
+		A = B
+		B =temp
+	end
+	for ind ∈ A
+		if !(ind ∈ B)
+			return ind
+		end
+	end
+	error("no difference was found!\n")
+end
+
 function getfree(qs::MPSState, pos::Vector{Int})
 	toreturn = Index[] 
 	for i =1:length(pos)
@@ -89,7 +102,6 @@ function position!(qs::MPSState, j::Int)
 		psi[ll+1] *= R
 		psi.llim_ += 1
 	end
-	# print("hit mid\n")
 	while rightLim(psi) > (j+1)
 		rl = rightLim(psi)-1
 		s = getfree(qs,rl)
@@ -137,29 +149,25 @@ function applysinglegate!(qs::MPSState, qg::QGate)
 	end
 	site = pos(qg)[1]
 	position!(qs, site)
-	newsite = noprime!(ITensor(qg, getfree(qs, site))* qs[site])
-	qs[site] = newsite
+	qs[site] = noprime!(ITensor(qg, getfree(qs, site))* qs[site])
 	return qs
 end
 
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	# print("\n>>>>>>>>>>>>>before moving the gauge:\n",qs)
 	# center = movegauge!(qs,pos(qg))	
-
-	# print("\n >>>>>>>>>>before forming the net:\n",qs)
 	(llink,rlink) = getlink(qs, pos(qg))
 	wires = IndexSet(getfree(qs,pos(qg)))
 	net = ITensorNet(ITensor(qg,wires))
 	for i ∈ pos(qg)
-		print("pushing\n", qs[i])
 		push!(net, qs[i])
 	end
-	print("\n>>>>>>>net:", net)
-	print("\n\n")
 	exact = noprime!(contractall(net))
-	print("exact: ", exact)
-	approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
-	replace!(qs, approx, pos(qg))
+	if range(qg) == 1
+		qs[pos(qg)[1]] = exact 
+	else 
+		approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
+		replace!(qs, approx, pos(qg))
+	end
 	return qs
 end
 

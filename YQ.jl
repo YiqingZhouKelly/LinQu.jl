@@ -1,7 +1,7 @@
 
 module YQ
 
-include("./../ITensors_fork/src/ITensors.jl")
+include("./../ITensors/src/ITensors.jl")
 
 using .ITensors
 import Base.length,
@@ -15,6 +15,7 @@ import Base.length,
 	   Base.deleteat!,
 	   Base.print,
 	   Base.show,
+	   Base.replace!,
 	   .ITensors.linkind,
 	   .ITensors.getindex,
 	   .ITensors.noprime,

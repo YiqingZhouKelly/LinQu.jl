@@ -47,7 +47,7 @@ function contractall(N::ITensorNet)
 	product = N.net[1]
 	for i = 2:length(N)
 		# global product
-		product*=N.net[i]
+		product =product * N.net[i]
 	end
 	return product
 end

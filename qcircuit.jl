@@ -23,7 +23,6 @@ function runlocal!(qc::QCircuit)
 		# else
 			applylocalgate!(qc.state, gate)
 		# end
-		print("\n>>>>>>>>>>",qc)
 		qc.evalpos+=1
 	end
 end
@@ -67,7 +66,6 @@ function show(io::IO, qc::QCircuit)
 	print("-------\n")
 	print("|State|\n")
 	print("-------\n")
-	print(io,"=====================\n")
 	print(io,state(qc),"\n")
 	print("-------\n")
 	print("|Gates|\n")
@@ -75,7 +73,7 @@ function show(io::IO, qc::QCircuit)
 	for gate ∈ gates(qc)
 		print(io,gate,"\n")
 	end
-	print(io,"=====================\n")
+	print(io,"===============================================================================\n")
 end
 
 function cleargates!(qc::QCircuit)
