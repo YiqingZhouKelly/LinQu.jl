@@ -77,7 +77,8 @@ include("helper.jl")
 export exact_MPS,
 	   stepsize,
 	   optpos,
-	   noprime!
+	   noprime!,
+	   IndexSetdiff
 
 include("qgate.jl")
 export QGate,

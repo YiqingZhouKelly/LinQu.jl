@@ -73,7 +73,6 @@ function show(io::IO, qc::QCircuit)
 	for gate ∈ gates(qc)
 		print(io,gate,"\n")
 	end
-	print(io,"===============================================================================\n")
 end
 
 function cleargates!(qc::QCircuit)

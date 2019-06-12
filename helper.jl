@@ -44,3 +44,17 @@ function _tuple_array(T)
 	Tarr = [t for t in T]
 	return Tarr
 end
+
+function IndexSetdiff(A::IndexSet, B:: IndexSet)
+	if length(B)>length(A)
+		temp = A
+		A = B
+		B =temp
+	end
+	for ind ∈ A
+		if !(ind ∈ B)
+			return ind
+		end
+	end
+	error("no difference was found!\n")
+end
