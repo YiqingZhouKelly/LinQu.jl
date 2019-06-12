@@ -14,9 +14,7 @@ function exact_MPS(exact::ITensor,indexorder,
 			U,S,V,leftlink,v = svd(remain, indexorder[i];kwargs...)
 		end 
 		push!(resultMPS,U)
-		print(S)
-		print(V)
-		remain = S*V # Crashes here...:(
+		remain = complex(S)*V # Crashes here...:(
 	end
 	push!(resultMPS,remain)
 	return resultMPS
