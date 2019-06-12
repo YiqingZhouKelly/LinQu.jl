@@ -125,7 +125,8 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 end
 
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	center = movegauge!(qs,pos(qg))	
+	center = movegauge!(qs,pos(qg))
+	qs[center] /= norm(qs[center]) 
 	positions = pos(qg)
 	(llink,rlink) = getlink(qs, positions)
 	wires = IndexSet(getfree(qs,positions))

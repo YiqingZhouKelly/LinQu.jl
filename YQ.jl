@@ -32,7 +32,8 @@ import Base.length,
 	   .ITensors.rightLim,
 	   .ITensors.iterate,
 	   .ITensors.ITensor,
-	   .ITensors.Index
+	   .ITensors.Index,
+	   .ITensors.norm
 
 # functions from Base, ITensors
 export linkind,

@@ -3,12 +3,9 @@ mutable struct QCircuit
 	state::QState
 	gates::QGateSet
 	evalpos::Int
-	# TODO: store truncation criterion
-	function QCircuit(N::Int)
-		mps = MPSState(N)
-		new(mps,QGateSet(),0) 
-	end
-	QCircuit(mps::MPSState) = new(mps,QGateSet(),0)
+	# TODO: store truncation criterion?
+	QCircuit(N::Int) = new(MPSState(N), QGateSet(),0)
+	QCircuit(qs::MPSState) = new(qs,QGateSet(),0)
 end #struct
 
 gates(qc::QCircuit) = qc.gates
@@ -16,16 +13,14 @@ state(qc::QCircuit) = qc.state
 push!(qc:: QCircuit, qg::QGate) = push!(gates(qc), qg)
 # iterate(qc::QCircuit,state::Int=1) = iterate(qc.gates,state)
 # size(qc::QCircuit) = size(QGateSet)
-function runlocal!(qc::QCircuit)
+
+function runlocal!(qc::QCircuit; kwargs...)
 	for gate ∈ gates(qc)
-		# if range(gate) ==1
-		# 	applysinglegate!(qc.state, gate)
-		# else
-			applylocalgate!(qc.state, gate)
-		# end
+		applylocalgate!(qc.state, gate; kwargs...)
 		qc.evalpos+=1
 	end
 end
+
 function localize(qc::QCircuit) #::QGateSet
 	localized = QGateSet()
 	for gate ∈ gates(qc)

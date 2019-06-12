@@ -128,6 +128,7 @@ CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
 # === new added====
 ITensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
 ITensor(qg::QGate, ind::Index...) = ITensor(qg, IndexSet(_tuple_array(ind)))
+# TODO: better way to recognize a swap gate?
 isswap(qg::QGate) = (gate_tensor(qg)== [1.,0.,0.,0.,
 										0.,0.,1.,0.,
 										0.,1.,0.,0.,

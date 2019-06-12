@@ -21,3 +21,7 @@
 ## Potential Changes/ Optimizations / Improvements
 - [ ] Consider both adding SWAP and moving gauge when decide center of canonical form
 - [ ] In QCircuit, currently localize(!) returns type QGateSet, meybe should change to QCircuit
+
+## Need to think about:
+- [ ] Better way to recognize a SWAP gate
+- [ ] Maybe add support to remember truncation `kwargs...`
