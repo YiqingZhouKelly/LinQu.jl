@@ -33,6 +33,7 @@ setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n)
 MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 iterate(m::MPSState) = iterate(m)
+
 getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
 function getlink(qs::MPSState, pos::Vector{Int})
 	sortedpos = sort(pos)
@@ -48,8 +49,8 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeindex = IndexSetdiff(IndexSet(qs[j]),links)
-	return freeindex
+	freeind = uniqueindex(IndexSet(qs[j]),links)
+	return freeind
 end
 
 function getfree(qs::MPSState, pos::Vector{Int})
@@ -60,13 +61,32 @@ function getfree(qs::MPSState, pos::Vector{Int})
 	return freeinds
 end
 
-
 leftLim(m::MPSState) = leftLim(m.s)
 rightLim(m::MPSState) = rightLim(m.s)
 
-
 MPS_exact(mps::MPS) = contractall(mps.A_)
 MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
+
+function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
+	center = movegauge!(qs,pos(qg))
+	qs[center] /= norm(qs[center]) 
+	positions = pos(qg)
+	(llink,rlink) = getlink(qs, positions)
+	wires = IndexSet(getfree(qs,positions))
+	net = ITensorNet(ITensor(qg,wires))
+	for i ∈ positions
+		push!(net, qs[i])
+	end
+	exact = noprime!(contractall(net))
+	if range(qg) == 1 # for single qubit gate
+		qs[pos(qg)[1]] = exact 
+	else 
+		approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
+		replace!(qs, approx, positions)
+	end
+	changelims!(qs,positions)
+	return qs
+end
 
 function position!(qs::MPSState, j::Int) 
 	psi = qs.s
@@ -123,27 +143,6 @@ function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
 	for i =1 : length(pos)
 		qs[pos[i]] = new[i]
 	end
-end
-
-function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	center = movegauge!(qs,pos(qg))
-	qs[center] /= norm(qs[center]) 
-	positions = pos(qg)
-	(llink,rlink) = getlink(qs, positions)
-	wires = IndexSet(getfree(qs,positions))
-	net = ITensorNet(ITensor(qg,wires))
-	for i ∈ positions
-		push!(net, qs[i])
-	end
-	exact = noprime!(contractall(net))
-	if range(qg) == 1 # for single qubit gate
-		qs[pos(qg)[1]] = exact 
-	else 
-		approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
-		replace!(qs, approx, positions)
-	end
-	changelims!(qs,positions)
-	return qs
 end
 
 function changelims!(qs::MPSState, pos::Vector{Int})

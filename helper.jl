@@ -14,7 +14,7 @@ function exact_MPS(exact::ITensor,indexorder,
 			U,S,V,leftlink,v = svd(remain, indexorder[i];kwargs...)
 		end 
 		push!(resultMPS,U)
-		remain = complex(S)*V # Crashes here...:(
+		remain = complex(S)*V # TODO: auto type conversion?
 	end
 	push!(resultMPS,remain)
 	return resultMPS
@@ -32,7 +32,7 @@ function stepsize(llim::Int, rlim::Int, target::Int)
 end
 
 function optpos(llim::Int, rlim::Int, targets::Vector{Int})
-	distances = stepsize.(llim,rlim,targets) #not sure if the dot operator is working
+	distances = stepsize.(llim,rlim,targets)
 	return targets[argmin(distances)]
 end
 
@@ -43,18 +43,4 @@ end
 function _tuple_array(T)
 	Tarr = [t for t in T]
 	return Tarr
-end
-
-function IndexSetdiff(A::IndexSet, B:: IndexSet)
-	if length(B)>length(A)
-		temp = A
-		A = B
-		B =temp
-	end
-	for ind ∈ A
-		if !(ind ∈ B)
-			return ind
-		end
-	end
-	error("no difference was found!\n")
 end

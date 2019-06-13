@@ -1,7 +1,7 @@
 
 module YQ
 
-include("./../ITensors/src/ITensors.jl")
+include("./../ITensors_fork/src/ITensors.jl")
 
 using .ITensors
 import Base.length,
@@ -86,7 +86,6 @@ include("qgate.jl")
 export QGate,
 	   gate_tensor,
 	   copy,
-	   checklocal,
 	   nonlocal_local,
 	   movegate!,
 	   movegate,
@@ -121,7 +120,6 @@ export QState,
        rightLim,
        MPS_exact,
        position!,
-       movegauge!,
        replace!,
        applylocalgate!
 

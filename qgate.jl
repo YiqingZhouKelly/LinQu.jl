@@ -19,9 +19,8 @@ copy(qg::QGate) = QGate(copy(gate_tensor(qg)), copy(pos(qg)))
 
 function checklocal(pos::Vector{Int})
 	length(pos) == 1 && return true
-	sorted = sort(pos)
 	for i =2:length(pos)
-		(sorted[i] != sorted[i-1]+1) && (return false)
+		(pos[i] != pos[i-1]+1) && (return false)
 	end
 	return true
 end
@@ -79,12 +78,10 @@ TGate(pos::Int...) = TGate(_tuple_array(pos))
 HGate(pos::Int...) = HGate(_tuple_array(pos)) # H could be decomposed in to XY / YZ gates
 SGate(pos::Int...) = SGate(_tuple_array(pos))
 
-
-
 function Rx(θ, pos::Vector{Int})
 	θ = float(θ)
 	c = cos(θ/2.)
-	s = -1.0im*sim(θ/2.)
+	s = -1im*sim(θ/2.)
 	QGate(complex([c,s,s,c]),pos)
 end
 
@@ -92,7 +89,7 @@ function Ry(θ, pos::Vector{Int})
 	θ = float(θ)
 	c = cos(θ/2)
 	s = sin(θ/2)
-	QGate([c,-s,s,c],pos)
+	QGate([c,s,-s,c],pos)
 end
 
 function Rz(θ, pos::Vector{Int})
