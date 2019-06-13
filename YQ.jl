@@ -16,6 +16,7 @@ import Base.length,
 	   Base.print,
 	   Base.show,
 	   Base.replace!,
+	   Base.reverse,
 	   .ITensors.linkind,
 	   .ITensors.getindex,
 	   .ITensors.noprime,
@@ -105,7 +106,8 @@ export QGate,
 	   isswap,
 	   sameposition,
 	   repeatedswap,
-	   ITensor
+	   ITensor,
+	   reverse
 
 include("qstate.jl")
 export QState,

@@ -66,7 +66,10 @@ elseif test == "control_target"
 	print(qc)
 elseif test == "YGate"
 	qc = QCircuit(3)
-	push!(qc, YGate(3))
+	push!(qc, XGate(1))
+	push!(qc, XGate(3))
+	push!(qc, CNOTGate(1,3))
+	minswap_localize!(qc)
 	runlocal!(qc)
 	print(qc)
 else
