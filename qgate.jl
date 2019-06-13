@@ -78,6 +78,8 @@ TGate(pos::Int...) = TGate(_tuple_array(pos))
 HGate(pos::Int...) = HGate(_tuple_array(pos)) # H could be decomposed in to XY / YZ gates
 SGate(pos::Int...) = SGate(_tuple_array(pos))
 
+TdagGate(pos::Vector{Int}) = QGate(complex([1,0,0,exp(π/4im)]),pos)
+TdagGate(pos::Int...) = TdagGate(_tuple_array(pos))
 function Rx(θ, pos::Vector{Int})
 	θ = float(θ)
 	c = cos(θ/2.)

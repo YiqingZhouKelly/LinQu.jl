@@ -34,7 +34,7 @@ MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 iterate(m::MPSState) = iterate(m)
 
-getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
+getlink(qs::MPSState,j::Int) = linkindex(MPS(qs),j)
 function getlink(qs::MPSState, pos::Vector{Int})
 	sortedpos = sort(pos)
 	leftend = sortedpos[1]
@@ -49,7 +49,7 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeind = Index(uniqueinds(IndexSet(qs[j]),links))
+	freeind = uniqueindex(IndexSet(qs[j]),links)
 	return freeind
 end
 
@@ -98,7 +98,7 @@ function position!(qs::MPSState, j::Int)
 		if ll == 1
 	  		(Q,R) = qr(psi[ll],s)
 		else
-	  		li = linkind(psi,ll-1)
+	  		li = linkindex(psi,ll-1)
 	  		(Q,R) = qr(psi[ll],s,li)
 		end
 		psi[ll] = Q
@@ -111,7 +111,7 @@ function position!(qs::MPSState, j::Int)
 		if rl == N
 	  		(Q,R) = qr(psi[rl],s)
 		else
-	  		ri = linkind(psi,rl)
+	  		ri = linkindex(psi,rl)
 	  		(Q,R) = qr(psi[rl],s,ri)
 		end
 		psi[rl] = Q

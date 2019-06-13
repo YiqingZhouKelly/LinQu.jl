@@ -62,12 +62,12 @@ function show(io::IO, qc::QCircuit)
 	print("|State|\n")
 	print("-------\n")
 	print(io,state(qc),"\n")
-	print("-------\n")
-	print("|Gates|\n")
-	print("-------\n")
-	for gate ∈ gates(qc)
-		print(io,gate,"\n")
-	end
+	# print("-------\n")
+	# print("|Gates|\n")
+	# print("-------\n")
+	# for gate ∈ gates(qc)
+	# 	print(io,gate,"\n")
+	# end
 end
 
 function cleargates!(qc::QCircuit)
