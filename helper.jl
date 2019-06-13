@@ -14,7 +14,7 @@ function exact_MPS(exact::ITensor,indexorder,
 			U,S,V,leftlink,v = svd(remain, indexorder[i];kwargs...)
 		end 
 		push!(resultMPS,U)
-		remain = complex(S)*V # TODO: auto type conversion?
+		remain = S*V # TODO: auto type conversion?
 	end
 	push!(resultMPS,remain)
 	return resultMPS

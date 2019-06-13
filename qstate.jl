@@ -49,7 +49,7 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeind = uniqueindex(IndexSet(qs[j]),links)
+	freeind = Index(uniqueinds(IndexSet(qs[j]),links))
 	return freeind
 end
 
