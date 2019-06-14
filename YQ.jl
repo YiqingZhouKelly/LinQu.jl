@@ -3,7 +3,7 @@ module YQ
 
 include("./../ITensors/src/ITensors.jl")
 
-using .ITensors
+using .ITensors, LinearAlgebra
 import Base.length,
 	   Base.copy,
 	   Base.push!,
@@ -17,6 +17,7 @@ import Base.length,
 	   Base.show,
 	   Base.replace!,
 	   Base.reverse,
+	   LinearAlgebra.norm,
 	   .ITensors.linkindex,
 	   .ITensors.getindex,
 	   .ITensors.noprime,
@@ -123,7 +124,10 @@ export QState,
        replace!,
        applylocalgate!
 
-
+include("exactstate.jl")
+export ExactState,
+		findindex,
+		ITensor
 
 include("qgateset.jl")
 export QGateSet,
