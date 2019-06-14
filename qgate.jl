@@ -66,7 +66,7 @@ IGate(pos::Vector{Int}) = QGate(complex([1,0,0,1]),pos)
 XGate(pos::Vector{Int}) = QGate(complex([0,1,1,0]),pos)
 YGate(pos::Vector{Int}) = QGate(complex([0,1im,-1im,0]),pos)
 ZGate(pos::Vector{Int}) = QGate(complex([1,0,0,-1]),pos)
-TGate(pos::Vector{Int}) = QGate(complex([1,0,0,exp(-π/4im)]),pos)
+TGate(pos::Vector{Int}) = QGate(complex([1,0,0,exp(π/4im)]),pos)
 HGate(pos::Vector{Int}) = QGate(complex((1/√2)*[1,1,1,-1]),pos) # H could be decomposed in to XY / YZ gates
 SGate(pos::Vector{Int}) = QGate(complex([1,0,0,1im]),pos)
 
@@ -78,7 +78,7 @@ TGate(pos::Int...) = TGate(_tuple_array(pos))
 HGate(pos::Int...) = HGate(_tuple_array(pos)) # H could be decomposed in to XY / YZ gates
 SGate(pos::Int...) = SGate(_tuple_array(pos))
 
-TdagGate(pos::Vector{Int}) = QGate(complex([1,0,0,exp(π/4im)]),pos)
+TdagGate(pos::Vector{Int}) = QGate(complex([1,0,0,exp(-π/4im)]),pos)
 TdagGate(pos::Int...) = TdagGate(_tuple_array(pos))
 function Rx(θ, pos::Vector{Int})
 	θ = float(θ)

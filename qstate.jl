@@ -64,7 +64,13 @@ end
 leftLim(m::MPSState) = leftLim(m.s)
 rightLim(m::MPSState) = rightLim(m.s)
 
-MPS_exact(mps::MPS) = contractall(mps.A_)
+function MPS_exact(mps::MPS) 
+	result = mps.A_[1]
+	for i =2:length(mps.A_)
+		result*=mps.A_[i]
+	end
+	return result
+end
 MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
 
 function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
