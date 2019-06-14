@@ -17,6 +17,7 @@ import Base.length,
 	   Base.show,
 	   Base.replace!,
 	   Base.reverse,
+	   Base.*,
 	   LinearAlgebra.norm,
 	   .ITensors.linkindex,
 	   .ITensors.getindex,
@@ -34,7 +35,8 @@ import Base.length,
 	   .ITensors.iterate,
 	   .ITensors.ITensor,
 	   .ITensors.Index,
-	   .ITensors.norm
+	   .ITensors.norm,
+	   .ITensors.*
 
 # functions from Base, ITensors
 export linkind,
@@ -125,9 +127,11 @@ export QState,
        applylocalgate!
 
 include("exactstate.jl")
-export ExactState,
+export 	ExactState,
 		findindex,
-		ITensor
+		ITensor,
+		applygate!
+		# applylocalgate!
 
 include("qgateset.jl")
 export QGateSet,
