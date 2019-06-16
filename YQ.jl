@@ -18,6 +18,7 @@ import Base.length,
 	   Base.replace!,
 	   Base.reverse,
 	   Base.*,
+	   Base.conj,
 	   LinearAlgebra.norm,
 	   .ITensors.linkindex,
 	   .ITensors.getindex,
@@ -112,8 +113,10 @@ export QGate,
 	   reverse
 
 include("qstate.jl")
-export QState,
-       MPSState,
+export QState
+
+include("mpsstate.jl")
+export MPSState,
        length,
        getindex,
        setindex!,
@@ -124,7 +127,8 @@ export QState,
        MPS_exact,
        position!,
        replace!,
-       applylocalgate!
+       applylocalgate!,
+       MPS_exact
 
 include("exactstate.jl")
 export 	ExactState,

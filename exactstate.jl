@@ -10,8 +10,10 @@ mutable struct ExactState <: QState
 	end
 	ExactState(N::Int) = ExactState(N, [1,0])
 end # struct
+
 length(es::ExactState) = length(IndexSet(es.s))
 ITensor(es::ExactState) = es.s
+
 function getindex(es::ExactState, n::Int)
 	tag = "Site, s=$(n)"
 	return findindex(IndexSet(es.s), tag)
