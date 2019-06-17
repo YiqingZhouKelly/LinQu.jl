@@ -19,8 +19,9 @@ import Base.length,
 	   Base.reverse,
 	   Base.*,
 	   Base.pop!,
+	   Base.range,
 	   LinearAlgebra.norm,
-	   .ITensors.linkind,
+	   .ITensors.linkindex,
 	   .ITensors.getindex,
 	   .ITensors.noprime,
 	   .ITensors.noprime!,
@@ -40,7 +41,7 @@ import Base.length,
 	   .ITensors.*
 
 # functions from Base, ITensors
-export linkind,
+export linkindex,
 	   getindex,
 	   noprime,
 	   noprime!,
@@ -143,7 +144,8 @@ export QGateSet,
 	   QGate,
 	   length,
 	   setindex!,
-	   getindex
+	   getindex,
+	   range
 
 include("qcircuit.jl")
 export QCircuit,

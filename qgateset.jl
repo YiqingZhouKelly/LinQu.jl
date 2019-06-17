@@ -20,7 +20,7 @@ end
 pop!(qgset::QGateSet) = pop!(qgset.set) # ?
 
 size(qgs::QGateSet) = size(qgs.set)
-iterate(qgs::QGateSet,state::Int=1) = iterate(qgs.set,state)
+iterate(qgs::QGateSet, state::Int=1) = iterate(qgs.set,state)
 #copy should not be needed
 QGate(qgs::QGateSet) = length(qgs)==1 ? qgs[1] : error("Cannot convert QGateSet of length >1 to a QGate\n")
 
@@ -30,4 +30,12 @@ function applylocalgate!(qs::MPSState, qg::QGateSet; kwargs...)
 		applylocalgate!(qs,gate;kwargs...)
 	end
 	return qs
+end
+
+function range(s::QGateSet)
+	locations = Int[]
+	for gate ∈ s
+		push!(locations,pos(gate)...)
+	end
+	return min(locations...), max(locations...)
 end

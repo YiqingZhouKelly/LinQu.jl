@@ -7,12 +7,12 @@ struct MPSState <: QState
 		for i =1:N
 			global rightlink, leftlink
 			if i ==1
-				rightlink = Index(1)
+				rightlink = Index(1, "Link, l=$(i)")
 				push!(itensors, ITensor(init, rightlink,Index(2, "Site, s=$(i)")))
 			elseif i == N
 				push!(itensors, ITensor(init, leftlink, Index(2, "Site, s=$(i)")))
 			else
-				rightlink = Index(1)
+				rightlink = Index(1, "Link, l=$(i)")
 				push!(itensors, ITensor(init, leftlink, rightlink, Index(2, "Site, s=$(i)")))
 			end
 			leftlink = rightlink
@@ -29,7 +29,7 @@ MPS(qs::MPSState) = qs.s #::MPS
 length(m::MPSState) = length(m.s)
 iterate(m::MPSState) = iterate(m)
 
-getlink(qs::MPSState,j::Int) = linkind(MPS(qs),j)
+getlink(qs::MPSState,j::Int) = linkindex(MPS(qs),j)
 function getlink(qs::MPSState, pos::Vector{Int})
 	sortedpos = sort(pos)
 	leftend = sortedpos[1]
@@ -44,8 +44,10 @@ function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a A
 	links = IndexSet()
 	j>1 && push!(links, getlink(qs,j-1))
 	j<length(qs) && push!(links,getlink(qs,j))
-	freeind = uniqueindex(IndexSet(qs[j]),links)
-	return freeind
+	freeind = uniqueinds(IndexSet(qs[j]),links)
+	print(freeind,"\n")
+	Index(freeind)
+	# return freeind
 end
 
 function getfree(qs::MPSState, pos::Vector{Int})
@@ -95,26 +97,30 @@ function position!(qs::MPSState, j::Int)
 
 	while leftLim(psi) < (j-1)
 		ll = leftLim(psi)+1
-		s = getfree(qs,ll)
+		s = findindex(psi[ll], "Site, s=$(ll)")#getfree(qs,ll)
 		if ll == 1
 	  		(Q,R) = qr(psi[ll],s)
 		else
-	  		li = linkind(psi,ll-1)
+	  		li = linkindex(psi,ll-1)
 	  		(Q,R) = qr(psi[ll],s,li)
 		end
+		Q = replacetags(Q, "u", "l=$(ll)")
+		R = replacetags(R, "u", "l=$(ll)")
 		psi[ll] = Q
 		psi[ll+1] *= R
 		psi.llim_ += 1
 	end
 	while rightLim(psi) > (j+1)
 		rl = rightLim(psi)-1
-		s = getfree(qs,rl)
+		s  = findindex(psi[rl], "Site, s=$(rl)")
 		if rl == N
 	  		(Q,R) = qr(psi[rl],s)
 		else
-	  		ri = linkind(psi,rl)
+	  		ri = linkindex(psi,rl)
 	  		(Q,R) = qr(psi[rl],s,ri)
 		end
+		Q = replacetags(Q, "u", "l=$(rl-1)")
+		R = replacetags(R, "u", "l=$(rl-1)")
 		psi[rl] = Q
 		psi[rl-1] *= R
 		psi.rlim_ -= 1
