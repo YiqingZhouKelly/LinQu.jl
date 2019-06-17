@@ -17,8 +17,8 @@ function push!(set1::QGateSet, set2::QGateSet)
 		push!(set1, set2[i])
 	end
 end
+pop!(qgset::QGateSet) = pop!(qgset.set) # ?
 
-# Support iteration
 size(qgs::QGateSet) = size(qgs.set)
 iterate(qgs::QGateSet,state::Int=1) = iterate(qgs.set,state)
 #copy should not be needed
