@@ -56,6 +56,7 @@ function toExactState(state::MPSState)
 	net = ITensorNet(state.sites)
 	return ExactState(contractAll(net))
 end
+
 function orderQubits!(state::MPSState; kwargs...)
 	for q = 1:length(state)
 		moveQubit!(state, q, q; kwargs...)
@@ -88,7 +89,6 @@ function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
 
 		sortedSites[i] = target
 	end
-
 	return state
 end
 

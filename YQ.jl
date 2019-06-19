@@ -88,36 +88,56 @@ export exact_MPS,
 	   IndexSetdiff,
 	   exactMPS
 
-include("qgate.jl")
-export QGate,
-	   gate_tensor,
-	   qubits, #new
-	   data, #new
-	   copy,
-	   nonlocal_local,
-	   mult_nonlocal_local,
-	   movegate!,
-	   movegate,
-	   IGate,
-	   XGate,
-	   YGate,
-	   ZGate,
-	   TGate,
-	   HGate,
-	   SGate,
-	   TdagGate,
-	   Rx,
-	   Ry,
-	   Rz,
-	   SwapGate,
-	   CNOTGate,
-	   ToffoliGate,
-	   ITensor,
-	   isswap,
-	   sameposition,
-	   repeatedswap,
-	   ITensor,
-	   reverse
+# include("qgate.jl")
+# export QGate,
+# 	   gate_tensor,
+# 	   qubits, #new
+# 	   data, #new
+# 	   copy,
+# 	   nonlocal_local,
+# 	   mult_nonlocal_local,
+# 	   movegate!,
+# 	   movegate,
+# 	   IGate,
+# 	   XGate,
+# 	   YGate,
+# 	   ZGate,
+# 	   TGate,
+# 	   HGate,
+# 	   SGate,
+# 	   TdagGate,
+# 	   Rx,
+# 	   Ry,
+# 	   Rz,
+# 	   SwapGate,
+# 	   CNOTGate,
+# 	   ToffoliGate,
+# 	   ITensor,
+# 	   isswap,
+# 	   sameposition,
+# 	   repeatedswap,
+# 	   ITensor,
+# 	   reverse
+
+include("qgate_new.jl")
+export  qubits,
+		data,
+		IGate,
+		XGate,
+		YGate,
+		ZGate,
+		TGate,
+		HGate,
+		SGate,
+		TdagGate,
+		RxGate,
+		RyGate,
+		RzGate,
+		SwapGate,
+		CNOTGate,
+		ToffoliGate,
+		ITensor
+
 
 include("qstates/qstate.jl")
 export QState
@@ -131,7 +151,8 @@ export MPSState,
 	   moveQubit!,
 	   orderQubits!,
 	   printFull,
-	   applyGate!
+	   applyGate!,
+	   toExactState
 #        length,
 #        getindex,
 #        setindex!,
@@ -149,7 +170,8 @@ include("qstates/exactstate.jl")
 export 	ExactState,
 		findindex,
 		ITensor,
-		applygate!
+		applyGate!,
+		toMPSState
 		# applylocalgate!
 
 include("qgateset.jl")

@@ -52,6 +52,17 @@ function contractall(N::ITensorNet)
 	return product
 end
 
+function contractAll(N::ITensorNet) # new
+	#TODO: possible optimization in contraction order
+	product = N.net[1]
+	for i = 2:length(N)
+		# global product
+		product =product * N.net[i]
+	end
+	return product
+end
+
+
 function contractall(A::ITensor,B::ITensor,C...)
 	net = ITensor[]
 	push!(net,A,B)
