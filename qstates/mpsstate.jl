@@ -158,7 +158,6 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	push!(newSites, product)
 
 	# update state
-
 	for i =1:length(sites)
 		state.sites[leftEnd-1+i] = newSites[i]
 		state.qubitAtSite[leftEnd-1+i] = qubits(gate)[i]
@@ -170,22 +169,32 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	return state
 end
 
-function swapSites!(state::MPSState, s1::Int, s2::Int; kwargs...)
+function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
 	s1 > s2 && ((s1, s2) = (s2, s1))
 	(s2 != s1+1) && error("swapSites can only swap two neighbor sites")
 	(q1, q2) = (qubitAtSite(state, s1), qubitAtSite(state, s2))
 	product = state[s1] * state[s2]
-	if s1 > 1
-		leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
-							findindex(product, "q=$(q2)"))
-		U,S,V,u,v = svd(product, leftinds; kwargs...)
-	else
-		U,S,V,u,v = svd(product, findindex(product, "q=$(q2)"); kwargs...)
+	if decomp =="svd"
+		if s1 > 1
+			leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
+								findindex(product, "q=$(q2)"))
+			U,S,V,u,v = svd(product, leftinds; kwargs...)
+		else
+			U,S,V,u,v = svd(product, findindex(product, "q=$(q2)"); kwargs...)
+		end
+		state[s1] = replacetags(U,"u", "l=$(s1)")
+		state[s2] = replacetags(S*V,"u", "l=$(s1)")
+	else #qr
+		if s1 > 1
+			leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
+								findindex(product, "q=$(q2)"))
+			Q,R = qr(product, leftinds)
+		else
+			Q,R = qr(product, findindex(product, "q=$(q2)"))
+		end
+		state[s1] = replacetags(Q,"u", "l=$(s1)")
+		state[s2] = replacetags(R,"u", "l=$(s1)")
 	end
-	U = replacetags(U,"u", "l=$(s1)")
-	S = replacetags(S,"u", "l=$(s1)")
-	state[s1] = U
-	state[s2]= S*V
 	state.qubitAtSite[s1] = q2
 	state.qubitAtSite[s2] = q1
 	state.siteForQubit[q1] = s2
