@@ -1,38 +1,43 @@
-mutable struct ExactState <: QState
-	s:: ITensor
+mutable struct ExactState
+	site:: ITensor
+	ExactState(T::ITensor) = new(T)
 	function ExactState(N::Int, init::Vector{T}) where T
 		norm(init) != 1 && error("initial state must have norm 1\n")
 		net = ITensorNet()
 		for i =1: N
-			push!(net, ITensor(init, Index(2,"Site, s=$(i)")))
+			push!(net, ITensor(init, Index(2,"Site, q=$(i)")))
 		end
 		new(contractall(net))
 	end
 	ExactState(N::Int) = ExactState(N, [1,0])
 end # struct
 
-length(es::ExactState) = length(IndexSet(es.s))
-ITensor(es::ExactState) = es.s
-
-function getindex(es::ExactState, n::Int)
-	tag = "Site, s=$(n)"
-	return findindex(IndexSet(es.s), tag)
-end
-function setindex!(es::ExactState)
-	error("No support for changing index of an exact state\n")
+function applyGate!(state::ExactState, gate::QGate)
+	qubitInds = qubits(gate)
+	inds = IndexSet([findindex(state.site, "q=$(qubitInds)")])
+	gateITensor = ITensor(gate.data, IndexSet(inds, prime(inds)))
+	state.site = noprime!(state.site * gateITensor)
+	return state
 end
 
-getfree(es::ExactState, n::Int) = getindex(es,n)
-*(es::ExactState, op::ITensor) = *(es.s, op)
-
-function applygate!(es::ExactState, qg::QGate)
-	inds = IndexSet()
-	for i ∈ pos(qg)
-		push!(inds, es[i])
+function toMPSState(state::ExactState; kwargs...)
+	numQubits = length(IndexSet(state.site))
+	leftLink = Nothing
+	remain = copy(state.site) 
+	sites = ITensor[]
+	for i =1:numQubits-1
+		if leftLink != Nothing
+			U,S,V,leftLink,v = svd(remain, 
+								   IndexSet(leftLink, findindex(remain, "q=$(i)")); 
+								   kwargs...)
+		else
+			U,S,V,leftLink,v = svd(remain, findindex(remain, "q=$(i)"); kwargs...)
+		end
+		push!(sites, replacetags(U, "u", "l=$(i)"))
+		S = replacetags(S, "u", "l=$(i)")
+		leftLink = replacetags(leftLink, "u", "l=$(i)")
+		remain = S*V
 	end
-	gate = ITensor(qg.data, IndexSet(inds, prime(inds)))
-	es.s = gate*es.s
-	noprime!(es.s)
-	return es
+	push!(sites, remain)
+	return MPSState(sites,[1:1:numQubits;],[1:1:numQubits;], numQubits-1, numQubits+1)
 end
-applylocalgate!(es::ITensor, qg::QGate) = applygate!(es,qg)

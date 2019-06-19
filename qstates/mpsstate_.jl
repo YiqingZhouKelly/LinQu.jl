@@ -1,165 +1,196 @@
-
-struct MPSState <: QState
-	s::MPS
-	function MPSState(N::Int, init::Vector{T}) where {T}
-		itensors = ITensor[]
+mutable struct MPSState
+	sites::Vector{ITensor}
+	siteForQubit::Vector{Int}
+	qubitAtSite::Vector{Int}
+	llim::Int
+	rlim::Int
+	function MPSState(N::Int, init::Vector{T}) where {T <:Number}
+		sites = ITensor[]
 		rightlink,leftlink
 		for i =1:N
 			global rightlink, leftlink
 			if i ==1
 				rightlink = Index(1, "Link, l=$(i)")
-				push!(itensors, ITensor(init, rightlink,Index(2, "Site, s=$(i)")))
+				push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
 			elseif i == N
-				push!(itensors, ITensor(init, leftlink, Index(2, "Site, s=$(i)")))
+				push!(sites, ITensor(init, leftlink, Index(2, "Site, q=$(i)")))
 			else
 				rightlink = Index(1, "Link, l=$(i)")
-				push!(itensors, ITensor(init, leftlink, rightlink, Index(2, "Site, s=$(i)")))
+				push!(sites, ITensor(init, leftlink, rightlink, Index(2, "Site, q=$(i)")))
 			end
 			leftlink = rightlink
 		end
-		new(MPS(N,itensors,0,N+1))
+		new(sites,[1:1:N;],[1:1:N;],0,N+1)
 	end
-
-	MPSState(N::Int) = MPSState(N,[1.,0.]) #initialize to |0> state
+	MPSState(N::Int) = MPSState(N, [1,0])
 end #struct
+getindex(state::MPSState, n::Int) = getindex(state.sites,n)
+setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n)
+length(state::MPSState) = length(state.sites)
+size(state::MPSState) = size(state.sites)
+iterate(state::MPSState, itstate::Int=1) = iterate(state.sites,itstate)
 
-getindex(st::MPSState,n::Int) = getindex(st.s,n) # ::ITensor
-setindex!(st::MPSState,T::ITensor,n::Integer) = setindex!(st.s,T,n) 
-MPS(qs::MPSState) = qs.s #::MPS
-length(m::MPSState) = length(m.s)
-iterate(m::MPSState) = iterate(m)
+siteForQubit(state::MPSState, i::Int) = state.siteForQubit[i]
+sitesForQubits(state::MPSState, inds::Vector{Int}) = [siteForQubit(state,i) for i ∈ inds]
+qubitAtSite(state::MPSState, i::Int) = state.qubitAtSite[i]
+qubitsAtSites(state::MPSState, inds::Vector{Int}) = [qubitAtSite(state,i) for i ∈ inds]
+getQubit(state::MPSState, i::Int) = state.sites[siteForQubit(state,i)]
+getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ inds]
+siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
+siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds])
 
-getlink(qs::MPSState,j::Int) = linkindex(MPS(qs),j)
-function getlink(qs::MPSState, pos::Vector{Int})
-	sortedpos = sort(pos)
-	leftend = sortedpos[1]
-	rightend = sortedpos[length(sortedpos)]
-	leftlink = Nothing 
-	rightlink= Nothing
-	leftend !=1 && (leftlink=getlink(qs,leftend-1))
-	rightend != length(qs) && (rightlink = getlink(qs, rightend))
-	return leftlink, rightlink
-end	
-function getfree(qs::MPSState,j::Int) # return Index if only have 1 free, or a Array{Index,1} o.w.
-	links = IndexSet()
-	j>1 && push!(links, getlink(qs,j-1))
-	j<length(qs) && push!(links,getlink(qs,j))
-	freeind = uniqueinds(IndexSet(qs[j]),links)
-	print(freeind,"\n")
-	Index(freeind)
-	# return freeind
+function applyGate!(state::MPSState, gate::QGate; kwargs...)
+	localizeQubits!(state, qubits(gate); kwargs...)
+	centerAtSite!(state, siteForQubit(state,qubits(gate)[1]))
+	applyLocalGate!(state, gate; kwargs...)
 end
 
-function getfree(qs::MPSState, pos::Vector{Int})
-	freeinds = Index[] 
-	for i ∈ pos
-		push!(freeinds,getfree(qs,i))
-	end
-	return freeinds
-end
+function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
+	sortedSites = sort(sitesForQubits(state, qubits))
 
-leftLim(m::MPSState) = leftLim(m.s)
-rightLim(m::MPSState) = rightLim(m.s)
+	for i = 2: length(sortedSites)
+		curr = sortedSites[i]
+		target = sortedSites[i-1]+1
 
-function MPS_exact(mps::MPS) 
-	result = mps.A_[1]
-	for i =2:length(mps.A_)
-		result*=mps.A_[i]
-	end
-	return result
-end
-MPS_exact(mpss::MPSState) = MPS_exact(mpss.s)
-
-function applylocalgate!(qs::MPSState,qg::QGate; kwargs...)
-	center = movegauge!(qs,pos(qg))
-	qs[center] /= norm(qs[center]) 
-	positions = pos(qg)
-	(llink,rlink) = getlink(qs, positions)
-	wires = IndexSet(getfree(qs,positions))
-	net = ITensorNet(ITensor(qg,wires))
-	for i ∈ positions
-		push!(net, qs[i])
-	end
-	exact = noprime!(contractall(net))
-	if range(qg) == 1 
-		qs[pos(qg)[1]] = exact 
-	else 
-		approx = exact_MPS(exact, wires, llink, rlink; kwargs...)
-		replace!(qs, approx, positions)
-	end
-	changelims!(qs,positions)
-	return qs
-end
-
-function position!(qs::MPSState, j::Int) 
-	psi = qs.s
-	N = length(psi)
-
-	while leftLim(psi) < (j-1)
-		ll = leftLim(psi)+1
-		s = findindex(psi[ll], "Site, s=$(ll)")#getfree(qs,ll)
-		if ll == 1
-	  		(Q,R) = qr(psi[ll],s)
-		else
-	  		li = linkindex(psi,ll-1)
-	  		(Q,R) = qr(psi[ll],s,li)
+		while curr != target
+			swapSites!(state, curr-1, curr; kwargs...)
+			curr-=1
 		end
-		Q = replacetags(Q, "u", "l=$(ll)")
-		R = replacetags(R, "u", "l=$(ll)")
-		psi[ll] = Q
-		psi[ll+1] *= R
-		psi.llim_ += 1
+
+		sortedSites[i] = target
 	end
-	while rightLim(psi) > (j+1)
-		rl = rightLim(psi)-1
-		s  = findindex(psi[rl], "Site, s=$(rl)")
-		if rl == N
-	  		(Q,R) = qr(psi[rl],s)
+
+	return state
+end
+
+function centerAtSite!(state::MPSState, s::Int)
+	while state.llim < s-1
+		currIndex = state.llim+1
+		curr = state[currIndex]
+		if currIndex != 1 
+			Q,R = qr(curr, findindex(curr,"Site"), findindex(curr, "l=$(currIndex-1)"))
 		else
-	  		ri = linkindex(psi,rl)
-	  		(Q,R) = qr(psi[rl],s,ri)
+			Q,R = qr(curr, findindex(curr,"Site"))
 		end
-		Q = replacetags(Q, "u", "l=$(rl-1)")
-		R = replacetags(R, "u", "l=$(rl-1)")
-		psi[rl] = Q
-		psi[rl-1] *= R
-		psi.rlim_ -= 1
+		state[currIndex] = replacetags(Q, "u", "l=$(currIndex)")
+		state[currIndex+1] = replacetags(state[currIndex+1]*R , "u", "l=$(currIndex)")
+		state.llim+=1
 	end
-	psi.llim_ = j-1
-	psi.rlim_ = j+1
+
+	while state.rlim > s+1
+		currIndex = state.rlim-1
+		curr = state[currIndex]
+		if currIndex != length(state)
+			Q,R = qr(curr, findindex(curr, "Site"), findindex(curr, "l=$(currIndex)"))
+		else
+			Q,R = qr(curr, findindex(curr, "Site"))
+		end
+		state[currIndex] = replacetags(Q, "u", "l=$(currIndex-1)")
+		state[currIndex-1] = replacetags(state[currIndex-1]*R , "u", "l=$(currIndex-1)")
+		state.rlim-=1
+	end
+
+	state.llim = s-1
+	state.rlim = s+1
+	state[s] /= norm(state[s])
+	return state
 end
 
-function movegauge!(qs::MPSState, pos::Int)
-	position!(qs,pos)
-	return pos
-end
-
-function movegauge!(qs::MPSState, pos::Vector{Int})
-	if length(pos) == 1
-		return movegauge!(qs,pos[1])
-	end
-	#2 quibit gate
-	l = leftLim(qs)
-	r = rightLim(qs)
-	center = optpos(l,r,pos)
-	position!(qs,center)
-	return center
-end
-
-function replace!(qs::MPSState,new::Vector{ITensor}, pos::Vector{Int})
-	if length(new)!= length(pos)
-		error("length of new MPS sites and pos should match\n") 
-	end
-	for i =1 : length(pos)
-		qs[pos[i]] = new[i]
+function orderQubits!(state::MPSState; kwargs...)
+	for q = 1:length(state)
+		moveQubit!(state, q, q; kwargs...)
 	end
 end
 
-function changelims!(qs::MPSState, pos::Vector{Int})
-	sorted = sort(pos)
-	sorted != pos && error("local gate not have ordered pos input\n")
-	MPS(qs).llim_ = pos[1]-1
-	MPS(qs).rlim_ = pos[length(pos)]+1
-	return qs
+function moveQubit!(state::MPSState, q::Int, s::Int; kwargs...)
+	currSite = siteForQubit(state,q)
+	while currSite < s
+		swapSites!(state, currSite, currSite+1; kwargs...)
+		currSite += 1
+	end
+	while currSite > s
+		swapSites!(state, currSite-1, currSite; kwargs...)
+		currSite -= 1
+	end
+end
+function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
+	# Contract
+	sites = sitesForQubits(state, qubits(gate))
+	inds = siteInds(state, sites)
+	gateITensor = ITensor(data(gate), IndexSet(inds, prime(inds)))
+	qubitITensors = getQubits(state, qubits(gate))
+	net = ITensorNet(gateITensor, qubitITensors...)
+	product = noprime(contractAll(net))
+
+	# SVD Split
+	newSites = ITensor[]
+	linkindex = leftEnd = min(sites...)
+	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=Nothing
+	for i =1:length(sites)-1
+		if leftLink != Nothing 
+			U,S,V,leftLink,v = svd(product, 
+							IndexSet(leftLink, findindex(product, "q=$(qubits(gate)[i])"));
+							kwargs...)
+		else
+			U,S,V,leftLink,v = svd(product, 
+							findindex(product, "q=$(qubits(gate)[i])");
+							kwargs...)
+		end
+		leftLink = replacetags(leftLink, "u", "l=$(linkindex)")
+		U = replacetags(U, "u", "l=$(linkindex)")
+		S = replacetags(S, "u", "l=$(linkindex)")
+		product = S*V
+		push!(newSites, U)
+		linkindex+=1
+	end
+	push!(newSites, product)
+
+	# update state
+
+	for i =1:length(sites)
+		state.sites[leftEnd-1+i] = newSites[i]
+		state.qubitAtSite[leftEnd-1+i] = qubits(gate)[i]
+		state.siteForQubit[qubits(gate)[i]] = leftEnd-1+i
+	end
+	rightEnd = leftEnd-1+length(sites)
+	state.llim >= leftEnd && (state.llim = leftEnd-1)
+	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
+	return state
 end
 
+function swapSites!(state::MPSState, s1::Int, s2::Int; kwargs...)
+	s1 > s2 && ((s1, s2) = (s2, s1))
+	(s2 != s1+1) && error("swapSites can only swap two neighbor sites")
+	(q1, q2) = (qubitAtSite(state, s1), qubitAtSite(state, s2))
+	product = state[s1] * state[s2]
+	if s1 > 1
+		leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
+							findindex(product, "q=$(q2)"))
+		U,S,V,u,v = svd(product, leftinds; kwargs...)
+	else
+		U,S,V,u,v = svd(product, findindex(product, "q=$(q2)"); kwargs...)
+	end
+	U = replacetags(U,"u", "l=$(s1)")
+	S = replacetags(S,"u", "l=$(s1)")
+	state[s1] = U
+	state[s2]= S*V
+	state.qubitAtSite[s1] = q2
+	state.qubitAtSite[s2] = q1
+	state.siteForQubit[q1] = s2
+	state.siteForQubit[q2] = s1
+	state.llim >= s1 && (state.llim = s1-1)
+	state.rlim <= s2 && (state.rlim = s2+1)
+end
+
+function show(io::IO, state::MPSState)
+	for i =1: length(state)
+		print("Site $(i):", IndexSet(state.sites[i]),"\n")
+	end
+	print("siteForQubit:", state.siteForQubit, "\n")
+	print("qubitAtSite:", state.qubitAtSite, "\n")
+	print("llim = $(state.llim), rlim = $(state.rlim)\n")
+end
+
+function printFull(state::MPSState)
+	print(state.sites,"\n")
+end

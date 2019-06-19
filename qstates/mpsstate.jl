@@ -1,9 +1,16 @@
+
 mutable struct MPSState
 	sites::Vector{ITensor}
 	siteForQubit::Vector{Int}
 	qubitAtSite::Vector{Int}
 	llim::Int
 	rlim::Int
+	MPSState(sites::Vector{ITensor},
+		     siteForQubit::Vector{Int},
+		     qubitAtSite::Vector{Int},
+		     llim::Int,
+		     rlim::Int) = new(sites, siteForQubit,qubitAtSite, llim, rlim)
+
 	function MPSState(N::Int, init::Vector{T}) where {T <:Number}
 		sites = ITensor[]
 		rightlink,leftlink
@@ -43,6 +50,28 @@ function applyGate!(state::MPSState, gate::QGate; kwargs...)
 	localizeQubits!(state, qubits(gate); kwargs...)
 	centerAtSite!(state, siteForQubit(state,qubits(gate)[1]))
 	applyLocalGate!(state, gate; kwargs...)
+end
+
+function toExactState(state::MPSState)
+	net = ITensorNet(state.sites)
+	return ExactState(contractAll(net))
+end
+function orderQubits!(state::MPSState; kwargs...)
+	for q = 1:length(state)
+		moveQubit!(state, q, q; kwargs...)
+	end
+end
+
+function moveQubit!(state::MPSState, q::Int, s::Int; kwargs...)
+	currSite = siteForQubit(state,q)
+	while currSite < s
+		swapSites!(state, currSite, currSite+1; kwargs...)
+		currSite += 1
+	end
+	while currSite > s
+		swapSites!(state, currSite-1, currSite; kwargs...)
+		currSite -= 1
+	end
 end
 
 function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
@@ -96,23 +125,6 @@ function centerAtSite!(state::MPSState, s::Int)
 	return state
 end
 
-function orderQubits!(state::MPSState; kwargs...)
-	for q = 1:length(state)
-		moveQubit!(state, q, q; kwargs...)
-	end
-end
-
-function moveQubit!(state::MPSState, q::Int, s::Int; kwargs...)
-	currSite = siteForQubit(state,q)
-	while currSite < s
-		swapSites!(state, currSite, currSite+1; kwargs...)
-		currSite += 1
-	end
-	while currSite > s
-		swapSites!(state, currSite-1, currSite; kwargs...)
-		currSite -= 1
-	end
-end
 function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	# Contract
 	sites = sitesForQubits(state, qubits(gate))
