@@ -73,6 +73,7 @@ export  TensorNet,
 		delete!,
 		push!,
 		contractall,
+		contractAll,
 		contractsubset!,
 		deleteat!,
 		getindex,
@@ -84,13 +85,17 @@ export exact_MPS,
 	   stepsize,
 	   optpos,
 	   noprime!,
-	   IndexSetdiff
+	   IndexSetdiff,
+	   exactMPS
 
 include("qgate.jl")
 export QGate,
 	   gate_tensor,
+	   qubits, #new
+	   data, #new
 	   copy,
 	   nonlocal_local,
+	   mult_nonlocal_local,
 	   movegate!,
 	   movegate,
 	   IGate,
@@ -106,6 +111,7 @@ export QGate,
 	   Rz,
 	   SwapGate,
 	   CNOTGate,
+	   ToffoliGate,
 	   ITensor,
 	   isswap,
 	   sameposition,
@@ -118,18 +124,26 @@ export QState
 
 include("qstates/mpsstate.jl")
 export MPSState,
-       length,
-       getindex,
-       setindex!,
-       getlink,
-       getfree,
-       leftLim,
-       rightLim,
-       MPS_exact,
-       position!,
-       replace!,
-       applylocalgate!,
-       MPS_exact
+	   swapSites!,
+	   applyLocalGate!,
+	   localizeQubits!,
+	   centerAtSite!,
+	   moveQubit!,
+	   orderQubits!,
+	   printFull,
+	   applyGate!
+#        length,
+#        getindex,
+#        setindex!,
+#        getlink,
+#        getfree,
+#        leftLim,
+#        rightLim,
+#        MPS_exact,
+#        position!,
+#        replace!,
+#        applylocalgate!,
+#        MPS_exact
 
 include("qstates/exactstate.jl")
 export 	ExactState,

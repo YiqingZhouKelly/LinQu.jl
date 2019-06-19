@@ -13,8 +13,10 @@ mutable struct QGate
 end # struct
 
 pos(g::QGate) = g.pos
+qubits(gate::QGate) = gate.pos # new
 range(g::QGate) = length(g.pos)
 gate_tensor(g::QGate) = g.data
+data(gate::QGate) = gate.data # new
 copy(qg::QGate) = QGate(copy(gate_tensor(qg)), copy(pos(qg)))
 
 function checklocal(pos::Vector{Int})
@@ -29,9 +31,7 @@ checklocal(qg::QGate) = checklocal(pos(qg))
 function nonlocal_local(qg::QGate) #:: QGateSet
 	#TODO : Could do optimization here
 	position = pos(qg)
-	if length(position)>2
-		error("currently only support 2 qubit gates\n")
-	end
+	length(position)>2 && error("currently only support 2 qubit gates\n")
 	localgates = QGate[]
 	left = min(position...)
 	right = max(position...)
@@ -40,19 +40,38 @@ function nonlocal_local(qg::QGate) #:: QGateSet
 		push!(localgates, SwapGate(right-1, right))
 		right-=1
 	end
-	if position[1]>position[2] # control to the right of target
-		push!(localgates, SwapGate(left, right))
-	end
 	swapback = reverse(localgates)
 	localqg = movegate(qg,left, right)
+	if position[1]>position[2]
+		localqg = movegate(qg,right, left)
+	end
 	push!(localgates,localqg)
 	localgates = vcat(localgates, swapback)
 	return QGateSet(localgates)
 end
 
+function mult_nonlocal_local(qg::QGate)
+	sorted = sort(pos(qg))
+	perm = [1:1:sorted[end];]
+	localgates = QGate[]
+	for i =1: length(sorted)-1
+		left = sorted[i]
+		right = sorted[i+1]
+		while(right>left+1)
+			push!(localgates, SwapGate(right-1, right))
+			(perm[right-1], perm[right]) = (perm[right], perm[right-1])
+			right-=1
+		end
+		sorted[i+1] = sorted[i]+1
+	end
+	print("gates:", localgates)
+	# swapback = reverse(localgates)
+	# localqg = movegate(qg,)
+end
+
 function movegate!(qg::QGate, p::Vector{Int})
 	if length(p) != range(qg)
-		error(" Got wron gnumber of qubits to act on\n")
+		error(" Got wrong number of qubits to act on\n")
 	end
 	qg.pos = p
 	return qg
@@ -113,13 +132,8 @@ CNOTGate(pos::Int...) = CNOTGate(_tuple_array(pos))
 # CRGate(θ::Number) = QGate(Diagonal([1.,1.,1.,exp(1.0im*θ))]),2)
 # CRkGate(k::Number) = CRGate()
 
-# # Toffoli 
-# function ToffoliGate()
-# 	mat = diagm(0 =>push!(ones(6),0.,0.))
-# 	mat[7,8] = 1.
-# 	mat[8,7] = 1.
-# 	QGate(mat, 3)
-# end
+# Toffoli 
+
 
 # === new added====
 ITensor(qg::QGate, inds::IndexSet) = ITensor(gate_tensor(qg), IndexSet(inds,prime(inds)))
@@ -128,3 +142,7 @@ ITensor(qg::QGate, ind::Index...) = ITensor(qg, IndexSet(_tuple_array(ind)))
 isswap(qg::QGate) = (gate_tensor(qg)== complex([1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1]))
 sameposition(A::QGate, B::QGate) = (sort(pos(A)) == sort(pos(B)))
 repeatedswap(A::QGate, B::QGate) = (isswap(A) && isswap(B) && sameposition(A,B))
+
+function show(io::IO, gate::QGate)
+	print(pos(gate),"\n")
+end
