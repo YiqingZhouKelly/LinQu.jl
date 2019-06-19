@@ -1,6 +1,6 @@
 
 mutable struct QGate 
-	data::Vector{Complex{Float64}} #where T
+	data::Vector{T} where {T}
 	pos::Vector{Int}
 	function QGate(data,pos::Vector{Int}) #TODO: data specified as Vector{Number} breaks the code
 		numqubit = Int(log2(length(data))/2)
@@ -12,12 +12,12 @@ mutable struct QGate
 	QGate(data, pos::Int...) = QGate(data,_tuple_array(pos))
 end # struct
 
-pos(g::QGate) = g.pos
+pos(gate::QGate) = gate.pos
 qubits(gate::QGate) = gate.pos # new
-range(g::QGate) = length(g.pos)
-gate_tensor(g::QGate) = g.data
+range(gate::QGate) = length(gate.pos)
+gate_tensor(gate::QGate) = gate.data
 data(gate::QGate) = gate.data # new
-copy(qg::QGate) = QGate(copy(gate_tensor(qg)), copy(pos(qg)))
+copy(gate::QGate) = QGate(copy(gate_tensor(gate)), copy(pos(gate)))
 
 function checklocal(pos::Vector{Int})
 	length(pos) == 1 && return true
