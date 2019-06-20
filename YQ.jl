@@ -1,7 +1,7 @@
 
 module YQ
 
-include("./../../work/ITensors/src/ITensors.jl")
+include("./../ITensors/src/ITensors.jl")
 
 using .ITensors, LinearAlgebra
 import Base.length,
@@ -68,19 +68,6 @@ export  QState,
 		ITensorNet,
 		MPSState
 
-include("tensornet.jl")
-export  TensorNet,
-		delete!,
-		push!,
-		contractall,
-		contractAll,
-		contractSubset!,
-		deleteat!,
-		getindex,
-		setindex!,
-		copy
-
-
 include("qgate.jl")
 export  qubits,
 		data,
@@ -106,11 +93,14 @@ export MPSState,
 	   applyLocalGate!,
 	   localizeQubits!,
 	   centerAtSite!,
+	   centerAtQubit!,
 	   moveQubit!,
+	   moveSite!,
 	   orderQubits!,
 	   printFull,
 	   applyGate!,
-	   toExactState
+	   toExactState,
+	   getProbDist
 
 include("qstates/exactstate.jl")
 export 	ExactState,

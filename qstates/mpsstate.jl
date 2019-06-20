@@ -48,14 +48,21 @@ siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for
 
 function applyGate!(state::MPSState, gate::QGate; kwargs...)
 	localizeQubits!(state, qubits(gate); kwargs...)
-	centerAtSite!(state, siteForQubit(state,qubits(gate)[1]))
+	centerAtQubit!(state, qubits(gate)[1])
 	applyLocalGate!(state, gate; kwargs...)
 end
 
-function toExactState(state::MPSState)
-	net = ITensorNet(state.sites)
-	return ExactState(contractAll(net))
+function getProbDist(state::MPSState, qubits::Vector{Int}; kwargs...)
+	localizeQubits!(state, qubits; kwargs...)
+	centerAtQubit!(state, qubits[1])
+	qubitITensors = getQubits(state, qubits)
+	psi = prod(qubitITensors)
+	linkinds = findinds(psi, "Link")
+	probDensity = psi * dag(noprime(psi', linkinds'))
+	return probDensity
 end
+
+toExactState(state::MPSState) = ExactState(prod(state.sites))
 
 function orderQubits!(state::MPSState; kwargs...)
 	for q = 1:length(state)
@@ -63,32 +70,27 @@ function orderQubits!(state::MPSState; kwargs...)
 	end
 end
 
-function moveQubit!(state::MPSState, q::Int, s::Int; kwargs...)
-	currSite = siteForQubit(state,q)
-	while currSite < s
-		swapSites!(state, currSite, currSite+1; kwargs...)
-		currSite += 1
+function moveSite!(state::MPSState, s::Int, t::Int; kwargs...)
+	while s < t
+		swapSites!(state, s, s+1; kwargs...)
+		s += 1
 	end
-	while currSite > s
-		swapSites!(state, currSite-1, currSite; kwargs...)
-		currSite -= 1
+	while s > t
+		swapSites!(state, s-1, s; kwargs...)
+		s -= 1
 	end
 end
+
+moveQubit!(state::MPSState, q::Int, s::Int; kwargs...) = moveSite!(state, siteForQubit(state,q), s; kwargs...)
 
 function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
 	sortedSites = sort(sitesForQubits(state, qubits))
 
 	for i = 2: length(sortedSites)
-		curr = sortedSites[i]
-		target = sortedSites[i-1]+1
-
-		while curr != target
-			swapSites!(state, curr-1, curr; kwargs...)
-			curr-=1
-		end
-
-		sortedSites[i] = target
+		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)
+		sortedSites[i] = sortedSites[i-1]+1
 	end
+	
 	return state
 end
 
@@ -125,14 +127,15 @@ function centerAtSite!(state::MPSState, s::Int)
 	return state
 end
 
+centerAtQubit!(state::MPSState, q::Int) = centerAtSite!(state, siteForQubit(state, q))
+
 function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	# Contract
 	sites = sitesForQubits(state, qubits(gate))
 	inds = siteInds(state, sites)
 	gateITensor = ITensor(data(gate), IndexSet(inds, prime(inds)))
 	qubitITensors = getQubits(state, qubits(gate))
-	net = ITensorNet(gateITensor, qubitITensors...)
-	product = noprime(contractAll(net))
+	product = noprime(gateITensor * prod(qubitITensors))
 
 	# SVD Split
 	newSites = ITensor[]
