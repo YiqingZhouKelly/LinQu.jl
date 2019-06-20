@@ -87,6 +87,10 @@ export  qubits,
 		ToffoliGate,
 		ITensor
 
+include("qstates/qubitsitemap.jl")
+export 	QubitSiteMap,
+		updateMap!
+
 include("qstates/mpsstate.jl")
 export MPSState,
 	   swapSites!,
@@ -108,6 +112,5 @@ export 	ExactState,
 		ITensor,
 		applyGate!,
 		toMPSState
-
 end #module
 

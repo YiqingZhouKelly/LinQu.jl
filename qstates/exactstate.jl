@@ -1,3 +1,4 @@
+
 mutable struct ExactState
 	site:: ITensor
 	ExactState(T::ITensor) = new(T)
@@ -10,7 +11,7 @@ mutable struct ExactState
 		new(contractall(net))
 	end
 	ExactState(N::Int) = ExactState(N, [1,0])
-end # struct
+end #struct
 
 function applyGate!(state::ExactState, gate::QGate)
 	qubitInds = qubits(gate)
@@ -22,11 +23,11 @@ end
 
 function toMPSState(state::ExactState; kwargs...)
 	numQubits = length(IndexSet(state.site))
-	leftLink = Nothing
+	leftLink = nothing
 	remain = copy(state.site) 
 	sites = ITensor[]
 	for i =1:numQubits-1
-		if leftLink != Nothing
+		if leftLink != nothing
 			U,S,V,leftLink,v = svd(remain, 
 								   IndexSet(leftLink, findindex(remain, "q=$(i)")); 
 								   kwargs...)
@@ -39,5 +40,5 @@ function toMPSState(state::ExactState; kwargs...)
 		remain = S*V
 	end
 	push!(sites, remain)
-	return MPSState(sites,[1:1:numQubits;],[1:1:numQubits;], numQubits-1, numQubits+1)
+	return MPSState(sites,QubitSiteMap(numQubits), numQubits-1, numQubits+1)
 end

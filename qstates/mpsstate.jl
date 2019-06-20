@@ -1,15 +1,13 @@
 
 mutable struct MPSState
 	sites::Vector{ITensor}
-	siteForQubit::Vector{Int}
-	qubitAtSite::Vector{Int}
+	map::QubitSiteMap
 	llim::Int
 	rlim::Int
 	MPSState(sites::Vector{ITensor},
-		     siteForQubit::Vector{Int},
-		     qubitAtSite::Vector{Int},
+		     map::QubitSiteMap,
 		     llim::Int,
-		     rlim::Int) = new(sites, siteForQubit,qubitAtSite, llim, rlim)
+		     rlim::Int) = new(sites, map, llim, rlim)
 
 	function MPSState(N::Int, init::Vector{T}) where {T <:Number}
 		sites = ITensor[]
@@ -27,7 +25,7 @@ mutable struct MPSState
 			end
 			leftlink = rightlink
 		end
-		new(sites,[1:1:N;],[1:1:N;],0,N+1)
+		new(sites,QubitSiteMap(N),0,N+1)
 	end
 	MPSState(N::Int) = MPSState(N, [1,0])
 end #struct
@@ -37,10 +35,12 @@ length(state::MPSState) = length(state.sites)
 size(state::MPSState) = size(state.sites)
 iterate(state::MPSState, itstate::Int=1) = iterate(state.sites,itstate)
 
-siteForQubit(state::MPSState, i::Int) = state.siteForQubit[i]
-sitesForQubits(state::MPSState, inds::Vector{Int}) = [siteForQubit(state,i) for i ∈ inds]
-qubitAtSite(state::MPSState, i::Int) = state.qubitAtSite[i]
-qubitsAtSites(state::MPSState, inds::Vector{Int}) = [qubitAtSite(state,i) for i ∈ inds]
+siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
+sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
+qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
+qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
+updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+
 getQubit(state::MPSState, i::Int) = state.sites[siteForQubit(state,i)]
 getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ inds]
 siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
@@ -90,7 +90,7 @@ function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
 		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)
 		sortedSites[i] = sortedSites[i-1]+1
 	end
-	
+
 	return state
 end
 
@@ -140,9 +140,9 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	# SVD Split
 	newSites = ITensor[]
 	linkindex = leftEnd = min(sites...)
-	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=Nothing
+	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=nothing
 	for i =1:length(sites)-1
-		if leftLink != Nothing 
+		if leftLink != nothing 
 			U,S,V,leftLink,v = svd(product, 
 							IndexSet(leftLink, findindex(product, "q=$(qubits(gate)[i])"));
 							kwargs...)
@@ -163,8 +163,7 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	# update state
 	for i =1:length(sites)
 		state.sites[leftEnd-1+i] = newSites[i]
-		state.qubitAtSite[leftEnd-1+i] = qubits(gate)[i]
-		state.siteForQubit[qubits(gate)[i]] = leftEnd-1+i
+		updateMap!(state, (s=leftEnd-1+i, q=qubits(gate)[i]))
 	end
 	rightEnd = leftEnd-1+length(sites)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)
@@ -198,10 +197,8 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
 		state[s1] = replacetags(Q,"u", "l=$(s1)")
 		state[s2] = replacetags(R,"u", "l=$(s1)")
 	end
-	state.qubitAtSite[s1] = q2
-	state.qubitAtSite[s2] = q1
-	state.siteForQubit[q1] = s2
-	state.siteForQubit[q2] = s1
+	updateMap!(state, (s=s1, q=q2))
+	updateMap!(state, (s=s2, q=q1))
 	state.llim >= s1 && (state.llim = s1-1)
 	state.rlim <= s2 && (state.rlim = s2+1)
 end
@@ -210,8 +207,8 @@ function show(io::IO, state::MPSState)
 	for i =1: length(state)
 		print("Site $(i):", IndexSet(state.sites[i]),"\n")
 	end
-	print("siteForQubit:", state.siteForQubit, "\n")
-	print("qubitAtSite:", state.qubitAtSite, "\n")
+	print("siteForQubit:", state.map.siteForQubit, "\n")
+	print("qubitAtSite:", state.map.qubitAtSite, "\n")
 	print("llim = $(state.llim), rlim = $(state.rlim)\n")
 end
 
