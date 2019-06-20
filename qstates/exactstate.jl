@@ -16,7 +16,7 @@ function applyGate!(state::ExactState, gate::QGate)
 	qubitInds = qubits(gate)
 	inds = IndexSet([findindex(state.site, "q=$(q)") for q ∈ qubitInds])
 	gateITensor = ITensor(gate.data, IndexSet(inds, prime(inds)))
-	state.site = noprime!(state.site * gateITensor)
+	state.site = noprime(state.site * gateITensor)
 	return state
 end
 

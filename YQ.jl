@@ -1,7 +1,7 @@
 
 module YQ
 
-include("./../ITensors/src/ITensors.jl")
+include("./../../work/ITensors/src/ITensors.jl")
 
 using .ITensors, LinearAlgebra
 import Base.length,
@@ -74,52 +74,14 @@ export  TensorNet,
 		push!,
 		contractall,
 		contractAll,
-		contractsubset!,
+		contractSubset!,
 		deleteat!,
 		getindex,
 		setindex!,
 		copy
 
-include("helper.jl")
-export exact_MPS,
-	   stepsize,
-	   optpos,
-	   noprime!,
-	   IndexSetdiff,
-	   exactMPS
 
-# include("qgate.jl")
-# export QGate,
-# 	   gate_tensor,
-# 	   qubits, #new
-# 	   data, #new
-# 	   copy,
-# 	   nonlocal_local,
-# 	   mult_nonlocal_local,
-# 	   movegate!,
-# 	   movegate,
-# 	   IGate,
-# 	   XGate,
-# 	   YGate,
-# 	   ZGate,
-# 	   TGate,
-# 	   HGate,
-# 	   SGate,
-# 	   TdagGate,
-# 	   Rx,
-# 	   Ry,
-# 	   Rz,
-# 	   SwapGate,
-# 	   CNOTGate,
-# 	   ToffoliGate,
-# 	   ITensor,
-# 	   isswap,
-# 	   sameposition,
-# 	   repeatedswap,
-# 	   ITensor,
-# 	   reverse
-
-include("qgate_new.jl")
+include("qgate.jl")
 export  qubits,
 		data,
 		IGate,
@@ -138,10 +100,6 @@ export  qubits,
 		ToffoliGate,
 		ITensor
 
-
-include("qstates/qstate.jl")
-export QState
-
 include("qstates/mpsstate.jl")
 export MPSState,
 	   swapSites!,
@@ -153,18 +111,6 @@ export MPSState,
 	   printFull,
 	   applyGate!,
 	   toExactState
-#        length,
-#        getindex,
-#        setindex!,
-#        getlink,
-#        getfree,
-#        leftLim,
-#        rightLim,
-#        MPS_exact,
-#        position!,
-#        replace!,
-#        applylocalgate!,
-#        MPS_exact
 
 include("qstates/exactstate.jl")
 export 	ExactState,
@@ -172,30 +118,6 @@ export 	ExactState,
 		ITensor,
 		applyGate!,
 		toMPSState
-		# applylocalgate!
 
-include("qgateset.jl")
-export QGateSet,
-	   applylocalgate!,
-	   QGate,
-	   length,
-	   setindex!,
-	   getindex,
-	   range
-
-include("qcircuit.jl")
-export QCircuit,
-	   gates,
-	   state,
-	   push!,
-	   localize,
-	   localize!,
-	   minswap,
-	   minswap!,
-	   minswap_localize!,
-	   print,
-	   show,
-	   runlocal!,
-	   cleargates!
 end #module
 

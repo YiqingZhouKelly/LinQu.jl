@@ -3,7 +3,7 @@ struct ITensorNet
 	net:: Vector{ITensor}
 	ITensorNet() = new(ITensor[])
 	ITensorNet(m::Vector{ITensor}) = new(m)
-	ITensorNet(A::ITensor...) = ITensorNet(_tuple_array(A))
+	ITensorNet(A::ITensor...) = ITensorNet([T for T ∈ A])
 end #struct
 # ==== basics ====
 getindex(N::ITensorNet, j::Int) = getindex(N.net,j)
@@ -62,17 +62,7 @@ function contractAll(N::ITensorNet) # new
 	return product
 end
 
-
-function contractall(A::ITensor,B::ITensor,C...)
-	net = ITensor[]
-	push!(net,A,B)
-	for tensor ∈ C
-		push!(net,tensor)
-	end
-	contractall(net)
-end
-
-function contractsubset!(N::ITensorNet, A::ITensor, B::ITensor, C...)
+function contractSubset!(N::ITensorNet, A::ITensor, B::ITensor, C...)
 	result = A*B
 	delete!(N,A,B)
 	for tensor ∈ C
