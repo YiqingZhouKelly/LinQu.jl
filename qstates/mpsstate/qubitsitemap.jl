@@ -11,8 +11,8 @@ qubitAtSite(map::QubitSiteMap, i::Int) = map.qubitAtSite[i]
 qubitsAtSites(map::QubitSiteMap, inds::Vector{Int}) = [qubitAtSite(map,i) for i ∈ inds]
 
 function updateMap!(map::QubitSiteMap, tup:: T) where T <: Union{NamedTuple{(:s, :q),Tuple{Int64,Int64}}, 
-																  NamedTuple{(:q, :s),Tuple{Int64,Int64}}}
-	map.siteForQubit[tup.q] = tup.s
-	map.qubitAtSite[tup.s] = tup.q
+																 NamedTuple{(:q, :s),Tuple{Int64,Int64}}}
+	@inbounds map.siteForQubit[tup.q] = tup.s
+	@inbounds map.qubitAtSite[tup.s] = tup.q
 	return map
 end

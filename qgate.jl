@@ -1,6 +1,6 @@
 
 mutable struct QGate 
-	data#::Vector{T} where {T}
+	data::Vector{T} where {T}
 	qubits::Vector{Int}
 
 	function QGate(data, qubits::Vector{Int})
