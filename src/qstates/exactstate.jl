@@ -4,11 +4,11 @@ mutable struct ExactState
 	ExactState(T::ITensor) = new(T)
 	function ExactState(N::Int, init::Vector{T}) where T
 		norm(init) != 1 && error("initial state must have norm 1\n")
-		net = ITensorNet()
+		net = ITensor[]
 		for i =1: N
 			push!(net, ITensor(init, Index(2,"Site, q=$(i)")))
 		end
-		new(contractall(net))
+		new(prod(net))
 	end
 	ExactState(N::Int) = ExactState(N, [1,0])
 end #struct
@@ -16,7 +16,7 @@ end #struct
 function applyGate!(state::ExactState, gate::QGate)
 	qubitInds = qubits(gate)
 	inds = IndexSet([findindex(state.site, "q=$(q)") for q ∈ qubitInds])
-	gateITensor = ITensor(data(gate), IndexSet(inds, prime(inds)))
+	gateITensor = ITensor(gate, IndexSet(inds, prime(inds)))
 	state.site = noprime(state.site * gateITensor)
 	return state
 end

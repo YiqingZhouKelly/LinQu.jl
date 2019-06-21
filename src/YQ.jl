@@ -18,6 +18,7 @@ import Base.length,
 	   Base.replace!,
 	   Base.reverse,
 	   Base.*,
+	   Base.+,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
@@ -67,7 +68,7 @@ export  QState,
 		QCircuit,
 		ITensorNet,
 		MPSState
-		
+
 include("qgates/constants.jl")
 export  IntFloat,
 		Location,
@@ -105,7 +106,9 @@ export 	ConstGate,
 		qubits,
 		data,
 		id,
+		copy,
 		ITensor
+
 include("qgates/vargate.jl")
 export  VarGate,
 		qubits,
@@ -116,6 +119,7 @@ export  VarGate,
 		Ry,
 		Rz,
 		Rϕ,
+		copy,
 		ITensor
 
 include("qgates/qgate.jl")

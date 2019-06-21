@@ -1,4 +1,4 @@
-struct VarGate
+mutable struct VarGate
 	id::Int
 	qubits::Vector{Int}
 	θ::Float64
@@ -14,6 +14,8 @@ end
 qubits(gate::VarGate) = gate.qubits
 id(gate::VarGate) = gate.id
 θ(gate::VarGate) = gate.θ
+copy(gate::VarGate) = ConstGate(id(gate), copy(qubits(gate)), θ(gate))
+
 function data(gate::VarGate)
 	if id(gate) == 1 #Rx
 		return cos(θ(gate)/2)I_DATA - sin(θ(gate)/2)im* X_DATA
