@@ -16,10 +16,7 @@ function QCircuit(path::String)
 		for line in eachline(file)
 			parsed = split(line)
 			gateId = findfirst(x->x==parsed[1], GATE_NAME)
-			qubits = Int[]
-			for i =2:length(parsed)
-				push!(qubits, parse(Int, parsed[i]))
-			end
+			qubits = parse.(Int, parsed[2:end])
 			push!(circuit, QGate(gateId, qubits))
 		end
 	end

@@ -13,12 +13,15 @@
 - [x] Implement common gates
 - [ ] Add support for left & right svd to reduce cost of moving gauge
 - [ ] Measurement
-- [ ] QCircuit Basic Structure Design
-- [ ] Add support for block of quantum circuits (maybe via QGateSet)
+- [x] QCircuit Basic Structure Design
+- [x] Add support for block of quantum circuits (maybe via QGateSet)
 - [ ] Add user-friendly interface
 - [ ] Sample quantum algorithms
 - [ ] Support Mixed state (part of the state was traced out)
+- [x] .txt to Circuit
+- [ ] Circuit to Latex (and latex to Circuit)
+
 
 ## Potential Changes/ Optimizations / Improvements
-- [ ] Consider both adding SWAP and moving gauge when deciding center of canonical form
+- [x] Consider both adding SWAP and moving gauge when deciding center of canonical form
 - [ ] Maybe add support to remember truncation `kwargs...` (in interface.jl?)
