@@ -23,7 +23,7 @@ function data(gate::VarGate)
 		return cos(θ(gate)/2)I_DATA - sin(θ(gate)/2)im* Y_DATA
 	elseif id(gate) == 3 #Rz
 		return cos(θ(gate)/2)I_DATA - sin(θ(gate)/2)im* Z_DATA
-	elseif id(gate) == 4 #Rϕ
+	else # id(gate) == 4 #Rϕ
 		phaseGate = zeros(2,2)
 		phaseGate[1,1] = 1
 		phaseGate[2,2] = exp(θ(gate)im)
@@ -38,3 +38,15 @@ Rϕ(θ::IntFloat, qubits::Location...) = VarGate(4,qubits, θ)
 
 ITensor(gate::VarGate, inds::IndexSet) = ITensor(data(gate), inds)
 ITensor(gate::VarGate, ind::Index...) = ITensor(data(gate), ind...)
+
+function show(io::IO, gate::VarGate)
+	if id(gate) == 1 
+		print("Rx, θ=$(θ(gate)), $(qubits(gate))\n")
+	elseif id(gate) == 2
+		print("Ry, θ=$(θ(gate)), $(qubits(gate))\n")
+	elseif id(gate) == 3
+		print("Rz, θ=$(θ(gate)), $(qubits(gate))\n")
+	else 
+		print("Rϕ, θ=$(θ(gate)), $(qubits(gate))\n")	
+	end	
+end
