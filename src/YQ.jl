@@ -19,6 +19,7 @@ import Base.length,
 	   Base.reverse,
 	   Base.*,
 	   Base.+,
+	   Base.-,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
@@ -64,10 +65,10 @@ export linkindex,
 # Types
 export  QState,
 		QGate,
-		QGateSet,
 		QCircuit,
-		ITensorNet,
-		MPSState
+		MPSState,
+		ExactState,
+		QGateblock
 
 include("qgates/constants.jl")
 export  IntFloat,
@@ -86,7 +87,9 @@ export  IntFloat,
 		TOFFOLI_DATA,
 		FREDKIN_DATA,
 		CSWAP_DATA,
-		GATE_TABLE
+		GATE_TABLE,
+		GATE_NAME,
+		CONST_GATE_COUNT
 
 include("qgates/constgate.jl")
 export 	ConstGate,
@@ -150,5 +153,22 @@ export 	ExactState,
 		ITensor,
 		applyGate!,
 		toMPSState
+
+include("qstates/qstate.jl")
+export 	QState
+
+include("qgateblock.jl")
+export  QGateBlock,
+	    gates,
+	    length,
+	    push!,
+	    applyGate!
+
+include("qcircuit.jl")
+export	Operator,
+		QCircuit,
+		operators,
+		QGateBlock,
+		runCircuit!
 end #module
 
