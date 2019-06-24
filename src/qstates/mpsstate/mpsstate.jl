@@ -30,6 +30,7 @@ mutable struct MPSState
 	MPSState(N::Int) = MPSState(N, [1,0])
 end #struct
 getindex(state::MPSState, n::Int) = getindex(state.sites,n)
+getinds(state::MPSState, inds::Vector{Int}) = [getindex(state, i) for i ∈ inds]
 setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n)
 length(state::MPSState) = length(state.sites)
 size(state::MPSState) = size(state.sites)
@@ -52,14 +53,50 @@ function applyGate!(state::MPSState, gate::QGate; kwargs...)
 	applyLocalGate!(state, gate; kwargs...)
 end
 
-function getProbDist(state::MPSState, qubits::Vector{Int}; kwargs...)
-	localizeQubits!(state, qubits; kwargs...)
-	centerAtQubit!(state, qubits[1])
-	qubitITensors = getQubits(state, qubits)
-	psi = prod(qubitITensors)
-	linkinds = findinds(psi, "Link")
-	probDensity = psi * dag(noprime(psi', linkinds'))
-	return probDensity
+function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+	localizeQubitsInOrder!(state, qubits; kwargs...)
+	sites = sitesForQubits(state, qubits)
+	centerAtSite!(state, sites[1])
+	counts = zeros(2^(length(qubits)))
+	function binaryToDecimal(binary::Vector{Int})
+		decimal = zeros(Int,1)
+		for i =1:length(binary)
+			decimal[1] = decimal[1]*2+binary[i]
+		end
+		return decimal[1]
+	end
+	for i =1:shots
+		sampleDecimal = binaryToDecimal(oneShot(state, sites; kwargs...))
+		counts[sampleDecimal+1] += 1
+	end
+	return counts
+end
+
+function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
+	sample = zeros(Int, length(sites))
+	clamped = nothing
+	for i =1:length(sites)
+		ψ = state[sites[i]]
+		clamped != nothing && (ψ *= clamped)
+		ψ0 = ψ*projector(1, findindex(ψ, "Site"))
+		prob0 = Real(scalar(ψ0 * dag(ψ0)))
+		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
+		prob1 = Real(scalar(ψ1 * dag(ψ1)))
+		prob0 /= (prob0+prob1)
+		if rand(0:1000)/1000 > prob0
+			sample[i] = 1
+			clamped = ψ1
+		else
+			clamped = ψ0
+		end 
+	end
+	return sample
+end
+
+function projector(i::Int, ind::Index)
+	data = zeros(2)
+	data[i] = 1
+	return ITensor(data, ind)
 end
 
 toExactState(state::MPSState) = ExactState(prod(state.sites))
@@ -92,6 +129,12 @@ function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
 	end
 
 	return state
+end
+
+function localizeQubitsInOrder!(state::MPSState, qubits::Vector{Int}; kwargs...)
+	for i = 1:length(qubits)
+		moveQubit!(state, qubits[i], i; kwargs...)
+	end
 end
 
 function centerAtSite!(state::MPSState, s::Int)

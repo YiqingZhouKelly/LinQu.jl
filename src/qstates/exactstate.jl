@@ -13,7 +13,7 @@ mutable struct ExactState
 	ExactState(N::Int) = ExactState(N, [1,0])
 end #struct
 
-function applyGate!(state::ExactState, gate::QGate)
+function applyGate!(state::ExactState, gate::QGate; kwarg...)
 	qubitInds = qubits(gate)
 	inds = IndexSet([findindex(state.site, "q=$(q)") for q ∈ qubitInds])
 	gateITensor = ITensor(gate, IndexSet(inds, prime(inds)))

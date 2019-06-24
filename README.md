@@ -12,7 +12,7 @@
 - [x] Add support for Exact State
 - [x] Implement common gates
 - [ ] Add support for left & right svd to reduce cost of moving gauge
-- [ ] Measurement
+- [x] Measurement
 - [x] QCircuit Basic Structure Design
 - [x] Add support for block of quantum circuits (maybe via QGateSet)
 - [ ] Add user-friendly interface

@@ -35,9 +35,9 @@ function QGateBlock(circuit::QCircuit)
 	return block
 end
 
-function runCircuit!(state::QState, circuit::QCircuit)
+function runCircuit!(state::QState, circuit::QCircuit; kwargs...)
 	for op ∈ circuit.operators
-		applyGate!(state, op)
+		applyGate!(state, op; kwargs...)
 	end
 	return state
 end

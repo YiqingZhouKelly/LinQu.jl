@@ -145,7 +145,9 @@ export MPSState,
 	   printFull,
 	   applyGate!,
 	   toExactState,
-	   getProbDist
+	   getProbDist,
+	   oneShot,
+	   measure!
 
 include("qstates/exactstate.jl")
 export 	ExactState,
