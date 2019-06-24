@@ -1,14 +1,14 @@
 mutable struct VarGate
 	id::Int
 	qubits::Vector{Int}
-	θ::Float64
+	θ::T where {T<:Real}
 	VarGate(id::Int, 
 			qubits::Tuple{Vector{Int}}, 
-			θ::IntFloat) = new(id, qubits[1], Float64(θ))
+			θ::T where {T<: Real}) = new(id, qubits[1], θ)
 
 	VarGate(is::Int, 
-			qubits::NTuple{T, Int} where {T},
-			θ:: IntFloat) = new(is,[qubits...], Float64(θ))
+			qubits::NTuple{S, Int} where {S},
+			θ:: T where {T<: Real}) = new(is,[qubits...], θ)
 end
 
 qubits(gate::VarGate) = gate.qubits
@@ -31,10 +31,10 @@ function data(gate::VarGate)
 	end
 end
 
-Rx(θ::IntFloat, qubits::Location...) = VarGate(1,qubits, θ)
-Ry(θ::IntFloat, qubits::Location...) = VarGate(2,qubits, θ)
-Rz(θ::IntFloat, qubits::Location...) = VarGate(3,qubits, θ)
-Rϕ(θ::IntFloat, qubits::Location...) = VarGate(4,qubits, θ)
+Rx(θ::T where {T<: Real}, qubits::Location...) = VarGate(1,qubits, θ)
+Ry(θ::T where {T<: Real}, qubits::Location...) = VarGate(2,qubits, θ)
+Rz(θ::T where {T<: Real}, qubits::Location...) = VarGate(3,qubits, θ)
+Rϕ(θ::T where {T<: Real}, qubits::Location...) = VarGate(4,qubits, θ)
 
 ITensor(gate::VarGate, inds::IndexSet) = ITensor(data(gate), inds)
 ITensor(gate::VarGate, ind::Index...) = ITensor(data(gate), ind...)
