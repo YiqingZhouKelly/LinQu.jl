@@ -36,9 +36,6 @@ Ry(θ::T where {T<: Real}, qubits::Location...) = VarGate(2,qubits, θ)
 Rz(θ::T where {T<: Real}, qubits::Location...) = VarGate(3,qubits, θ)
 Rϕ(θ::T where {T<: Real}, qubits::Location...) = VarGate(4,qubits, θ)
 
-# ITensor(gate::VarGate, inds::IndexSet) = ITensor(data(gate), inds)
-# ITensor(gate::VarGate, ind::Index...) = ITensor(data(gate), ind...)
-
 function show(io::IO, gate::VarGate)
 	if id(gate) == 1 
 		print("Rx, θ=$(θ(gate)), $(qubits(gate))\n")
