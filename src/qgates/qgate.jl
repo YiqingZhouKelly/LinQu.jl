@@ -1,5 +1,5 @@
 
-const QGate = Union{VarGate, ConstGate}
+const QGate = Union{VarGate, ConstGate, CustomizedGate}
 
 function QGate(id::Int, qubits::Location...)
 	if id <= CONST_GATE_COUNT
@@ -16,3 +16,6 @@ function (+)(gate::QGate, offset::Int)
 end
 
 (-)(gate::QGate, offset::Int) = (+)(gate, -offset)
+
+ITensor(gate::QGate, inds::IndexSet) = ITensor(data(gate), inds)
+ITensor(gate::QGate, ind::Index...) = ITensor(data(gate), ind...)

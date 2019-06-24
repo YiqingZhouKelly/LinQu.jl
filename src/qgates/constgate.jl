@@ -25,8 +25,8 @@ CNOT(qubits::Location...) = ConstGate(10, qubits)
 TOFFOLI(qubits::Location...) = ConstGate(11, qubits) 
 FREDKIN(qubits::Location...) = ConstGate(12, qubits) 
 
-ITensor(gate::ConstGate, inds::IndexSet) = ITensor(data(gate), inds)
-ITensor(gate::ConstGate, ind::Index...) = ITensor(data(gate), ind...)
+# ITensor(gate::ConstGate, inds::IndexSet) = ITensor(data(gate), inds)
+# ITensor(gate::ConstGate, ind::Index...) = ITensor(data(gate), ind...)
 
 function show(io::IO, gate::ConstGate)
 	print("$(GATE_NAME[id(gate)]), $(qubits(gate))")

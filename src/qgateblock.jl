@@ -25,9 +25,10 @@ function push!(block::QGateBlock, gate::QGate...)
 		push!(block.gates, (gate .- block.offset)...)
 end
 
-function applyGate!(state::QState, block::QGateBlock; kwargs...)
+function applyGate!(state::QState, block::QGateBlock, offset=nothing ; kwargs...)
+	offset == nothing && (offset = offset(gate))
 	for gate ∈ gates(block)
-		applyGate!(state, gate + offset(gate); kwargs...)
+		applyGate!(state, gate + offset; kwargs...)
 	end
 end
 

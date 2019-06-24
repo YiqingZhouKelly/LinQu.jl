@@ -125,6 +125,16 @@ export  VarGate,
 		copy,
 		ITensor
 
+include("qgates/customizedgate.jl")
+export  CustomizedGate,
+		qubits,
+		param,
+		func,
+		copy,
+		data,
+		changeParam!,
+		changeParam
+
 include("qgates/qgate.jl")
 export  QGate
 

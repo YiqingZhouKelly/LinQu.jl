@@ -47,6 +47,8 @@ getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ in
 siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
 siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds])
 
+toExactState(state::MPSState) = ExactState(prod(state.sites))
+
 function applyGate!(state::MPSState, gate::QGate; kwargs...)
 	localizeQubits!(state, qubits(gate); kwargs...)
 	centerAtQubit!(state, qubits(gate)[1])
@@ -71,35 +73,6 @@ function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	end
 	return counts
 end
-
-function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
-	sample = zeros(Int, length(sites))
-	clamped = nothing
-	for i =1:length(sites)
-		ψ = state[sites[i]]
-		clamped != nothing && (ψ *= clamped)
-		ψ0 = ψ*projector(1, findindex(ψ, "Site"))
-		prob0 = Real(scalar(ψ0 * dag(ψ0)))
-		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
-		prob1 = Real(scalar(ψ1 * dag(ψ1)))
-		prob0 /= (prob0+prob1)
-		if rand(0:1000)/1000 > prob0
-			sample[i] = 1
-			clamped = ψ1
-		else
-			clamped = ψ0
-		end 
-	end
-	return sample
-end
-
-function projector(i::Int, ind::Index)
-	data = zeros(2)
-	data[i] = 1
-	return ITensor(data, ind)
-end
-
-toExactState(state::MPSState) = ExactState(prod(state.sites))
 
 function orderQubits!(state::MPSState; kwargs...)
 	for q = 1:length(state)
@@ -244,6 +217,32 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
 	updateMap!(state, (s=s2, q=q1))
 	state.llim >= s1 && (state.llim = s1-1)
 	state.rlim <= s2 && (state.rlim = s2+1)
+end
+
+function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
+	function projector(i::Int, ind::Index)
+		data = zeros(2)
+		data[i] = 1
+		return ITensor(data, ind)
+	end
+	sample = zeros(Int, length(sites))
+	clamped = nothing
+	for i =1:length(sites)
+		ψ = state[sites[i]]
+		clamped != nothing && (ψ *= clamped)
+		ψ0 = ψ*projector(1, findindex(ψ, "Site"))
+		prob0 = Real(scalar(ψ0 * dag(ψ0)))
+		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
+		prob1 = Real(scalar(ψ1 * dag(ψ1)))
+		prob0 /= (prob0+prob1)
+		if rand(0:1000)/1000 > prob0
+			sample[i] = 1
+			clamped = ψ1
+		else
+			clamped = ψ0
+		end 
+	end
+	return sample
 end
 
 function show(io::IO, state::MPSState)
