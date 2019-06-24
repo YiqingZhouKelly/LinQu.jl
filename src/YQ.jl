@@ -162,7 +162,8 @@ export  QGateBlock,
 	    gates,
 	    length,
 	    push!,
-	    applyGate!
+	    applyGate!,
+	    zeroOffset
 
 include("qcircuit.jl")
 export	Operator,

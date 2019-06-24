@@ -1,14 +1,14 @@
 
 const Operator = Union{QGate, QGateBlock}
 mutable struct QCircuit
-	operators:: Vector{Operator}
+	operators:: Vector{T} where {T<:Operator}
 	QCircuit() = new(Operator[])
-	QCircuit(gates::Vector{Operator}) = new(gates)
+	QCircuit(gates::Vector{T}) where {T<:Operator} = new(gates)
 
 end #struct
 
 operators(circuit::QCircuit) = circuit.operators
-push!(circuit::QCircuit, gate::QGate) = push!(circuit.operators, gate)
+push!(circuit::QCircuit, gate::Operator...) = push!(circuit.operators, gate...)
 
 function QCircuit(path::String)
 	circuit = QCircuit()
@@ -27,9 +27,7 @@ function QGateBlock(circuit::QCircuit)
 	block = QGateBlock()
 	for operator ∈ operators(circuit)
 		if isa(operator, QGateBlock)
-			for gate ∈ operator 
-				push!(block, gate+offset)
-			end
+			push!(block, (gates(operator).+offset(operator))...)
 		else
 			push!(block, operator)
 		end
@@ -38,7 +36,8 @@ function QGateBlock(circuit::QCircuit)
 end
 
 function runCircuit!(state::QState, circuit::QCircuit)
-	for op ∈ circuit.gates
+	for op ∈ circuit.operators
 		applyGate!(state, op)
 	end
+	return state
 end

@@ -29,13 +29,21 @@ s = zeros(ComplexF64,2,2)
 s[1,1] = 1 
 s[2,2] = 1im
 const S_DATA = s
-const SDAG_DATA = s'
+
+sdag = zeros(ComplexF64,2,2)
+sdag[1,1] = 1 
+sdag[2,2] = -1im
+const SDAG_DATA = sdag
 
 t = zeros(ComplexF64,2,2)
 t[1,1] = 1
 t[2,2] = exp(π/4im)
 const T_DATA = t
-const TDAG_DATA = t'
+
+tdag = zeros(ComplexF64,2,2)
+tdag[1,1] = 1
+tdag[2,2] = exp(-π/4im)
+const TDAG_DATA = tdag
 
 
 #2-qubit gates
