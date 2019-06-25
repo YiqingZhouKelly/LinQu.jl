@@ -20,6 +20,7 @@
 - [ ] Support Mixed state (part of the state was traced out)
 - [x] .txt to Circuit
 - [ ] Circuit to Latex (and latex to Circuit)
+- [ ] merge VarGate into CustomizedGate
 
 
 ## Potential Changes/ Optimizations / Improvements
