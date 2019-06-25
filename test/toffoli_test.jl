@@ -2,6 +2,6 @@
 # using .YQ
 
 state = MPSState(4)
-circuit = QCircuit("GHZ_circuit.txt")
+circuit = QCircuit("toffoli_circuit.txt")
 runCircuit!(state, circuit)
-print(measure!(state, [1,2,3,4], 1024))
+print(measure!(state, [1,2,3], 1024))
