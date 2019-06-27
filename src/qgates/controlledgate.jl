@@ -9,6 +9,7 @@ end #struct
 
 qubits(gate::ControlledGate) = gate.qubits
 targetGate(gate::ControlledGate) = gate.targetGate
+copy(gate::ControlledGate) = ControlledGate(targetGate, copy(quibits))
 
 function data(gate::ControlledGate)
 	length(qubits(gate))!=2 && error("Currently only support controlled sigle qubit gate\n")

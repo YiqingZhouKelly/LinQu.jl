@@ -28,3 +28,7 @@ FREDKIN(qubits::Location...) = ConstGate(12, qubits)
 function show(io::IO, gate::ConstGate)
 	print("$(GATE_NAME[id(gate)]), $(qubits(gate))")
 end
+
+# function control(gate::ConstGate, qubits::Location)
+	
+# end

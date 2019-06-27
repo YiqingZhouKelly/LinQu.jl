@@ -1,45 +1,42 @@
+
 mutable struct CustomizedGate
-	f::Function
-	param:: Vector{T} where {T <: Number}
-	qubits::Vector{Int}
-	name::String
+	shell::VarGateShell
+	param:: Vector{Real}
 	CustomizedGate(f::Function, 
+				   qubits::Union{ Vector{Int}, NTuple{S, Int} where {S}},
 				   param:: Vector{T} where {T <: Number},
-				   qubits::Vector{Int}, 
-				   name="CustomizedGate") = new(f, param, qubits, name)
-	CustomizedGate(f::Function, 
-				   param:: Vector{T} where {T <: Number},
-				   qubits::NTuple{S, Int} where {S}, 
-				   name="CustomizedGate") = new(f, param, [qubits...], name)
+				   name="CustomizedGate") = new(VarGate(f,qubits, name), param)
+	CustomizedGate(shell::VarGateShell, param::Vector{Real}) = new(shell, param)
 
 end # struct
 
-qubits(gate::CustomizedGate) = gate.qubits
+qubits(gate::CustomizedGate) = qubits(gate.shell)
+func(gate::CustomizedGate) = func(gate.shell)
+name(gate::CustomizedGate) = name(gate.shell)
 param(gate::CustomizedGate) = gate.param
-func(gate::CustomizedGate) = gate.f
-name(gate::CustomizedGate) = gate.name
+copy(gate::CustomizedGate) = CustomizedGate(copy(gate.shell), copy(gate.param))
 
-copy(gate::CustomizedGate) = CustomizedGate(gate.f, copy(gate.param), copy(gate.qubits))
-changeParam!(gate::CustomizedGate, newParam::Vector{Number}) = (gate.param = newParam; return gate)
-changeParam(gate::CustomizedGate, newParam::Vector{Number}) = CustomizedGate(gate.f, newParam, copy(qubits))
+changeParams!(gate::CustomizedGate, newParam::Vector{Real}) = (gate.param = newParam; return gate)
+changeParams(gate::CustomizedGate, newParam::Vector{Real}) = CustomizedGate(gate.f, newParam, copy(qubits))
+changeParam!(gate::CustomizedGate, newParam::Real) = (gate.param = [newParam]; return gate)
 
-data(gate::CustomizedGate) = gate.f((gate.param)...)
+data(gate::CustomizedGate) = func(gate)((gate.param)...)
 
-RxFunc(θ::Number) = cos(θ/2)I_DATA - sin(θ/2)im* X_DATA
-RyFunc(θ::Number) = cos(θ/2)I_DATA - sin(θ/2)im* Y_DATA
-RzFunc(θ::Number) = cos(θ/2)I_DATA - sin(θ/2)im* Z_DATA
+RxFunc(θ::Real) = cos(θ/2)I_DATA - sin(θ/2)im* X_DATA
+RyFunc(θ::Real) = cos(θ/2)I_DATA - sin(θ/2)im* Y_DATA
+RzFunc(θ::Real) = cos(θ/2)I_DATA - sin(θ/2)im* Z_DATA
 
-function RϕFunc(θ::Number)
+function RϕFunc(θ::Real)
 	phaseGate = zeros(ComplexF64,2,2)
 	phaseGate[1,1] = 1
 	phaseGate[2,2] = exp(θ* 1im)
 	return phaseGate
 end
 
-Rx(θ::Number, qubits::Location...) = CustomizedGate(RxFunc, [θ], qubits, "Rx")
-Ry(θ::Number, qubits::Location...) = CustomizedGate(RyFunc, [θ], qubits, "Ry")
-Rz(θ::Number, qubits::Location...) = CustomizedGate(RzFunc, [θ], qubits, "Rz")
-Rϕ(θ::Number, qubits::Location...) = CustomizedGate(RϕFunc, [θ], qubits, "Rϕ")
+Rx(θ::Real, qubits::Location...) = CustomizedGate(RxFunc, [θ], qubits, "Rx")
+Ry(θ::Real, qubits::Location...) = CustomizedGate(RyFunc, [θ], qubits, "Ry")
+Rz(θ::Real, qubits::Location...) = CustomizedGate(RzFunc, [θ], qubits, "Rz")
+Rϕ(θ::Real, qubits::Location...) = CustomizedGate(RϕFunc, [θ], qubits, "Rϕ")
 
 function show(io::IO,gate::CustomizedGate)
 	print("$(name(gate)), $(param(gate)) ,  $(qubits(gate))\n")

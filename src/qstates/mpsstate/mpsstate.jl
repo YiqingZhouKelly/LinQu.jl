@@ -40,7 +40,14 @@ siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
 sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
+
 updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
+	state.llim >= leftEnd && state.llim = leftEnd-1
+	state.rlim <= rightEnd && state.rlim = rightEnd+1
+	return state
+end
+updateLims!(state::MPSState, touchedSite::Int) = updateLims!(state, touchedSite, touchedSite)
 
 getQubit(state::MPSState, i::Int) = state.sites[siteForQubit(state,i)]
 getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ inds]
@@ -219,12 +226,13 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
 	state.rlim <= s2 && (state.rlim = s2+1)
 end
 
-function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
-	function projector(i::Int, ind::Index)
+function projector(i::Int, ind::Index)
 		data = zeros(2)
 		data[i] = 1
 		return ITensor(data, ind)
-	end
+end
+
+function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	sample = zeros(Int, length(sites))
 	clamped = nothing
 	for i =1:length(sites)
@@ -244,6 +252,34 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	end
 	return sample
 end
+
+function collapseQubits!(state::MPSState, qubits::Vector{Int}; reset=false)
+	results = zeros(Int, length(qubits))
+	for i = 1:length(qubits)
+		site = siteForQubit(state, qubits[i])
+		centerAtSite!(state, site)
+		ψ = state[site]
+		proj0 = projector(1, findindex(ψ, "Site"))
+		ψ0 = ψ*proj0
+		proj1 = projector(2, findindex(ψ, "Site"))
+		ψ1 = ψ*proj1
+		prob0 = Real(scalar(ψ0 * dag(ψ0)))
+		prob1 = Real(scalar(ψ1 * dag(ψ1)))
+		if rand(0:1000)/1000 < prob0
+			state[site] = ψ1*proj0
+		else
+			results[i] = 1
+			if reset
+				state[site] = ψ1*proj0
+			else 	
+				state[site] = ψ1*proj1
+			end
+		end 
+		updateLims!(state, site)
+	end
+	return results
+end
+collapseQubit!(state::MPSState, qubit::Int; reset=false) = collapseQubits!(state, [qubits]; reset= reset)[1]
 
 function show(io::IO, state::MPSState)
 	for i =1: length(state)
