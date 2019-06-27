@@ -34,7 +34,7 @@ function push!(block1::QGateBlock, block2::QGateBlock)
 end
 
 function applyGate!(state::QState, block::QGateBlock, offset=nothing ; kwargs...)
-	offset == nothing && (offset = offset(gate))
+	offset == nothing && (offset = block.offset)
 	for gate ∈ gates(block)
 		applyGate!(state, gate + offset; kwargs...)
 	end

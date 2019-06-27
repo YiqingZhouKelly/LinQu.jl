@@ -43,8 +43,8 @@ qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, ind
 
 updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
-	state.llim >= leftEnd && state.llim = leftEnd-1
-	state.rlim <= rightEnd && state.rlim = rightEnd+1
+	state.llim >= leftEnd && (state.llim = leftEnd-1)
+	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
 	return state
 end
 updateLims!(state::MPSState, touchedSite::Int) = updateLims!(state, touchedSite, touchedSite)
@@ -62,6 +62,7 @@ function applyGate!(state::MPSState, gate::QGate; kwargs...)
 	applyLocalGate!(state, gate; kwargs...)
 end
 
+applyGate!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	localizeQubitsInOrder!(state, qubits; kwargs...)
 	sites = sitesForQubits(state, qubits)
@@ -267,8 +268,10 @@ function collapseQubits!(state::MPSState, qubits::Vector{Int}; reset=false)
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
 		if rand(0:1000)/1000 < prob0
 			state[site] = ψ1*proj0
+			printstyled("0", bold=true, color=5)
 		else
 			results[i] = 1
+			printstyled("1", bold=true, color=43)
 			if reset
 				state[site] = ψ1*proj0
 			else 	
@@ -281,15 +284,29 @@ function collapseQubits!(state::MPSState, qubits::Vector{Int}; reset=false)
 end
 collapseQubit!(state::MPSState, qubit::Int; reset=false) = collapseQubits!(state, [qubits]; reset= reset)[1]
 
+function showStructure(io::IO, state::MPSState)
+	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
+	print(io, state.map.siteForQubit, "\n")
+	printstyled(io, "qubitAtSite:"; bold=true, color=:blue)
+	print(io, state.map.qubitAtSite, "\n")
+	printstyled(io, "llim = $(state.llim), rlim = $(state.rlim)\n", bold=true, color=:blue)
+	printstyled(io, "-------------------\n"; bold=true, color=5)
+end
 function show(io::IO, state::MPSState)
+	printstyled(io, "--- MPS state: ---\n"; bold=true, color=5)
 	for i =1: length(state)
-		print("Site $(i):", IndexSet(state.sites[i]),"\n")
+		printstyled(io, "Site $(i):"; bold=true, color=43)
+		print(io, IndexSet(state.sites[i]),"\n")
 	end
-	print("siteForQubit:", state.map.siteForQubit, "\n")
-	print("qubitAtSite:", state.map.qubitAtSite, "\n")
-	print("llim = $(state.llim), rlim = $(state.rlim)\n")
+	showStructure(io, state)
 end
 
-function printFull(state::MPSState)
-	print(state.sites,"\n")
+function showData(io::IO,state::MPSState)
+	printstyled("--- MPS state: ---\n"; bold=true, color=5)
+	for i =1: length(state)
+		printstyled(io, "Site $(i):\n"; bold=true, color=43)
+		print(io, state[i],"\n")
+	end
+	showStructure(io, state)
 end
+showData(state::MPSState) = showData(stdout, state)

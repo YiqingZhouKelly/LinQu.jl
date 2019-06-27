@@ -1,5 +1,5 @@
 
-const QGate = Union{ConstGate, CustomizedGate, ControlledGate}
+const QGate = Union{ConstGate, CustomizedGate, MeasureGate}
 
 function QGate(id::Int, qubits::Location...)
 	if id <= CONST_GATE_COUNT

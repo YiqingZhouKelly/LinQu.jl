@@ -126,11 +126,13 @@ export  CustomizedGate,
 		changeParam!,
 		changeParam
 
-include("qgates/controlledgate.jl")
-export  ControlledGate,
-		data,
-		qubits
-
+include("qgates/measuregate.jl")
+export MeasureGate,
+	   qubits,
+	   copy,
+	   MEASURE_RESET,
+	   MEASURE
+	   
 include("qgates/qgate.jl")
 export  QGate
 
@@ -153,7 +155,8 @@ export MPSState,
 	   toExactState,
 	   getProbDist,
 	   oneShot,
-	   measure!
+	   measure!,
+	   showData
 
 include("qstates/exactstate.jl")
 export 	ExactState,
@@ -164,6 +167,8 @@ export 	ExactState,
 
 include("qstates/qstate.jl")
 export 	QState
+
+
 
 include("qgateblock.jl")
 export  QGateBlock,

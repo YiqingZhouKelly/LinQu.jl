@@ -1,20 +1,20 @@
 
 mutable struct CustomizedGate
-	f::Function
-	qubits::Vector{Int}
-	param:: Vector{T} where {T<:Real}
-	name::String
+	shell::VarGateShell
+	param:: Vector{Real}
 	CustomizedGate(f::Function, 
-				   qubits::Vector{Int},
+				   qubits::Union{ Vector{Int}, NTuple{S, Int} where {S}},
 				   param:: Vector{T} where {T <: Number},
-				   name="CustomizedGate") = new(f,qubits, param, name)
+				   name="CustomizedGate") = new(VarGateShell(f,qubits, name), param)
+	CustomizedGate(shell::VarGateShell, param::Vector{Real}) = new(shell, param)
+
 end # struct
 
-qubits(gate::CustomizedGate) = gate.qubits
-func(gate::CustomizedGate) = gate.f
-name(gate::CustomizedGate) = gate.name
+qubits(gate::CustomizedGate) = qubits(gate.shell)
+func(gate::CustomizedGate) = func(gate.shell)
+name(gate::CustomizedGate) = name(gate.shell)
 param(gate::CustomizedGate) = gate.param
-copy(gate::CustomizedGate) = CustomizedGate(gate.f,copy(gate.qubits), copy(gate.param), gate.name)
+copy(gate::CustomizedGate) = CustomizedGate(copy(gate.shell), copy(gate.param))
 
 changeParams!(gate::CustomizedGate, newParam::Vector{Real}) = (gate.param = newParam; return gate)
 changeParams(gate::CustomizedGate, newParam::Vector{Real}) = CustomizedGate(gate.f, newParam, copy(qubits))

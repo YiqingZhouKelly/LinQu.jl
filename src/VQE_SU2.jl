@@ -1,54 +1,44 @@
-include("./../YQ.jl")
-using .YQ
+# include("./YQ.jl")
+# using .YQ
 
-N = 4
+V = 4
 d = 5
-V = 16
+N = 16
 
-state = MPSState(N+1)
+state = MPSState(V+1)
 
-# swap alpha
-swapAlpha(θ::Real)=expm(-θ/2im*SWAP_DATA)
-SA(q1::Int, q2::Int, param::Vector{Real}) = CustomizedGate(swapAlpha, param, [q1,q2],"SA")
-
-#parameterized gate block (repeated d times)
-function paramBlock(param::Vector{Real})
-	paramIdx = 1
-	paramBlock = QGateblock()
-	for i = 1:N-1
-		push!(paramBlock, SA(i,i+1, param[paramIdx:paramIdx]))
+function SU2Circuit(V,d,N)
+	circuit = QCircuit()
+	swapAlpha(θ::Real)=reshape(exp(reshape(-θ/2im*SWAP_DATA,(4,4))),(2,2,2,2))
+	SA(q1::Int, q2::Int, param::Vector{T} where {T<:Real}) = CustomizedGate(swapAlpha,[q1,q2],param,"SA")
+	function paramBlock()
+		pb = QGateBlock()
+		for i = 1:V
+			push!(pb, SA(i,i+1, rand(Float64,1)))
+		end
+		push!(pb,  SA(1, V, rand(Float64,1)))
+		return pb
 	end
-	push!(paramBlock, SA(1,N))
-	return 
+
+	push!(circuit, X(2), H(2), CNOT(2,3),X(4), H(4), CNOT(4,5))
+
+	prefix = Array{QGateBlock,1}(undef, 2)
+	prefix[1] ,prefix[2] =  QGateBlock(), QGateBlock()
+	push!(prefix[1], X(1), H(1), CNOT(1, V+1))
+	push!(prefix[2], SWAP(1, V+1))
+
+	for s = 1:N-V
+		push!(circuit, prefix[s%2+1])
+		for r = 1:d
+			push!(circuit, paramBlock())
+		end
+		push!(circuit, MEASURE_RESET([1]))
+	end
+	return circuit
 end
 
-function fillParamBlock!(block::QGateblock, θ::Vector{Float64})
-	for i = 1:length(θ)
-		changeParam!(gates(block)[i], θ[i])
-	end
-end
-
-step_= N-V #step
-qubits_ = V+1 #qubits
-repeats_ = d #repeat
-θ = rand(Float64,s,r,q) # initialize parameters
-
-
-initBlock = QGateblock()
-push!(initBlock, X(2), H(2), CNOT(2,3))
-push!(initBlock, X(4), H(4), CNOT(4,5))
-applyGate!(state, initBlock)
-
-prefix = Array{QGateblock,1}(undef, 2)
-prefix[1]. prefix[2] =  QGateblock(), QGateblock()
-push!(prefix[1], X(1), H(1), CNOT(1, N+1))
-push!(prefix[2], SWAP(1, N+1))
-
-for s = 1:step_
-	applyGate!(state, prefix[s%2])
-	for r = 1:d
-		fillParamBlock!(paramBlock, θ[s, r, :])
-		applyGate!(state, paramBlock)
-	end
-	measure
+circuit = SU2Circuit(V,d,N)
+for shot = 1:4096
+	runCircuit!(MPSState(V+1), circuit)
+	print("\n")
 end
