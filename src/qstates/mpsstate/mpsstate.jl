@@ -56,13 +56,13 @@ siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for
 
 toExactState(state::MPSState) = ExactState(prod(state.sites))
 
-function applyGate!(state::MPSState, gate::QGate; kwargs...)
-	localizeQubits!(state, qubits(gate); kwargs...)
-	centerAtQubit!(state, qubits(gate)[1])
-	applyLocalGate!(state, gate; kwargs...)
+function apply!(state::MPSState, gate::QGate, qubits::ActPosition; kwargs...)
+	localizeQubits!(state, qubits; kwargs...)
+	centerAtQubit!(state, qubits[1])
+	applyLocalGate!(state, gate, qubits; kwargs...)
 end
 
-applyGate!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
+# apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	localizeQubitsInOrder!(state, qubits; kwargs...)
 	sites = sitesForQubits(state, qubits)
@@ -101,8 +101,8 @@ end
 
 moveQubit!(state::MPSState, q::Int, s::Int; kwargs...) = moveSite!(state, siteForQubit(state,q), s; kwargs...)
 
-function localizeQubits!(state::MPSState, qubits::Vector{Int}; kwargs...)
-	sortedSites = sort(sitesForQubits(state, qubits))
+function localizeQubits!(state::MPSState, actpos::ActPosition; kwargs...)
+	sortedSites = sort(sitesForQubits(state, actpos.qubits))
 
 	for i = 2: length(sortedSites)
 		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)
@@ -153,12 +153,12 @@ end
 
 centerAtQubit!(state::MPSState, q::Int) = centerAtSite!(state, siteForQubit(state, q))
 
-function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
+function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwargs...)
 	# Contract
-	sites = sitesForQubits(state, qubits(gate))
+	sites = sitesForQubits(state, actpos.qubits)
 	inds = siteInds(state, sites)
 	gateITensor = ITensor(gate, IndexSet(inds, prime(inds)))
-	qubitITensors = getQubits(state, qubits(gate))
+	qubitITensors = getQubits(state, actpos.qubits)
 	product = noprime(gateITensor * prod(qubitITensors))
 
 	# SVD Split
@@ -168,11 +168,11 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	for i =1:length(sites)-1
 		if leftLink != nothing 
 			U,S,V,leftLink,v = svd(product, 
-							IndexSet(leftLink, findindex(product, "q=$(qubits(gate)[i])"));
+							IndexSet(leftLink, findindex(product, "q=$(actpos[i])"));
 							kwargs...)
 		else
 			U,S,V,leftLink,v = svd(product, 
-							findindex(product, "q=$(qubits(gate)[i])");
+							findindex(product, "q=$(actpos[i])");
 							kwargs...)
 		end
 		leftLink = replacetags(leftLink, "u", "l=$(linkindex)")
@@ -187,7 +187,7 @@ function applyLocalGate!(state::MPSState, gate::QGate; kwargs...)
 	# update state
 	for i =1:length(sites)
 		state.sites[leftEnd-1+i] = newSites[i]
-		updateMap!(state, (s=leftEnd-1+i, q=qubits(gate)[i]))
+		updateMap!(state, (s=leftEnd-1+i, q=actpos[i]))
 	end
 	rightEnd = leftEnd-1+length(sites)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)

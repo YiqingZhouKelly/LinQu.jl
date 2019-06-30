@@ -1,21 +1,8 @@
 
-const QGate = Union{ConstGate, CustomizedGate, MeasureGate}
+abstract type QGate end 
 
-function QGate(id::Int, qubits::Location...)
-	if id <= CONST_GATE_COUNT
-		return ConstGate(id, qubits)
-	else
-		return VarGate(id%CONST_GATE_COUNT, qubits)
-	end
-end
+flatten(gate::QGate) = gate
 
-function (+)(gate::QGate, offset::Int)
-	gateCopy = copy(gate)
-	gateCopy.qubits.+=offset
-	return gateCopy
-end
-
-(-)(gate::QGate, offset::Int) = (+)(gate, -offset)
-
+#  visible to state
 ITensor(gate::QGate, inds::IndexSet) = ITensor(data(gate), inds)
 ITensor(gate::QGate, ind::Index...) = ITensor(data(gate), ind...)

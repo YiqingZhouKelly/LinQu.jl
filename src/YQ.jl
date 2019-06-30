@@ -70,7 +70,14 @@ export  QState,
 		ExactState,
 		QGateblock
 
-include("qgates/constants.jl")
+include("actpos.jl")
+export  ActPosition
+
+include("qgates/gatekernel.jl")
+export  GateKernel,
+		func,
+		name
+include("qgates/commongates/constants.jl")
 export  IntFloat,
 		Location,
 		I_DATA,
@@ -90,10 +97,36 @@ export  IntFloat,
 		GATE_TABLE,
 		GATE_NAME,
 		CONST_GATE_COUNT
+include("qgates/commongates/commonkernel.jl")
+
+include("qgates/qgate.jl")
+export  QGate
 
 include("qgates/constgate.jl")
 export 	ConstGate,
-		X,
+		qubits,
+		data,
+		copy,
+		control
+
+include("qgates/vargate.jl")
+export  VarGate,
+		qubits,
+		param,
+		func,
+		copy,
+		data,
+		control
+
+include("qgates/measuregate.jl")
+export MeasureGate,
+	   qubits,
+	   copy,
+	   MEASURE_RESET,
+	   MEASURE
+
+include("qgates/commongates/commongates.jl")
+export 	X,
 		Y,
 		Z,
 		H,
@@ -106,35 +139,10 @@ export 	ConstGate,
 		TOFFOLI,
 		FREDKIN,
 		CSWAP,
-		qubits,
-		data,
-		id,
-		copy,
-		ITensor
-
-include("qgates/customizedgate.jl")
-export  CustomizedGate,
-		qubits,
-		param,
-		func,
-		copy,
-		data,
 		Rx,
 		Ry,
 		Rz,
-		Rϕ,
-		changeParam!,
-		changeParam
-
-include("qgates/measuregate.jl")
-export MeasureGate,
-	   qubits,
-	   copy,
-	   MEASURE_RESET,
-	   MEASURE
-	   
-include("qgates/qgate.jl")
-export  QGate
+		Rϕ
 
 include("qstates/mpsstate/qubitsitemap.jl")
 export 	QubitSiteMap,
@@ -162,7 +170,7 @@ include("qstates/exactstate.jl")
 export 	ExactState,
 		findindex,
 		ITensor,
-		applyGate!,
+		apply!,
 		toMPSState
 
 include("qstates/qstate.jl")
@@ -175,15 +183,14 @@ export  QGateBlock,
 	    gates,
 	    length,
 	    push!,
-	    applyGate!,
-	    zeroOffset,
-	    zeroOffset
+	    apply!,
+	    addGate!
 
 include("qcircuit.jl")
 export	Operator,
 		QCircuit,
 		operators,
 		QGateBlock,
-		runCircuit!
+		applyCircuit!
 end #module
 
