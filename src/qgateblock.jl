@@ -26,6 +26,7 @@ end
 function add!(block::QGateBlock, gate::Operator, pos::ActPosition)
 	push!(gates(block), gate)
 	push!(qubits(block), pos)
+	return block
 end
 
 const GatePosTuple = Tuple{T, ActPosition} where {T <: Operator}
@@ -34,6 +35,7 @@ function add!(block::QGateBlock, tuples::GatePosTuple...)
 	for tuple ∈ tuples
 		add!(block, tuple[1], tuple[2])
 	end
+	return block
 end
 
 addCopy!(block::QGateBlock, gate::Operator, pos::ActPosition) = add!(block, copy(gate), pos)
