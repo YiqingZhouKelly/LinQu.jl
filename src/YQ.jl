@@ -184,13 +184,12 @@ export  QGateBlock,
 	    length,
 	    push!,
 	    apply!,
-	    addGate!
+	    addGate!,
+	    flatten
 
 include("qcircuit.jl")
-export	Operator,
-		QCircuit,
-		operators,
-		QGateBlock,
-		applyCircuit!
+export	addGate!,
+		apply!,
+		flatten
 end #module
 
