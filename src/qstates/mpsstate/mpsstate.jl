@@ -244,7 +244,7 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
 		prob0 /= (prob0+prob1)
-		if rand(0:1000)/1000 > prob0
+		if rand(0:10000)/10000 > prob0
 			sample[i] = 1
 			clamped = ψ1
 		else
@@ -266,7 +266,7 @@ function collapseQubits!(state::MPSState, qubits::Vector{Int}; reset=false)
 		ψ1 = ψ*proj1
 		prob0 = Real(scalar(ψ0 * dag(ψ0)))
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
-		if rand(0:1000)/1000 < prob0
+		if rand(0:10000)/10000 < prob0
 			state[site] = ψ1*proj0
 			printstyled("0", bold=true, color=5)
 		else
