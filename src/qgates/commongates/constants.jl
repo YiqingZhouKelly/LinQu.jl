@@ -82,11 +82,3 @@ for i =1:2
 end
 const FREDKIN_DATA = fredkin
 const CSWAP_DATA = fredkin
-
-const CONST_GATE_COUNT = 12
-const GATE_TABLE = [X_DATA, Y_DATA, Z_DATA, H_DATA, S_DATA, 
-					SDAG_DATA, T_DATA, TDAG_DATA, SWAP_DATA, 
-					CNOT_DATA, TOFFOLI_DATA, FREDKIN_DATA, I_DATA]
-const GATE_NAME = ["X", "Y", "Z", "H", "S", "SDAG", "T", 
-						  "TDAG", "SWAP", "CNOT", "TOFFOLI", 
-						  "FREDKIN", "Rx", "Ry", "Rz", "Rϕ"]

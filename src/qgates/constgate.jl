@@ -8,18 +8,9 @@ name(gate::ConstGate) = name(gate.kernel)
 data(gate::ConstGate) = func(gate)()
 func(gate::ConstGate) = func(gate.kernel)
 
-(gate::ConstGate)(qubit::Int...) = (gate, ActPosition([qubit...]))
-
-function control(gate::ConstGate)
-	function controlFunc()
-		controlled = zeros(ComplexF64,2,2,2,2)
-		controlled[1,:,1,:] = diagm(0=>ones(ComplexF64, 2))
-		controlled[2,:,2,:] = data(gate)
-		return controlled
-	end
-	kernel = GateKernel(controlFunc, "Control-"*name(gate))
-	return ConstGate(kernel)
-end
+copy(gate::ConstGate) = gate
+==(gate1::ConstGate, gate2::ConstGate) = (gate1.kernel == gate2.kernel)
+control(gate::ConstGate) = ConstGate(control(gate.kernel))
 
 function show(io::IO, gate::ConstGate)
 	printstyled(io, name(gate); bold=true, color= :blue)

@@ -1,7 +1,13 @@
 
 abstract type QGate end 
 
-flatten(gate::QGate) = gate
+function QGate(kernel:: GateKernel)
+	if paramCount(kernel)==0
+		return ConstGate(kernel)
+	else 
+		return VarGate(kernel)
+	end
+end
 
 #  visible to state
 ITensor(gate::QGate, inds::IndexSet) = ITensor(data(gate), inds)

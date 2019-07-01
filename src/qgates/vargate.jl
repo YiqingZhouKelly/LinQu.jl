@@ -2,29 +2,20 @@
 mutable struct VarGate <: QGate
 	kernel::GateKernel
 	param:: Vector{T} where {T<:Real}
-	VarGate(kernel::GateKernel, 
-				   param::Vector{T} where {T<:Real}) = new(kernel, qubits, param)
+	VarGate(kernel::GateKernel, param::Vector{T} where {T<:Real}) = new(kernel, param)
+	VarGate(kernel::GateKernel) = new(kernel, zeros(paramCount(kernel)))
 end # struct
 
 name(gate::VarGate) = name(gate.kernel)
 param(gate::VarGate) = gate.param
+paramCount(gate::VarGate) = paramCount(gate.kernel)
 copy(gate::VarGate) = VarGate(gate.kernel, copy(gate.param))
 data(gate::VarGate) = func(gate)(param(gate)...)
 func(gate::VarGate) = func(gate.kernel)
-(gate::VarGate)(qubit::Int...) = (gate, ActPosition([qubit...]))
+setParam!(gate::VarGate, newParams::Vector{T} where {T<: Real}) = (gate.param = newParams)
 
-
-function control(gate::VarGate, controlbit::Int)
-	# TODO: Suppport controlled multi-qubit gates?
-	function controlFunc(p::Real...)
-		controlled = zeros(ComplexF64,2,2,2,2)
-		controlled[1,:,1,:] = diagm(0=>ones(ComplexF64, 2))
-		controlled[2,:,2,:] = func(gate)(p...)
-		return controlled
-	end
-	kernel = GateKernel(controlFunc, "Control-"*name(gate))
-	return VarGate(kernel, copy(param))
-end
+control(gate::VarGate) = VarGate(control(gate.kernel), copy(gate.param))
+==(gate1::VarGate, gate2::VarGate)= (gate1.kernel==gate2.kernel && gate1.param ==gate2.param)
 
 function show(io::IO,gate::VarGate)
 	printstyled(io, name(gate); bold=true, color= :blue)

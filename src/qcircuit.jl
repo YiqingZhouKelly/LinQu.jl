@@ -9,11 +9,12 @@ gates(circuit::QCircuit) = gate(cirucit.block)
 size(cirucit::QCircuit) = size(cirucit.block) 
 iterate(circuit::QCircuit, state::Int = 1) = iterate(cirucit.block, state)
 length(circuit::QCircuit) = length(circuit.block)
+==(circuit1::QCircuit, circuit2::QCircuit) = ((circuit1.block == circuit2.block) && (circuit1.N == circuit2.N))
 
-addGate!(circuit::QCircuit, operator::Operator, pos::ActPosition) = addGate!(circuit.block, operator, pos)
-addGate!(circuit::QCircuit, tuples::GatePosTuple...) = addGate!(circuit.gate, tuples...)
+add!(circuit::QCircuit, operator::Operator, pos::ActPosition) = add!(circuit.block, operator, pos)
+add!(circuit::QCircuit, tuples::GatePosTuple...) = add!(circuit.block, tuples...)
 
-apply!(state::QState, circuit::QCircuit, pos::ActPosition) = apply!(state, circuit.block, pos)
+apply!(state::QState, circuit::QCircuit) = apply!(state, circuit.block, ActPosition([1:1:circuit.N;]))
 
 function flatten(circuit::QCircuit, flattened=nothing) 
 	flattened = flatten(circuit.block, ActPosition([1:1:circuit.N;]), flattened)

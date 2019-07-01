@@ -20,6 +20,7 @@ import Base.length,
 	   Base.*,
 	   Base.+,
 	   Base.-,
+	   Base.==,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
@@ -93,10 +94,7 @@ export  IntFloat,
 		SWAP_DATA,
 		TOFFOLI_DATA,
 		FREDKIN_DATA,
-		CSWAP_DATA,
-		GATE_TABLE,
-		GATE_NAME,
-		CONST_GATE_COUNT
+		CSWAP_DATA
 include("qgates/commongates/commonkernel.jl")
 
 include("qgates/qgate.jl")
@@ -116,7 +114,8 @@ export  VarGate,
 		func,
 		copy,
 		data,
-		control
+		control,
+		==
 
 include("qgates/measuregate.jl")
 export MeasureGate,
@@ -176,20 +175,24 @@ export 	ExactState,
 include("qstates/qstate.jl")
 export 	QState
 
-
-
 include("qgateblock.jl")
 export  QGateBlock,
 	    gates,
 	    length,
 	    push!,
 	    apply!,
-	    addGate!,
-	    flatten
+	    add!,
+	    addCopy!,
+	    flatten, 
+	    extractParams,
+	    insertParams!
 
 include("qcircuit.jl")
-export	addGate!,
+export	add!,
 		apply!,
 		flatten
+
+include("interface.jl")
+export 	getindex
 end #module
 

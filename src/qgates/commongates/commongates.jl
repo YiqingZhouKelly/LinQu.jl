@@ -12,9 +12,3 @@ SWAP = ConstGate(SWAP_kernel)
 CNOT = ConstGate(CNOT_kernel) 
 TOFFOLI = ConstGate(TOFFOLI_kernel) 
 FREDKIN = ConstGate(FREDKIN_kernel) 
-
-# VarGates 
-Rx(θ::Real) = VarGate(Rx_kernel, [θ])
-Ry(θ::Real) = VarGate(Ry_kernel, [θ])
-Rz(θ::Real) = VarGate(Rz_kernel, [θ])
-Rϕ(θ::Real) = VarGate(Rϕ_kernel, [θ])
