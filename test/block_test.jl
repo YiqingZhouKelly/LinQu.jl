@@ -23,7 +23,7 @@ using .YQ, Test
 		add!(block2, X(1))
 		add!(block2, block1(2,3,5))
 		params = extractParams(block2)
-		@test params ≈ repeat([π, π/2,π/4, 666],2)
+		@test params ≈ repeat([π, π/2,π/4, π/8],2)
 	end
 
 	@testset "block insert param test" begin

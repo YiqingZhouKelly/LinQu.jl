@@ -169,28 +169,31 @@ include("qstates/exactstate.jl")
 export 	ExactState,
 		findindex,
 		ITensor,
-		apply!,
 		toMPSState
 
 include("qstates/qstate.jl")
 export 	QState
 
-include("qgateblock.jl")
+include("qgates/qgateblock.jl")
 export  QGateBlock,
 	    gates,
 	    length,
 	    push!,
-	    apply!,
 	    add!,
 	    addCopy!,
 	    flatten, 
 	    extractParams,
 	    insertParams!
 
-include("qcircuit.jl")
+include("qgates/qcircuit.jl")
 export	add!,
-		apply!,
+		QCircuit,
 		flatten
+
+include("inter_qstate_qgate/exactstate_qgate.jl")
+include("inter_qstate_qgate/mpsstate_qgate.jl")
+include("inter_qstate_qgate/qstate_block_circuit.jl")
+export  apply!
 
 include("interface.jl")
 export 	getindex
