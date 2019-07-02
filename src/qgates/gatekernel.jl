@@ -19,3 +19,10 @@ function control(kernel::GateKernel)
 	end
 	return GateKernel(controlFunc, paramCount(kernel), "Control-"*name(kernel))
 end
+
+function inverse(kernel::GateKernel)
+	function inverse(p::Real...)
+		return conj(kernel.f(p...))
+	end
+	return GateKernel(inverse, paramCount(kernel), name(kernel)*"†")
+end

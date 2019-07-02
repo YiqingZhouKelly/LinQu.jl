@@ -15,3 +15,5 @@ control(gate::ConstGate) = ConstGate(control(gate.kernel))
 function show(io::IO, gate::ConstGate)
 	printstyled(io, name(gate); bold=true, color= :blue)
 end
+
+inverse(gate::ConstGate) = ConstGate(inverse(gate.kernel))

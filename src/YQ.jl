@@ -21,6 +21,7 @@ import Base.length,
 	   Base.+,
 	   Base.-,
 	   Base.==,
+	   Base.isapprox,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
@@ -169,7 +170,8 @@ include("qstates/exactstate.jl")
 export 	ExactState,
 		findindex,
 		ITensor,
-		toMPSState
+		toMPSState,
+		isapprox
 
 include("qstates/qstate.jl")
 export 	QState
@@ -183,7 +185,8 @@ export  QGateBlock,
 	    addCopy!,
 	    flatten, 
 	    extractParams,
-	    insertParams!
+	    insertParams!,
+	    inverse
 
 include("qgates/qcircuit.jl")
 export	add!,

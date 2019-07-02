@@ -16,6 +16,7 @@ setParam!(gate::VarGate, newParams::Vector{T} where {T<: Real}) = (gate.param = 
 
 control(gate::VarGate) = VarGate(control(gate.kernel), copy(gate.param))
 ==(gate1::VarGate, gate2::VarGate)= (gate1.kernel==gate2.kernel && gate1.param ==gate2.param)
+inverse(gate::VarGate) = VarGate(inverse(gate.kernel), copy(gate.param))
 
 function show(io::IO,gate::VarGate)
 	printstyled(io, name(gate); bold=true, color= :blue)

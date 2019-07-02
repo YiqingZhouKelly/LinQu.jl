@@ -13,6 +13,9 @@ mutable struct ExactState
 	ExactState(N::Int) = ExactState(N, [1,0])
 end #struct
 
+copy(state::ExactState) = ExactState(copy(state.site))
+isapprox(state1::ExactState, state2::ExactState) = isapprox(state1.site,state2.site)
+
 function toMPSState(state::ExactState; kwargs...)
 	numQubits = length(IndexSet(state.site))
 	leftLink = nothing

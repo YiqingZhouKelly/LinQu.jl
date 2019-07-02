@@ -46,3 +46,15 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
 	return state
 end
+
+function measure!(state::MPSState, basis::QGateBlock, actpos::ActPosition, shots::Int; kwargs...)
+	for q ∈ actpos
+		apply!(state, basis, ActPosition(q))
+	end
+	result = measure!(state, qubits(actpos), shots; kwargs...)
+	inverseBasis = inverse(basis)
+	for q ∈ actpos
+		apply!(state, inverseBasis, ActPosition(q))
+	end
+	return result
+end

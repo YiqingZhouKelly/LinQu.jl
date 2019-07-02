@@ -84,6 +84,15 @@ function insertParams!(block::QGateBlock, params::Vector{T} where {T<:Real}, i::
 	return i
 end
 
+function inverse(block::QGateBlock)
+	inversed = QGateBlock()
+	reverseOrderGates = reverse(block.gates)
+	reverseOrderPos = reverse(block.qubits)
+	for i = 1:length(block)
+		add!(inversed, inverse(reverseOrderGates[i]), reverseOrderPos[i])
+	end
+	return inversed
+end
 function show(io::IO, block::QGateBlock)
 	for i = 1:length(block)
 		if isa(block.gates[i], QGateBlock)
