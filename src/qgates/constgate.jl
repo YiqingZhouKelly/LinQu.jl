@@ -15,3 +15,16 @@ control(gate::ConstGate) = ConstGate(control(gate.kernel))
 function show(io::IO, gate::ConstGate)
 	printstyled(io, name(gate); bold=true, color= :blue)
 end
+
+inverse(gate::ConstGate) = ConstGate(inverse(gate.kernel))
+function randomConstGate(n::Int=rand(1:3))
+	if n==1
+		choices = [X,Y,Z,H,T,TDAG,S,SDAG]
+	elseif n==2
+		choices = [CNOT, SWAP]
+	else 
+		choices = [TOFFOLI, FREDKIN]
+	end
+	count = length(choices)
+	return choices[rand(1:count)]
+end

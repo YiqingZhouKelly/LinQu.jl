@@ -44,13 +44,6 @@ function addCopy!(block::QGateBlock, tuples::GatePosTuple...)
 		add!(block, copy(tuple[1]), copy(tuple[2]))
 	end
 end
-function apply!(state::QState, block::QGateBlock, pos::ActPosition)
-	for j = 1: length(block)
-		gateOrBlock = gates(block)[j]
-		gateOrBlockPos = qubits(block)[j]
-		apply!(state, gateOrBlock, ActPosition([pos[i] for i ∈ gateOrBlockPos]))
-	end
-end
 
 function flatten(block::QGateBlock, pos::ActPosition, flatttened = nothing)
 	flatttened==nothing && (flatttened = QGateBlock())
@@ -89,6 +82,37 @@ function insertParams!(block::QGateBlock, params::Vector{T} where {T<:Real}, i::
 		end
 	end
 	return i
+end
+
+function inverse(block::QGateBlock)
+	inversed = QGateBlock()
+	reverseOrderGates = reverse(block.gates)
+	reverseOrderPos = reverse(block.qubits)
+	for i = 1:length(block)
+		add!(inversed, inverse(reverseOrderGates[i]), reverseOrderPos[i])
+	end
+	return inversed
+end
+
+function randomQGateBlock(size::Int, depth::Int=rand(1:10))
+	block = QGateBlock()
+	for i=1:depth
+		type = rand(1:16)
+		if type <=12
+			subtype = rand(1:12)
+			if subtype<=8
+				numqubits=1
+			elseif subtype<=10
+				numqubits=2
+			else
+				numqubits = 3
+			end
+			add!(block,randomConstGate(numqubits), randomActPosition(size, numqubits))
+		else
+			add!(block, randomVarGate(), randomActPosition(size))
+		end
+	end
+	return block
 end
 
 function show(io::IO, block::QGateBlock)

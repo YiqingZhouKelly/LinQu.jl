@@ -3,7 +3,9 @@ struct QubitSiteMap
 	siteForQubit::Vector{Int}
 	qubitAtSite::Vector{Int}
 	QubitSiteMap(N::Int) = new([1:1:N;],[1:1:N;])
+	QubitSiteMap(siteForQubit::Vector{Int}, qubitAtSite::Vector{Int}) = new(siteForQubit,qubitAtSite)
 end #struct
+copy(map::QubitSiteMap) = QubitSiteMap(copy(map.siteForQubit), copy(map.qubitAtSite))
 
 siteForQubit(map::QubitSiteMap, i::Int) = map.siteForQubit[i]
 sitesForQubits(map::QubitSiteMap, inds::Vector{Int}) = [siteForQubit(map,i) for i ∈ inds]

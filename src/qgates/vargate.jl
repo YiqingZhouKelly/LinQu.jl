@@ -16,8 +16,14 @@ setParam!(gate::VarGate, newParams::Vector{T} where {T<: Real}) = (gate.param = 
 
 control(gate::VarGate) = VarGate(control(gate.kernel), copy(gate.param))
 ==(gate1::VarGate, gate2::VarGate)= (gate1.kernel==gate2.kernel && gate1.param ==gate2.param)
+inverse(gate::VarGate) = VarGate(inverse(gate.kernel), copy(gate.param))
+function randomVarGate()
+	choices = [Rx, Ry, Rz, Rϕ]
+	param = 2π/rand(1:360)
+	return VarGate(choices[rand(1:length(choices))], [param])
+end
 
 function show(io::IO,gate::VarGate)
 	printstyled(io, name(gate); bold=true, color= :blue)
-	print(", $(param(gate))\n")
+	print(io,", $(param(gate))\n")
 end

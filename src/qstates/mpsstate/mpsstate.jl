@@ -35,7 +35,13 @@ setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n
 length(state::MPSState) = length(state.sites)
 size(state::MPSState) = size(state.sites)
 iterate(state::MPSState, itstate::Int=1) = iterate(state.sites,itstate)
+copy(state::MPSState) = MPSState(copy.(state.sites), copy(state.map), state.llim, state.rlim)
 
+function isapprox(state1::MPSState, state2::MPSState)
+	exact1 = toExactState(state1)
+	exact2 = toExactState(state2)
+	return exact1 ≈ exact2
+end
 siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
 sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
@@ -55,12 +61,6 @@ siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
 siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds])
 
 toExactState(state::MPSState) = ExactState(prod(state.sites))
-
-function apply!(state::MPSState, gate::QGate, qubits::ActPosition; kwargs...)
-	localizeQubits!(state, qubits; kwargs...)
-	centerAtQubit!(state, qubits[1])
-	applyLocalGate!(state, gate, qubits; kwargs...)
-end
 
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
@@ -153,47 +153,7 @@ end
 
 centerAtQubit!(state::MPSState, q::Int) = centerAtSite!(state, siteForQubit(state, q))
 
-function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwargs...)
-	# Contract
-	sites = sitesForQubits(state, actpos.qubits)
-	inds = siteInds(state, sites)
-	gateITensor = ITensor(gate, IndexSet(inds, prime(inds)))
-	qubitITensors = getQubits(state, actpos.qubits)
-	product = noprime(gateITensor * prod(qubitITensors))
 
-	# SVD Split
-	newSites = ITensor[]
-	linkindex = leftEnd = min(sites...)
-	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=nothing
-	for i =1:length(sites)-1
-		if leftLink != nothing 
-			U,S,V,leftLink,v = svd(product, 
-							IndexSet(leftLink, findindex(product, "q=$(actpos[i])"));
-							kwargs...)
-		else
-			U,S,V,leftLink,v = svd(product, 
-							findindex(product, "q=$(actpos[i])");
-							kwargs...)
-		end
-		leftLink = replacetags(leftLink, "u", "l=$(linkindex)")
-		U = replacetags(U, "u", "l=$(linkindex)")
-		S = replacetags(S, "u", "l=$(linkindex)")
-		product = S*V
-		push!(newSites, U)
-		linkindex+=1
-	end
-	push!(newSites, product)
-
-	# update state
-	for i =1:length(sites)
-		state.sites[leftEnd-1+i] = newSites[i]
-		updateMap!(state, (s=leftEnd-1+i, q=actpos[i]))
-	end
-	rightEnd = leftEnd-1+length(sites)
-	state.llim >= leftEnd && (state.llim = leftEnd-1)
-	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
-	return state
-end
 
 function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
 	s1 > s2 && ((s1, s2) = (s2, s1))

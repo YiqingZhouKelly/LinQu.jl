@@ -17,10 +17,12 @@ import Base.length,
 	   Base.show,
 	   Base.replace!,
 	   Base.reverse,
+	   Base.size,
 	   Base.*,
 	   Base.+,
 	   Base.-,
 	   Base.==,
+	   Base.isapprox,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
@@ -72,7 +74,8 @@ export  QState,
 		QGateblock
 
 include("actpos.jl")
-export  ActPosition
+export  ActPosition,
+		randomActPosition
 
 include("qgates/gatekernel.jl")
 export  GateKernel,
@@ -105,7 +108,8 @@ export 	ConstGate,
 		qubits,
 		data,
 		copy,
-		control
+		control,
+		randomConstGate
 
 include("qgates/vargate.jl")
 export  VarGate,
@@ -115,7 +119,8 @@ export  VarGate,
 		copy,
 		data,
 		control,
-		==
+		==,
+		randomVarGate
 
 include("qgates/measuregate.jl")
 export MeasureGate,
@@ -169,28 +174,35 @@ include("qstates/exactstate.jl")
 export 	ExactState,
 		findindex,
 		ITensor,
-		apply!,
-		toMPSState
+		toMPSState,
+		isapprox
 
 include("qstates/qstate.jl")
 export 	QState
 
-include("qgateblock.jl")
+include("qgates/qgateblock.jl")
 export  QGateBlock,
 	    gates,
 	    length,
 	    push!,
-	    apply!,
 	    add!,
 	    addCopy!,
 	    flatten, 
 	    extractParams,
-	    insertParams!
+	    insertParams!,
+	    inverse,
+	    randomQGateBlock
 
-include("qcircuit.jl")
+include("qgates/qcircuit.jl")
 export	add!,
-		apply!,
-		flatten
+		QCircuit,
+		flatten,
+		randomQCircuit
+
+include("inter_qstate_qgate/exactstate_qgate.jl")
+include("inter_qstate_qgate/mpsstate_qgate.jl")
+include("inter_qstate_qgate/qstate_block_circuit.jl")
+export  apply!
 
 include("interface.jl")
 export 	getindex

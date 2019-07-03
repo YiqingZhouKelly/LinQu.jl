@@ -13,12 +13,8 @@ mutable struct ExactState
 	ExactState(N::Int) = ExactState(N, [1,0])
 end #struct
 
-function apply!(state::ExactState, gate::QGate, qubits::ActPosition; kwarg...)
-	inds = IndexSet([findindex(state.site, "q=$(q)") for q ∈ qubits])
-	gateITensor = ITensor(gate, IndexSet(inds, prime(inds)))
-	state.site = noprime(state.site * gateITensor)
-	return state
-end
+copy(state::ExactState) = ExactState(copy(state.site))
+isapprox(state1::ExactState, state2::ExactState) = isapprox(state1.site,state2.site)
 
 function toMPSState(state::ExactState; kwargs...)
 	numQubits = length(IndexSet(state.site))
