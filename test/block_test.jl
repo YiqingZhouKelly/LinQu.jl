@@ -44,17 +44,13 @@ using .YQ, Test
 	    @test data(inverse(S)) ≈ data(SDAG)
 	end
 
-	@testset "block inverse test" begin
-	    state = ExactState(5)
+	@testset "block/circuit inverse test" begin
+	    state = MPSState(5)
 	    ref = copy(state)
-	    a,b,c,d = rand(4)
-	    unit = add!(QGateBlock(), X(1)) #,Rx[a](4), Rx[b](3), Ry[c](2), Rz[d](5)
-	    block = add!(QGateBlock(), unit(1,2,3,4,5))
-	    block_dag = inverse(block)
-	    # print(block_dag)
-	    actpos = ActPosition(1,2,3,4,5)
-	    apply!(state, block, actpos)
-	    apply!(state, block_dag, actpos)
+	    circuit = randomQCircuit(5,10)
+	    circuit_inv = inverse(circuit)
+	    apply!(state, circuit)
+	    apply!(state, circuit_inv)
 	    @test ref ≈ state
 	end
 end
