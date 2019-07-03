@@ -21,8 +21,13 @@ function control(kernel::GateKernel)
 end
 
 function inverse(kernel::GateKernel)
+	# TODO: need optimization
 	function inverse(p::Real...)
-		return conj(kernel.f(p...))
+		tensor = conj(kernel.f(p...))
+		shape = size(tensor)
+		n = Int(√length(tensor))
+		tensor = transpose(reshape(tensor, n,n))
+		return Array(reshape(tensor, shape...))
 	end
 	return GateKernel(inverse, paramCount(kernel), name(kernel)*"†")
 end

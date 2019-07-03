@@ -18,7 +18,7 @@ function flatten(circuit::QCircuit, flattened=nothing)
 	flattened = flatten(circuit.block, ActPosition([1:1:circuit.N;]), flattened)
 	return QCircuit(flattened, circuit.N)
 end
-
+inverse(circuit::QCircuit) = QCircuit(inverse(circuit.block), circuit.N)
 randomQCircuit(size::Int, depth::Int = rand(1:10)) = QCircuit(randomQGateBlock(size,depth), size)
 
 function show(io::IO, circuit::QCircuit)

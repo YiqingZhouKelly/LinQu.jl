@@ -25,5 +25,5 @@ end
 
 function show(io::IO,gate::VarGate)
 	printstyled(io, name(gate); bold=true, color= :blue)
-	print(", $(param(gate))\n")
+	print(io,", $(param(gate))\n")
 end

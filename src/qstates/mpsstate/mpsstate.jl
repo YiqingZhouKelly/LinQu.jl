@@ -35,7 +35,13 @@ setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n
 length(state::MPSState) = length(state.sites)
 size(state::MPSState) = size(state.sites)
 iterate(state::MPSState, itstate::Int=1) = iterate(state.sites,itstate)
+copy(state::MPSState) = MPSState(copy.(state.sites), copy(state.map), state.llim, state.rlim)
 
+function isapprox(state1::MPSState, state2::MPSState)
+	exact1 = toExactState(state1)
+	exact2 = toExactState(state2)
+	return exact1 ≈ exact2
+end
 siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
 sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
