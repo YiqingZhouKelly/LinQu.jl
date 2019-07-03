@@ -15,3 +15,11 @@ length(pos::ActPosition) = length(pos.qubits)
 size(pos::ActPosition) = size(qubits(pos))
 iterate(pos::ActPosition, state::Int=1) = iterate(pos.qubits,state)
 ==(pos1::ActPosition, pos2::ActPosition) = (pos1.qubits == pos2.qubits)
+
+function randomActPosition(lim::Int, n::Int=1)
+	result = Set([])
+	while length(result)< n
+		push!(result,rand(1:lim))
+	end
+	return ActPosition([result...])
+end

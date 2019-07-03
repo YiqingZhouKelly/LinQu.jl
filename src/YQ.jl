@@ -73,7 +73,8 @@ export  QState,
 		QGateblock
 
 include("actpos.jl")
-export  ActPosition
+export  ActPosition,
+		randomActPosition
 
 include("qgates/gatekernel.jl")
 export  GateKernel,
@@ -106,7 +107,8 @@ export 	ConstGate,
 		qubits,
 		data,
 		copy,
-		control
+		control,
+		randomConstGate
 
 include("qgates/vargate.jl")
 export  VarGate,
@@ -116,7 +118,8 @@ export  VarGate,
 		copy,
 		data,
 		control,
-		==
+		==,
+		randomVarGate
 
 include("qgates/measuregate.jl")
 export MeasureGate,
@@ -186,12 +189,14 @@ export  QGateBlock,
 	    flatten, 
 	    extractParams,
 	    insertParams!,
-	    inverse
+	    inverse,
+	    randomQGateBlock
 
 include("qgates/qcircuit.jl")
 export	add!,
 		QCircuit,
-		flatten
+		flatten,
+		randomQCircuit
 
 include("inter_qstate_qgate/exactstate_qgate.jl")
 include("inter_qstate_qgate/mpsstate_qgate.jl")

@@ -93,6 +93,28 @@ function inverse(block::QGateBlock)
 	end
 	return inversed
 end
+
+function randomQGateBlock(size::Int, depth::Int=rand(1:10))
+	block = QGateBlock()
+	for i=1:depth
+		type = rand(1:16)
+		if type <=12
+			subtype = rand(1:12)
+			if subtype<=8
+				numqubits=1
+			elseif subtype<=10
+				numqubits=2
+			else
+				numqubits = 3
+			end
+			add!(block,randomConstGate(numqubits), randomActPosition(size, numqubits))
+		else
+			add!(block, randomVarGate(), randomActPosition(size))
+		end
+	end
+	return block
+end
+
 function show(io::IO, block::QGateBlock)
 	for i = 1:length(block)
 		if isa(block.gates[i], QGateBlock)

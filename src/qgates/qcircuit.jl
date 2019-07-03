@@ -19,6 +19,8 @@ function flatten(circuit::QCircuit, flattened=nothing)
 	return QCircuit(flattened, circuit.N)
 end
 
+randomQCircuit(size::Int, depth::Int = rand(1:10)) = QCircuit(randomQGateBlock(size,depth), size)
+
 function show(io::IO, circuit::QCircuit)
 	printstyled(io, "Circuit\n"; bold=true, color = 9)
 	print(io, circuit.block)
