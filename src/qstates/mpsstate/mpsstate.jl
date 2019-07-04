@@ -63,23 +63,40 @@ siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for
 toExactState(state::MPSState) = ExactState(prod(state.sites))
 
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
-function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
-	localizeQubitsInOrder!(state, qubits; kwargs...)
+function measure(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+	if length(qubits) > 1
+		localizeQubitsInOrder!(state, qubits; kwargs...)
+	end
 	sites = sitesForQubits(state, qubits)
 	centerAtSite!(state, sites[1])
-	counts = zeros(2^(length(qubits)))
-	function binaryToDecimal(binary::Vector{Int})
-		decimal = zeros(Int,1)
-		for i =1:length(binary)
-			decimal[1] = decimal[1]*2+binary[i]
-		end
-		return decimal[1]
+	results = zeros(Int, shots, length(qubits))
+	for i = 1:shots
+		results[i,:] = oneShot(state, sites; kwargs...)
 	end
-	for i =1:shots
-		sampleDecimal = binaryToDecimal(oneShot(state, sites; kwargs...))
-		counts[sampleDecimal+1] += 1
+	return results
+	# counts = zeros(2^(length(qubits)))
+	# function binaryToDecimal(binary::Vector{Int})
+	# 	decimal = zeros(Int,1)
+	# 	for i =1:length(binary)
+	# 		decimal[1] = decimal[1]*2+binary[i]
+	# 	end
+	# 	return decimal[1]
+	# end
+	# for i =1:shots
+	# 	sampleDecimal = binaryToDecimal(oneShot(state, sites; kwargs...))
+	# 	counts[sampleDecimal+1] += 1
+	# end
+	# return counts
+end
+
+function measure(state::MPSState, qubit::Int, shots::Int; kwargs...)
+	site = siteForQubit(state, qubit)
+	centerAtSite!(state, site)
+	results = zeros(Int, shots)
+	for i = 1: shots
+		results[i] = oneShot(state, [site]; kwargs...)[1]
 	end
-	return counts
+	return results
 end
 
 function orderQubits!(state::MPSState; kwargs...)
@@ -214,35 +231,38 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	return sample
 end
 
-function collapseQubits!(state::MPSState, qubits::Vector{Int}; reset=false)
+function measure!(state::MPSState, qubits::Vector{Int}; reset=false)
 	results = zeros(Int, length(qubits))
 	for i = 1:length(qubits)
-		site = siteForQubit(state, qubits[i])
-		centerAtSite!(state, site)
-		ψ = state[site]
-		proj0 = projector(1, findindex(ψ, "Site"))
-		ψ0 = ψ*proj0
-		proj1 = projector(2, findindex(ψ, "Site"))
-		ψ1 = ψ*proj1
-		prob0 = Real(scalar(ψ0 * dag(ψ0)))
-		prob1 = Real(scalar(ψ1 * dag(ψ1)))
-		if rand(0:10000)/10000 < prob0
-			state[site] = ψ1*proj0
-			printstyled("0", bold=true, color=5)
-		else
-			results[i] = 1
-			printstyled("1", bold=true, color=43)
-			if reset
-				state[site] = ψ1*proj0
-			else 	
-				state[site] = ψ1*proj1
-			end
-		end 
-		updateLims!(state, site)
+		results[i] = measure!(state, qubits[i]; reset = reset)
 	end
 	return results
 end
-collapseQubit!(state::MPSState, qubit::Int; reset=false) = collapseQubits!(state, [qubits]; reset= reset)[1]
+
+function measure!(state::MPSState, qubit::Int; reset=false)
+	site = siteForQubit(state, qubit)
+	centerAtSite!(state, site)
+	ψ = state[site]
+	proj0 = projector(1, findindex(ψ, "Site"))
+	ψ0 = ψ*proj0
+	proj1 = projector(2, findindex(ψ, "Site"))
+	ψ1 = ψ*proj1
+	prob0 = Real(scalar(ψ0 * dag(ψ0)))
+	prob1 = Real(scalar(ψ1 * dag(ψ1)))
+	if rand(0:10000)/10000 < prob0
+		result = 0
+		state[site] = ψ1*proj0
+	else
+		result = 1
+		if reset
+			state[site] = ψ1*proj0
+		else 	
+			state[site] = ψ1*proj1
+		end
+	end 
+	updateLims!(state, site)
+	return result
+end
 
 function showStructure(io::IO, state::MPSState)
 	printstyled(io, "siteForQubit:"; bold=true, color=:blue)

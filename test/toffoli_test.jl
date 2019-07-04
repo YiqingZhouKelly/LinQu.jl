@@ -23,4 +23,4 @@ add!(circuit, X(1),
 				  T(1),
 				  S(2))
 apply!(state, circuit)
-print(measure!(state, [1,2,3], 1024))
+print(measure(state, [1,2,3], 1024))

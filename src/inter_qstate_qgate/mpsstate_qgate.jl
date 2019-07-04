@@ -47,14 +47,34 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 	return state
 end
 
-function measure!(state::MPSState, basis::QGateBlock, actpos::ActPosition, shots::Int; kwargs...)
+function measure(state::MPSState, basis::QGateBlock, qubit::Int, shots::Int; kwargs...)
+	apply!(state, basis, ActPosition(qubit))
+	result = measure(state, qubit, shots; kwargs...)
+	inverseBasis = inverse(basis)
+	apply!(state, inverseBasis, ActPosition(qubit))
+	return result
+end
+function measure(state::MPSState, basis::QGateBlock, actpos::ActPosition, shots::Int; kwargs...)
 	for q ∈ actpos
 		apply!(state, basis, ActPosition(q))
 	end
-	result = measure!(state, qubits(actpos), shots; kwargs...)
+	result = measure(state, qubits(actpos), shots; kwargs...)
 	inverseBasis = inverse(basis)
 	for q ∈ actpos
 		apply!(state, inverseBasis, ActPosition(q))
 	end
 	return result
+end
+
+function measure!(state::MPSState, basis::QGateBlock, qubit::Int; reset = false)
+	apply!(state, basis, ActPosition(qubit))
+	return measure!(state, qubit; reset = reset)
+end
+
+function measure!(state::MPSState, basis::QGateBlock, qubits::ActPosition; reset = false)
+	results = zeros(Int, length(qubits))
+	for i =1:length(qubits)
+		results[i] = measure!(state, basis, qubits[i]; reset = reset)
+	end
+	return results
 end
