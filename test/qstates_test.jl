@@ -10,7 +10,7 @@ using .YQ, Test
 	    @test toExactState(mps) ≈ exact
 end
 
-@testset "MPSState test" begin    
+@testset "MPSState measure test" begin    
     @testset "measure single qubit test" begin
         zero_state = MPSState(1)
         one_state = MPSState(1)
@@ -31,11 +31,30 @@ end
         	@test prod(result2) ==1
         end
 	end
-	@testset "measure in X basis" begin
+	@testset "measure single qubit in X basis" begin
 	    state = MPSState(1)
         apply!(state, H, ActPosition(1))
         basis = add!(QGateBlock(), H, ActPosition(1))
         result = measure(state, basis, 1, 1024)
         @test sum(result) == 0
 	end
+    @testset "measure multiple qubits test" begin
+        state = MPSState(2)
+        apply!(state, H, ActPosition(1))
+        apply!(state, CNOT, ActPosition(1,2))
+        result = measure(state, [1,2], 20)
+        for i = 1:20
+            @test result[i,1] == result[i,2]
+        end
+    end
+    @testset "measure! multiple qubits test" begin
+        state = MPSState(2)
+        apply!(state, H, ActPosition(1))
+        apply!(state, CNOT, ActPosition(1,2))
+        result = measure!(state, [1,2])
+        result2 = measure(state, [1,2], 100)
+        for i = 1:100
+            @test result2[i,:] == result
+        end
+    end
 end
