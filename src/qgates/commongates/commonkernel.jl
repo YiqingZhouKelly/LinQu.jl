@@ -1,4 +1,5 @@
 
+I_func() = I_DATA
 X_func() = X_DATA
 Y_func() = Y_DATA
 Z_func() = Z_DATA
@@ -23,6 +24,7 @@ function Rϕ_func(θ::Real)
 	return phaseGate
 end
 
+const I_kernel = GateKernel(I_func, "I")
 const X_kernel = GateKernel(X_func, "X")
 const Y_kernel = GateKernel(Y_func, "Y")
 const Z_kernel = GateKernel(Z_func, "Z")

@@ -74,19 +74,6 @@ function measure(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 		results[i,:] = oneShot(state, sites; kwargs...)
 	end
 	return results
-	# counts = zeros(2^(length(qubits)))
-	# function binaryToDecimal(binary::Vector{Int})
-	# 	decimal = zeros(Int,1)
-	# 	for i =1:length(binary)
-	# 		decimal[1] = decimal[1]*2+binary[i]
-	# 	end
-	# 	return decimal[1]
-	# end
-	# for i =1:shots
-	# 	sampleDecimal = binaryToDecimal(oneShot(state, sites; kwargs...))
-	# 	counts[sampleDecimal+1] += 1
-	# end
-	# return counts
 end
 
 function measure(state::MPSState, qubit::Int, shots::Int; kwargs...)
