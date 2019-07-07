@@ -6,6 +6,9 @@ mutable struct VarGate <: QGate
 	VarGate(kernel::GateKernel) = new(kernel, zeros(paramCount(kernel)))
 end # struct
 
+VarGate(f::Function, paramCount::Int, name::String="Anonymous") = VarGate(GateKernel(f, paramCount,name))
+VarGate(f::Function, param::Vector{T} where {T<: Real}, name::String = "Anonymous") = VarGate(GateKernel(f, length(param), name), param)
+
 name(gate::VarGate) = name(gate.kernel)
 param(gate::VarGate) = gate.param
 paramCount(gate::VarGate) = paramCount(gate.kernel)

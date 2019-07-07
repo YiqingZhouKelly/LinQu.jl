@@ -1,5 +1,5 @@
-# include("./../src/YQ.jl")
-# using .YQ
+include("./../src/YQ.jl")
+using .YQ, Test
 
 N = 4
 state = MPSState(N)
@@ -23,4 +23,4 @@ add!(circuit, X(1),
 				  T(1),
 				  S(2))
 apply!(state, circuit)
-print(measure!(state, [1,2,3], 1024))
+result = measure!(state, [1,2,3], 1024)

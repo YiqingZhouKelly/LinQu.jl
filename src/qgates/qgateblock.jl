@@ -29,8 +29,10 @@ function add!(block::QGateBlock, gate::Operator, pos::ActPosition)
 	return block
 end
 
-const GatePosTuple = Tuple{T, ActPosition} where {T <: Operator}
+add!(block::QGateBlock, gate::Operator, qubits::Int...) = add!(block, gate, ActPosition(qubits...))
+add!(block::QGateBlock, gate::Operator, qubits::Vector{Int}) = add!(block, gate, ActPosition(qubits))
 
+const GatePosTuple = Tuple{T, ActPosition} where {T <: Operator}
 function add!(block::QGateBlock, tuples::GatePosTuple...)
 	for tuple ∈ tuples
 		add!(block, tuple[1], tuple[2])

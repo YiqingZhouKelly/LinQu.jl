@@ -1,5 +1,6 @@
 
 #ConstGate
+I = ConstGate(I_kernel)
 X = ConstGate(X_kernel) 
 Y = ConstGate(Y_kernel) 
 Z = ConstGate(Z_kernel) 

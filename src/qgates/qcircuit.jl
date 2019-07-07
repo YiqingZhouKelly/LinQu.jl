@@ -25,3 +25,5 @@ function show(io::IO, circuit::QCircuit)
 	printstyled(io, "Circuit\n"; bold=true, color = 9)
 	print(io, circuit.block)
 end
+
+#TODO: add insert/extract param functions for cirucits
