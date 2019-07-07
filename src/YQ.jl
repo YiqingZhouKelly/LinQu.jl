@@ -43,7 +43,8 @@ import Base.length,
 	   .ITensors.ITensor,
 	   .ITensors.Index,
 	   .ITensors.norm,
-	   .ITensors.*
+	   .ITensors.*,
+	   .ITensors.order
 
 # functions from Base, ITensors
 export linkindex,
@@ -64,7 +65,8 @@ export linkindex,
 	   Index,
 	   randomITensor,
 	   qr,
-	   IndexSet
+	   IndexSet,
+	   order
 # Types
 export  QState,
 		QGate,
@@ -146,7 +148,8 @@ export 	X,
 		Rx,
 		Ry,
 		Rz,
-		Rϕ
+		Rϕ, 
+		ROTATE
 
 include("qstates/mpsstate/qubitsitemap.jl")
 export 	QubitSiteMap,

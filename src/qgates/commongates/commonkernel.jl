@@ -24,6 +24,11 @@ function Rϕ_func(θ::Real)
 	return phaseGate
 end
 
+function ROTATE_func(Θ::Real, nx::Real, ny::Real, nz::Real)
+	nx, ny, nz = [nx, ny, nz]/norm([nx, ny, nz])
+	return cos(θ/2)-sin(θ/2)im* (nx*X_DATA+ny*Y_DATA+nz*Z_DATA)
+end
+
 const I_kernel = GateKernel(I_func, "I")
 const X_kernel = GateKernel(X_func, "X")
 const Y_kernel = GateKernel(Y_func, "Y")
@@ -41,3 +46,4 @@ const Rx = GateKernel(Rx_func, 1, "Rx")
 const Ry = GateKernel(Ry_func, 1, "Ry")
 const Rz = GateKernel(Rz_func, 1, "Rz")
 const Rϕ = GateKernel(Rϕ_func, 1, "Rϕ")
+const ROTATE = GateKernel(ROTATE_func, 4, "General rotation")

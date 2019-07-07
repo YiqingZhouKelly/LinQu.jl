@@ -4,6 +4,12 @@ mutable struct ConstGate <: QGate
 	ConstGate(kernel::GateKernel) = new(kernel)
 end #struct
 
+function ConstGate(data::Vector{T} where {T<:Number}, name::String="Anonymous")
+	f() = data
+	kernel = GateKernel(f, name)
+	return ConstGate(kernel)
+end
+
 name(gate::ConstGate) = name(gate.kernel)
 data(gate::ConstGate) = func(gate)()
 func(gate::ConstGate) = func(gate.kernel)

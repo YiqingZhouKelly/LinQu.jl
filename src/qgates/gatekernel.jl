@@ -14,7 +14,7 @@ function control(kernel::GateKernel)
 	function controlFunc(p::Real...)
 		controlled = zeros(ComplexF64,2,2,2,2)
 		controlled[1,:,1,:] = diagm(0=>ones(ComplexF64, 2))
-		controlled[2,:,2,:] = func(gate)(p...)
+		controlled[2,:,2,:] = func(kernel)(p...)
 		return controlled
 	end
 	return GateKernel(controlFunc, paramCount(kernel), "Control-"*name(kernel))
