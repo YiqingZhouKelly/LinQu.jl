@@ -63,7 +63,7 @@ siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for
 toExactState(state::MPSState) = ExactState(prod(state.sites))
 
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
-function measure(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	if length(qubits) > 1
 		localizeQubitsInOrder!(state, qubits; kwargs...)
 	end
@@ -76,7 +76,7 @@ function measure(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	return results
 end
 
-function measure(state::MPSState, qubit::Int, shots::Int; kwargs...)
+function measure!(state::MPSState, qubit::Int, shots::Int; kwargs...)
 	site = siteForQubit(state, qubit)
 	centerAtSite!(state, site)
 	results = zeros(Int, shots)
@@ -218,15 +218,15 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	return sample
 end
 
-function measure!(state::MPSState, qubits::Vector{Int}; reset=false)
+function collapse!(state::MPSState, qubits::Vector{Int}; reset=false)
 	results = zeros(Int, length(qubits))
 	for i = 1:length(qubits)
-		results[i] = measure!(state, qubits[i]; reset = reset)
+		results[i] = collapse!(state, qubits[i]; reset = reset)
 	end
 	return results
 end
 
-function measure!(state::MPSState, qubit::Int; reset=false)
+function collapse!(state::MPSState, qubit::Int; reset=false)
 	site = siteForQubit(state, qubit)
 	centerAtSite!(state, site)
 	ψ = state[site]

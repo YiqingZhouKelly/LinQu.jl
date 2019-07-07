@@ -171,7 +171,7 @@ export MPSState,
 	   getProbDist,
 	   oneShot,
 	   measure!,
-	   measure,
+	   collapse!,
 	   showData
 
 include("qstates/exactstate.jl")
