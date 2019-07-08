@@ -159,7 +159,7 @@ centerAtQubit!(state::MPSState, q::Int) = centerAtSite!(state, siteForQubit(stat
 
 
 
-function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "qr"; kwargs...)
+function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "svd"; kwargs...)
 	s1 > s2 && ((s1, s2) = (s2, s1))
 	(s2 != s1+1) && error("swapSites can only swap two neighbor sites")
 	(q1, q2) = (qubitAtSite(state, s1), qubitAtSite(state, s2))

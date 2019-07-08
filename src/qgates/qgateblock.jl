@@ -24,6 +24,9 @@ function ==(block1::QGateBlock, block2::QGateBlock)
 	return true
 end
 function add!(block::QGateBlock, gate::Operator, pos::ActPosition)
+	if isa(gate, VarGate)
+		gate = copy(gate)
+	end
 	push!(gates(block), gate)
 	push!(qubits(block), pos)
 	return block

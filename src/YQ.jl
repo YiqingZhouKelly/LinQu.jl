@@ -132,7 +132,8 @@ export MeasureGate,
 	   MEASURE
 
 include("qgates/commongates/commongates.jl")
-export 	X,
+export 	I,
+		X,
 		Y,
 		Z,
 		H,
