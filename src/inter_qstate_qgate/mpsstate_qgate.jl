@@ -46,8 +46,8 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 		updateMap!(state, (s=leftEnd-1+i, q=actpos[i]))
 	end
 	rightEnd = leftEnd-1+length(sites)
-	state.llim >= leftEnd && (state.llim = leftEnd-1)
-	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
+	state.llim = rightEnd-1
+	state.rlim = rightEnd+1
 	return state
 end
 
