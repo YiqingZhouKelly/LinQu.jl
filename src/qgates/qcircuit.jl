@@ -5,13 +5,13 @@ struct QCircuit
 	QCircuit(block::QGateBlock, N::Int) = new(block, N)
 end # struct
 
-gates(circuit::QCircuit) = gate(cirucit.block)
-size(cirucit::QCircuit) = size(cirucit.block) 
-iterate(circuit::QCircuit, state::Int = 1) = iterate(cirucit.block, state)
+gates(circuit::QCircuit) = gate(circuit.block)
+size(circuit::QCircuit) = size(circuit.block) 
+iterate(circuit::QCircuit, state::Int = 1) = iterate(circuit.block, state)
 length(circuit::QCircuit) = length(circuit.block)
 ==(circuit1::QCircuit, circuit2::QCircuit) = ((circuit1.block == circuit2.block) && (circuit1.N == circuit2.N))
 
-add!(circuit::QCircuit, operator::Operator, pos::ActPosition) = (add!(circuit.block, operator, pos); return cirucit)
+add!(circuit::QCircuit, operator::Operator, pos::ActPosition) = (add!(circuit.block, operator, pos); return circuit)
 add!(circuit::QCircuit, tuples::GatePosTuple...) = (add!(circuit.block, tuples...); return circuit)
 
 function flatten(circuit::QCircuit, flattened=nothing) 
@@ -26,4 +26,4 @@ function show(io::IO, circuit::QCircuit)
 	print(io, circuit.block)
 end
 
-#TODO: add insert/extract param functions for cirucits
+#TODO: add insert/extract param functions for circuits

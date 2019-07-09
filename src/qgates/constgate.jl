@@ -10,6 +10,8 @@ function ConstGate(data::Vector{T} where {T<:Number}, name::String="Anonymous")
 	return ConstGate(kernel)
 end
 
+ConstGate(f::Function, name::String="Anonymous") = ConstGate(GateKernel(f, name))
+
 name(gate::ConstGate) = name(gate.kernel)
 data(gate::ConstGate) = func(gate)()
 func(gate::ConstGate) = func(gate.kernel)
