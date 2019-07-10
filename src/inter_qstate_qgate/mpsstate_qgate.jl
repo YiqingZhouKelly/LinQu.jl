@@ -1,16 +1,21 @@
 
 function apply!(state::MPSState, gate::QGate, qubits::ActPosition; kwargs...)
-	localizeQubits!(state, qubits; kwargs...)
-	centerAtQubit!(state, qubits[1])
-	applyLocalGate!(state, gate, qubits; kwargs...)
+	if length(qubits)>1
+		localizeQubits!(state, qubits; kwargs...)
+		centerAtQubit!(state, qubits[1])
+		applyLocalGate!(state, gate, qubits; kwargs...)
+	else
+		applyLocalGate!(state, gate, qubits)
+	end
 end
 
 function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwargs...)
 	# Contract
-	sites = sitesForQubits(state, actpos.qubits)
+	sites = sitesForQubits(state, qubits(actpos))
 	inds = siteInds(state, sites)
 	gateITensor = ITensor(gate, IndexSet(prime(inds), inds))
-	qubitITensors = getQubits(state, actpos.qubits)
+
+	qubitITensors = getQubits(state, qubits(actpos))
 	product = noprime(gateITensor * prod(qubitITensors))
 
 	# SVD Split
@@ -42,8 +47,8 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 		updateMap!(state, (s=leftEnd-1+i, q=actpos[i]))
 	end
 	rightEnd = leftEnd-1+length(sites)
-	state.llim >= leftEnd && (state.llim = leftEnd-1)
-	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
+	state.llim = rightEnd-1
+	state.rlim = rightEnd+1
 	return state
 end
 
