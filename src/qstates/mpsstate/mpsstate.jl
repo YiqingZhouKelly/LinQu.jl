@@ -1,5 +1,5 @@
 
-mutable struct MPSState
+mutable struct MPSState <: QState
 	sites::Vector{ITensor}
 	map::QubitSiteMap
 	llim::Int
@@ -106,7 +106,7 @@ end
 moveQubit!(state::MPSState, q::Int, s::Int; kwargs...) = moveSite!(state, siteForQubit(state,q), s; kwargs...)
 
 function localizeQubits!(state::MPSState, actpos::ActPosition; kwargs...)
-	sortedSites = sort(sitesForQubits(state, actpos.qubits))
+	sortedSites = sort!(sitesForQubits(state, actpos.qubits))
 
 	for i = 2: length(sortedSites)
 		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)

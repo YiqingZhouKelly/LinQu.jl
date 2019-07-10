@@ -11,7 +11,7 @@ copy(pos::ActPosition) = ActPosition(copy(pos.qubits))
 getindex(pos::ActPosition, i::Int) = getindex(pos.qubits, i)
 setindex!(pos::ActPosition, q::Int, i::Int) = setindex!(pos.qubits, q, i)
 
-length(pos::ActPosition) = length(pos.qubits)
+length(pos::ActPosition) = length(qubits(pos))
 size(pos::ActPosition) = size(qubits(pos))
 iterate(pos::ActPosition, state::Int=1) = iterate(pos.qubits,state)
 ==(pos1::ActPosition, pos2::ActPosition) = (pos1.qubits == pos2.qubits)

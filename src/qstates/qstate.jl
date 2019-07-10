@@ -1,2 +1,2 @@
 
-const QState = Union{ExactState, MPSState}
+abstract type QState end 

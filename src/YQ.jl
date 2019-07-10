@@ -152,6 +152,10 @@ export 	I,
 		Rϕ, 
 		ROTATE
 
+include("qstates/qstate.jl")
+export 	QState
+
+
 include("qstates/mpsstate/qubitsitemap.jl")
 export 	QubitSiteMap,
 		updateMap!
@@ -181,9 +185,6 @@ export 	ExactState,
 		ITensor,
 		toMPSState,
 		isapprox
-
-include("qstates/qstate.jl")
-export 	QState
 
 include("qgates/qgateblock.jl")
 export  QGateBlock,

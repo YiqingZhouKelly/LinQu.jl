@@ -13,6 +13,8 @@ length(circuit::QCircuit) = length(circuit.block)
 
 add!(circuit::QCircuit, operator::Operator, pos::ActPosition) = (add!(circuit.block, operator, pos); return circuit)
 add!(circuit::QCircuit, tuples::GatePosTuple...) = (add!(circuit.block, tuples...); return circuit)
+addCopy!(circuit::QCircuit, operator::Operator, pos::ActPosition) = (addCopy!(circuit.block, operator, pos); return circuit)
+addCopy!(circuit::QCircuit, tuples::GatePosTuple...) = (addCopy!(circuit.block, tuples...); return circuit)
 
 function flatten(circuit::QCircuit, flattened=nothing) 
 	flattened = flatten(circuit.block, ActPosition([1:1:circuit.N;]), flattened)

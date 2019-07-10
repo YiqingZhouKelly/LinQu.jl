@@ -1,5 +1,5 @@
 
-mutable struct ExactState
+mutable struct ExactState <: QState
 	site:: ITensor
 	ExactState(T::ITensor) = new(T)
 	function ExactState(N::Int, init::Vector{T}) where T
