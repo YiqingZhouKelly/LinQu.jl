@@ -46,7 +46,7 @@ function print_prob(state::ExactState)
 	inds = IndexSet()
 	for i = 1:4
 		push!(inds, findindex(state.site, "q=$(i)"))
-	end 
+	end
 	for ii =0:2^N-1
 	    index = [Int((ii&a)/a) for a∈ [1,2,4,8]]
 	    amp = state.site[inds, (index.+1)]
@@ -61,9 +61,9 @@ function main()
 	circuit = test_circuit(N)
 	apply!(exact_state, circuit)
 	apply!(mps_state, circuit)
+	normalize!(mps_state)
 	@test exact_state ≈ toExactState(mps_state)
 	print_prob(exact_state)
 end
 
 main()
-
