@@ -258,6 +258,14 @@ function collapse!(state::MPSState, qubit::Int; reset=false)
 	return result
 end
 
+function dag(state::MPSState)
+	sites_dag = Vector{ITensor}(undef,0)
+	for i =1:length(state)
+		push!(sites_dag, dag(state[i]))
+	end
+	return MPSState(sites_dag, copy(state.map), 0, length(state)+1) # llim, rlim may be optimized
+end
+
 function showStructure(io::IO, state::MPSState)
 	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
 	print(io, state.map.siteForQubit, "\n")

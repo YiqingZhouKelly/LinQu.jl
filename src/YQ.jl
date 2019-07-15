@@ -179,7 +179,8 @@ export MPSState,
 	   measure!,
 	   collapse!,
 	   showData,
-	   normalize!
+	   normalize!,
+	   dag
 
 include("qstates/exactstate.jl")
 export 	ExactState,
