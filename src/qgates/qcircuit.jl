@@ -17,7 +17,7 @@ addCopy!(circuit::QCircuit, operator::Operator, pos::ActPosition) = (addCopy!(ci
 addCopy!(circuit::QCircuit, tuples::GatePosTuple...) = (addCopy!(circuit.block, tuples...); return circuit)
 
 function flatten(circuit::QCircuit, flattened=nothing) 
-	flattened = flatten(circuit.block, ActPosition([1:1:circuit.N;]), flattened)
+	flattened = flatten(circuit.block, ActPosition([1:circuit.N;]), flattened)
 	return QCircuit(flattened, circuit.N)
 end
 inverse(circuit::QCircuit) = QCircuit(inverse(circuit.block), circuit.N)
