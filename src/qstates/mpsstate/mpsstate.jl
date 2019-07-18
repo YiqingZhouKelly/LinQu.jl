@@ -62,6 +62,13 @@ siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for
 
 toExactState(state::MPSState) = ExactState(prod(state.sites))
 
+function normalize!(state::MPSState; kwargs...)
+	center::Int = get(kwargs, :center,-1)
+	if center ==-1
+		center = state.llim+1
+	end
+	centerAtSite!(state,center)
+end
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	if length(qubits) > 1
@@ -126,7 +133,7 @@ function centerAtSite!(state::MPSState, s::Int)
 	while state.llim < s-1
 		currIndex = state.llim+1
 		curr = state[currIndex]
-		if currIndex != 1 
+		if currIndex != 1
 			Q,R = qr(curr, findindex(curr,"Site"), findindex(curr, "l=$(currIndex-1)"))
 		else
 			Q,R = qr(curr, findindex(curr,"Site"))
@@ -151,7 +158,7 @@ function centerAtSite!(state::MPSState, s::Int)
 
 	state.llim = s-1
 	state.rlim = s+1
-	state[s] /= norm(state[s])
+	state[s] /= norm(state[s]) # normalization
 	return state
 end
 
@@ -166,7 +173,7 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "svd"; kwargs...)
 	product = state[s1] * state[s2]
 	if decomp =="svd"
 		if s1 > 1
-			leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
+			leftinds = IndexSet(findindex(product, "l=$(s1-1)"),
 								findindex(product, "q=$(q2)"))
 			U,S,V,u,v = svd(product, leftinds; kwargs...)
 		else
@@ -176,7 +183,7 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "svd"; kwargs...)
 		state[s2] = replacetags(S*V,"u", "l=$(s1)")
 	else #qr
 		if s1 > 1
-			leftinds = IndexSet(findindex(product, "l=$(s1-1)"), 
+			leftinds = IndexSet(findindex(product, "l=$(s1-1)"),
 								findindex(product, "q=$(q2)"))
 			Q,R = qr(product, leftinds)
 		else
@@ -213,7 +220,7 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 			clamped = ψ1
 		else
 			clamped = ψ0
-		end 
+		end
 	end
 	return sample
 end
@@ -243,12 +250,20 @@ function collapse!(state::MPSState, qubit::Int; reset=false)
 		result = 1
 		if reset
 			state[site] = ψ1*proj0
-		else 	
+		else
 			state[site] = ψ1*proj1
 		end
-	end 
+	end
 	updateLims!(state, site)
 	return result
+end
+
+function dag(state::MPSState)
+	sites_dag = Vector{ITensor}(undef,0)
+	for i =1:length(state)
+		push!(sites_dag, dag(state[i]))
+	end
+	return MPSState(sites_dag, copy(state.map), 0, length(state)+1) # llim, rlim may be optimized
 end
 
 function showStructure(io::IO, state::MPSState)

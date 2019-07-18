@@ -26,6 +26,7 @@ import Base.length,
 	   Base.pop!,
 	   Base.range,
 	   LinearAlgebra.norm,
+	   LinearAlgebra.normalize!,
 	   .ITensors.linkindex,
 	   .ITensors.getindex,
 	   .ITensors.noprime,
@@ -149,7 +150,7 @@ export 	I,
 		Rx,
 		Ry,
 		Rz,
-		Rϕ, 
+		Rϕ,
 		ROTATE
 
 include("qstates/qstate.jl")
@@ -177,7 +178,9 @@ export MPSState,
 	   oneShot,
 	   measure!,
 	   collapse!,
-	   showData
+	   showData,
+	   normalize!,
+	   dag
 
 include("qstates/exactstate.jl")
 export 	ExactState,
@@ -193,7 +196,7 @@ export  QGateBlock,
 	    push!,
 	    add!,
 	    addCopy!,
-	    flatten, 
+	    flatten,
 	    extractParams,
 	    insertParams!,
 	    inverse,
@@ -213,4 +216,3 @@ export  apply!
 include("interface.jl")
 export 	getindex
 end #module
-

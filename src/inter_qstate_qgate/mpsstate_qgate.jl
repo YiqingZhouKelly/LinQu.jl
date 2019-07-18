@@ -1,8 +1,8 @@
-
 function apply!(state::MPSState, gate::QGate, qubits::ActPosition; kwargs...)
 	if length(qubits)>1
 		localizeQubits!(state, qubits; kwargs...)
-		centerAtQubit!(state, qubits[1])
+		qrswitch::Bool = get(kwargs, :qrswitch, false)
+		qrswitch && (centerAtQubit!(state, qubits[1]))
 		applyLocalGate!(state, gate, qubits; kwargs...)
 	else
 		applyLocalGate!(state, gate, qubits)
@@ -22,12 +22,12 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 	linkindex = leftEnd = min(sites...)
 	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=nothing
 	for i =1:length(sites)-1
-		if leftLink != nothing 
-			U,S,V,leftLink,v = svd(product, 
+		if leftLink != nothing
+			U,S,V,leftLink,v = svd(product,
 							IndexSet(leftLink, findindex(product, "q=$(actpos[i])"));
 							kwargs...)
 		else
-			U,S,V,leftLink,v = svd(product, 
+			U,S,V,leftLink,v = svd(product,
 							findindex(product, "q=$(actpos[i])");
 							kwargs...)
 		end
@@ -46,8 +46,8 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::ActPosition; kwar
 		updateMap!(state, (s=leftEnd-1+i, q=actpos[i]))
 	end
 	rightEnd = leftEnd-1+length(sites)
-	state.llim = rightEnd-1
-	state.rlim = rightEnd+1
+	state.llim >= leftEnd-1 && (state.llim = rightEnd-1)
+	state.rlim <= rightEnd+1 && (state.rlim = rightEnd+1)
 	return state
 end
 
