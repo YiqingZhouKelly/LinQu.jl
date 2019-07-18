@@ -1,7 +1,7 @@
 function apply!(state::MPSState, gate::QGate, qubits::ActPosition; kwargs...)
 	if length(qubits)>1
 		localizeQubits!(state, qubits; kwargs...)
-		qrswitch::Bool = get(kwargs, :qrswitch, false)
+		qrswitch::Bool = get(kwargs, :qrswitch, true)
 		qrswitch && (centerAtQubit!(state, qubits[1]))
 		applyLocalGate!(state, gate, qubits; kwargs...)
 	else
