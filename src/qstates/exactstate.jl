@@ -10,8 +10,15 @@ mutable struct ExactState <: QState
 		end
 		new(prod(net))
 	end
-	ExactState(N::Int) = ExactState(N, [1,0])
 end #struct
+
+function ExactState(N::Int)
+	shape = ones(Int, N).*2
+	D = zeros(shape...)
+	D[1]=1
+	inds = [Index(2, "Site, q=$(i)") for i=1:N]
+	return ExactState(ITensor(D, inds...))
+end
 
 copy(state::ExactState) = ExactState(copy(state.site))
 isapprox(state1::ExactState, state2::ExactState) = isapprox(state1.site,state2.site)
@@ -19,12 +26,12 @@ isapprox(state1::ExactState, state2::ExactState) = isapprox(state1.site,state2.s
 function toMPSState(state::ExactState; kwargs...)
 	numQubits = length(IndexSet(state.site))
 	leftLink = nothing
-	remain = copy(state.site) 
+	remain = copy(state.site)
 	sites = ITensor[]
 	for i =1:numQubits-1
 		if leftLink != nothing
-			U,S,V,leftLink,v = svd(remain, 
-								   IndexSet(leftLink, findindex(remain, "q=$(i)")); 
+			U,S,V,leftLink,v = svd(remain,
+								   IndexSet(leftLink, findindex(remain, "q=$(i)"));
 								   kwargs...)
 		else
 			U,S,V,leftLink,v = svd(remain, findindex(remain, "q=$(i)"); kwargs...)
