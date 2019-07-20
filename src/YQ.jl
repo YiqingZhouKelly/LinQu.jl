@@ -45,7 +45,8 @@ import Base.length,
 	   .ITensors.Index,
 	   .ITensors.norm,
 	   .ITensors.*,
-	   .ITensors.order
+	   .ITensors.order,
+	   .ITensors.dag
 
 # functions from Base, ITensors
 export linkindex,
@@ -162,6 +163,7 @@ export 	QubitSiteMap,
 		updateMap!
 
 include("qstates/mpsstate/mpsstate.jl")
+include("qstates/mpsstate/mpsstate_doc.jl")
 export MPSState,
 	   swapSites!,
 	   applyLocalGate!,
