@@ -4,31 +4,33 @@ mutable struct MPSState <: QState
 	map::QubitSiteMap
 	llim::Int
 	rlim::Int
+
 	MPSState(sites::Vector{ITensor},
 		     map::QubitSiteMap,
 		     llim::Int,
 		     rlim::Int) = new(sites, map, llim, rlim)
-
-	function MPSState(N::Int, init::Vector{T}) where {T <:Number}
-		sites = ITensor[]
-		rightlink,leftlink
-		for i =1:N
-			global rightlink, leftlink
-			if i ==1
-				rightlink = Index(1, "Link, l=$(i)")
-				push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
-			elseif i == N
-				push!(sites, ITensor(init, leftlink, Index(2, "Site, q=$(i)")))
-			else
-				rightlink = Index(1, "Link, l=$(i)")
-				push!(sites, ITensor(init, leftlink, rightlink, Index(2, "Site, q=$(i)")))
-			end
-			leftlink = rightlink
-		end
-		new(sites,QubitSiteMap(N),0,N+1)
-	end
-	MPSState(N::Int) = MPSState(N, [1,0])
 end #struct
+
+function MPSState(N::Int, init::Vector{T}) where {T <:Number}
+	sites = ITensor[]
+	rightlink,leftlink
+	for i =1:N
+		global rightlink, leftlink
+		if i ==1
+			rightlink = Index(1, "Link, l=$(i)")
+			push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
+		elseif i == N
+			push!(sites, ITensor(init, leftlink, Index(2, "Site, q=$(i)")))
+		else
+			rightlink = Index(1, "Link, l=$(i)")
+			push!(sites, ITensor(init, leftlink, rightlink, Index(2, "Site, q=$(i)")))
+		end
+		leftlink = rightlink
+	end
+	MPSState(sites,QubitSiteMap(N),0,N+1)
+end
+MPSState(N::Int) = MPSState(N, [1,0])
+
 getindex(state::MPSState, n::Int) = getindex(state.sites,n)
 getinds(state::MPSState, inds::Vector{Int}) = [getindex(state, i) for i ∈ inds]
 setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n)
@@ -42,12 +44,14 @@ function isapprox(state1::MPSState, state2::MPSState)
 	exact2 = toExactState(state2)
 	return exact1 ≈ exact2
 end
+
 siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
 sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
 
 updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)
 	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
@@ -266,21 +270,20 @@ function dag(state::MPSState)
 	return MPSState(sites_dag, copy(state.map), 0, length(state)+1) # llim, rlim may be optimized
 end
 
-function showStructure(io::IO, state::MPSState)
-	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
-	print(io, state.map.siteForQubit, "\n")
-	printstyled(io, "qubitAtSite:"; bold=true, color=:blue)
-	print(io, state.map.qubitAtSite, "\n")
-	printstyled(io, "llim = $(state.llim), rlim = $(state.rlim)\n", bold=true, color=:blue)
-	printstyled(io, "-------------------\n"; bold=true, color=5)
-end
 function show(io::IO, state::MPSState)
-	printstyled(io, "--- MPS state: ---\n"; bold=true, color=5)
+	println(io, "$(length(state))-qubit MPSState")
+end
+function showStructure(io::IO, state::MPSState)
+	printstyled(io, "MPSState\n"; bold=true, color=:red)
 	for i =1: length(state)
 		printstyled(io, "Site $(i):"; bold=true, color=43)
 		print(io, IndexSet(state.sites[i]),"\n")
 	end
-	showStructure(io, state)
+	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
+	println(io, state.map.siteForQubit)
+	printstyled(io, "qubitAtSite:"; bold=true, color=:blue)
+	println(io, state.map.qubitAtSite)
+	printstyled(io, "llim = $(state.llim), rlim = $(state.rlim)\n", bold=true, color=:blue)
 end
 
 function showData(io::IO,state::MPSState)
@@ -289,6 +292,5 @@ function showData(io::IO,state::MPSState)
 		printstyled(io, "Site $(i):\n"; bold=true, color=43)
 		print(io, state[i],"\n")
 	end
-	showStructure(io, state)
 end
 showData(state::MPSState) = showData(stdout, state)
