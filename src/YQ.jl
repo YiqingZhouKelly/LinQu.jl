@@ -163,7 +163,6 @@ export 	QubitSiteMap,
 		updateMap!
 
 include("qstates/mpsstate/mpsstate.jl")
-include("qstates/mpsstate/mpsstate_doc.jl")
 export MPSState,
 	   swapSites!,
 	   applyLocalGate!,
@@ -217,4 +216,7 @@ export  apply!
 
 include("interface.jl")
 export 	getindex
+
+# Following files are documentations
+include("../doc/YQ_doc.jl")
 end #module
