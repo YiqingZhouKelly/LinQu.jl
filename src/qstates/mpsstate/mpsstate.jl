@@ -50,7 +50,8 @@ sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, i
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
 
-updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+# updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+updateMap!(state::MPSState; kwargs...) = updateMap!(state.map;kwargs...)
 
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)
@@ -196,8 +197,8 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "svd"; kwargs...)
 		state[s1] = replacetags(Q,"u", "l=$(s1)")
 		state[s2] = replacetags(R,"u", "l=$(s1)")
 	end
-	updateMap!(state, (s=s1, q=q2))
-	updateMap!(state, (s=s2, q=q1))
+	updateMap!(state; s=s1, q=q2)
+	updateMap!(state; s=s2, q=q1)
 	state.llim >= s1 && (state.llim = s1-1)
 	state.rlim <= s2 && (state.rlim = s2+1)
 end
