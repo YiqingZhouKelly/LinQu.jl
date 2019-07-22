@@ -38,16 +38,23 @@ end
 function frequency(v::Vector; kwargs...)
 	percentage = get(kwargs, :percentage, false)
  	samplesize = get(kwargs, :samplesize, length(v))
-
+ 	cutoff = get(kwargs, :cutoff, 0)
+ 	abscutoff = get(kwargs, :abscutoff, 0)
+ 	if abscutoff !=0 && cutoff !=0
+ 		error("cannot specify both cutoff and abscutoff")
+ 	end
+ 	abscutoff ==0 && (abscutoff = cutoff*samplesize)
 	dict = Dict{Int, Real}()
 	for key ∈ v
 		push!(dict, key => get!(dict, key, 0)+1)
 	end
-
-	if percentage
-		for (k,s) ∈ dict
+	for (k,s) ∈ dict
+		if s <= abscutoff
+			delete!(dict, k)
+		elseif percentage
 			push!(dict, k => s/samplesize)
 		end
 	end
+	
 	return dict
 end
