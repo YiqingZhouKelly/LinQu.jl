@@ -51,7 +51,7 @@ qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
 
 # updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
-updateMap!(state::MPSState; kwargs...) = updateMap!(state.map;kwargs...)
+updateMap!(state::MPSState; kwargs...) = updateMap!(state.map; kwargs...)
 
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)
@@ -76,14 +76,22 @@ function normalize!(state::MPSState; kwargs...)
 end
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+	binary = get(kwargs, :binary, true)
 	if length(qubits) > 1
 		localizeQubitsInOrder!(state, qubits; kwargs...)
 	end
 	sites = sitesForQubits(state, qubits)
 	centerAtSite!(state, sites[1])
-	results = zeros(Int, shots, length(qubits))
-	for i = 1:shots
-		results[i,:] = oneShot(state, sites; kwargs...)
+	if binary
+		results = zeros(Int, shots, length(qubits))
+		for i = 1:shots
+			results[i,:] = oneShot(state, sites; kwargs...)
+		end
+	else
+		results = zeros(Int, shots)
+		for i = 1:shots
+			results[i] = oneShot(state, sites; kwargs...)
+		end
 	end
 	return results
 end
@@ -210,7 +218,12 @@ function projector(i::Int, ind::Index)
 end
 
 function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
-	sample = zeros(Int, length(sites))
+	binary = get(kwargs, :binary, true)
+	if binary 
+		sample = zeros(Int, length(sites))
+	else 
+		sample = 0
+	end
 	clamped = nothing
 	for i =1:length(sites)
 		ψ = state[sites[i]]
@@ -221,7 +234,11 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
 		prob0 /= (prob0+prob1)
 		if rand(0:10000)/10000 > prob0
-			sample[i] = 1
+			if binary
+				sample[i] = 1
+			else
+				sample += 2^(i-1)
+			end
 			clamped = ψ1
 		else
 			clamped = ψ0
