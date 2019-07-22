@@ -12,6 +12,12 @@ end
 
 ConstGate(f::Function, name::String="Anonymous") = ConstGate(GateKernel(f, name))
 
+function ConstGate(; kwargs...)
+	f = get(kwargs, :f, error("function must be defined"))
+	name = get(kwargs, :name, "anonymous const gate")
+	return ConstGate(f, name)
+end
+
 name(gate::ConstGate) = name(gate.kernel)
 data(gate::ConstGate) = func(gate)()
 func(gate::ConstGate) = func(gate.kernel)

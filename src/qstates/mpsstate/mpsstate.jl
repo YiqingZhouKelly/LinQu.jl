@@ -4,31 +4,33 @@ mutable struct MPSState <: QState
 	map::QubitSiteMap
 	llim::Int
 	rlim::Int
+
 	MPSState(sites::Vector{ITensor},
 		     map::QubitSiteMap,
 		     llim::Int,
 		     rlim::Int) = new(sites, map, llim, rlim)
-
-	function MPSState(N::Int, init::Vector{T}) where {T <:Number}
-		sites = ITensor[]
-		rightlink,leftlink
-		for i =1:N
-			global rightlink, leftlink
-			if i ==1
-				rightlink = Index(1, "Link, l=$(i)")
-				push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
-			elseif i == N
-				push!(sites, ITensor(init, leftlink, Index(2, "Site, q=$(i)")))
-			else
-				rightlink = Index(1, "Link, l=$(i)")
-				push!(sites, ITensor(init, leftlink, rightlink, Index(2, "Site, q=$(i)")))
-			end
-			leftlink = rightlink
-		end
-		new(sites,QubitSiteMap(N),0,N+1)
-	end
-	MPSState(N::Int) = MPSState(N, [1,0])
 end #struct
+
+function MPSState(N::Int, init::Vector{T}) where {T <:Number}
+	sites = ITensor[]
+	rightlink,leftlink
+	for i =1:N
+		global rightlink, leftlink
+		if i ==1
+			rightlink = Index(1, "Link, l=$(i)")
+			push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
+		elseif i == N
+			push!(sites, ITensor(init, leftlink, Index(2, "Site, q=$(i)")))
+		else
+			rightlink = Index(1, "Link, l=$(i)")
+			push!(sites, ITensor(init, leftlink, rightlink, Index(2, "Site, q=$(i)")))
+		end
+		leftlink = rightlink
+	end
+	MPSState(sites,QubitSiteMap(N),0,N+1)
+end
+MPSState(N::Int) = MPSState(N, [1,0])
+
 getindex(state::MPSState, n::Int) = getindex(state.sites,n)
 getinds(state::MPSState, inds::Vector{Int}) = [getindex(state, i) for i ∈ inds]
 setindex!(state::MPSState, T::ITensor, n::Integer) = setindex!(state.sites, T, n)
@@ -42,12 +44,15 @@ function isapprox(state1::MPSState, state2::MPSState)
 	exact2 = toExactState(state2)
 	return exact1 ≈ exact2
 end
+
 siteForQubit(state::MPSState, i::Int) = siteForQubit(state.map,i)
 sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, inds)
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
 
-updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+# updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
+updateMap!(state::MPSState; kwargs...) = updateMap!(state.map; kwargs...)
+
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
 	state.llim >= leftEnd && (state.llim = leftEnd-1)
 	state.rlim <= rightEnd && (state.rlim = rightEnd+1)
@@ -71,14 +76,22 @@ function normalize!(state::MPSState; kwargs...)
 end
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+	binary = get(kwargs, :binary, true)
 	if length(qubits) > 1
 		localizeQubitsInOrder!(state, qubits; kwargs...)
 	end
 	sites = sitesForQubits(state, qubits)
 	centerAtSite!(state, sites[1])
-	results = zeros(Int, shots, length(qubits))
-	for i = 1:shots
-		results[i,:] = oneShot(state, sites; kwargs...)
+	if binary
+		results = zeros(Int, shots, length(qubits))
+		for i = 1:shots
+			results[i,:] = oneShot(state, sites; kwargs...)
+		end
+	else
+		results = zeros(Int, shots)
+		for i = 1:shots
+			results[i] = oneShot(state, sites; kwargs...)
+		end
 	end
 	return results
 end
@@ -192,8 +205,8 @@ function swapSites!(state::MPSState, s1::Int, s2::Int, decomp= "svd"; kwargs...)
 		state[s1] = replacetags(Q,"u", "l=$(s1)")
 		state[s2] = replacetags(R,"u", "l=$(s1)")
 	end
-	updateMap!(state, (s=s1, q=q2))
-	updateMap!(state, (s=s2, q=q1))
+	updateMap!(state; s=s1, q=q2)
+	updateMap!(state; s=s2, q=q1)
 	state.llim >= s1 && (state.llim = s1-1)
 	state.rlim <= s2 && (state.rlim = s2+1)
 end
@@ -205,7 +218,12 @@ function projector(i::Int, ind::Index)
 end
 
 function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
-	sample = zeros(Int, length(sites))
+	binary = get(kwargs, :binary, true)
+	if binary 
+		sample = zeros(Int, length(sites))
+	else 
+		sample = 0
+	end
 	clamped = nothing
 	for i =1:length(sites)
 		ψ = state[sites[i]]
@@ -216,7 +234,11 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
 		prob0 /= (prob0+prob1)
 		if rand(0:10000)/10000 > prob0
-			sample[i] = 1
+			if binary
+				sample[i] = 1
+			else
+				sample += 2^(i-1)
+			end
 			clamped = ψ1
 		else
 			clamped = ψ0
@@ -266,21 +288,20 @@ function dag(state::MPSState)
 	return MPSState(sites_dag, copy(state.map), 0, length(state)+1) # llim, rlim may be optimized
 end
 
-function showStructure(io::IO, state::MPSState)
-	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
-	print(io, state.map.siteForQubit, "\n")
-	printstyled(io, "qubitAtSite:"; bold=true, color=:blue)
-	print(io, state.map.qubitAtSite, "\n")
-	printstyled(io, "llim = $(state.llim), rlim = $(state.rlim)\n", bold=true, color=:blue)
-	printstyled(io, "-------------------\n"; bold=true, color=5)
-end
 function show(io::IO, state::MPSState)
-	printstyled(io, "--- MPS state: ---\n"; bold=true, color=5)
+	println(io, "$(length(state))-qubit MPSState")
+end
+function showStructure(io::IO, state::MPSState)
+	printstyled(io, "MPSState\n"; bold=true, color=:red)
 	for i =1: length(state)
 		printstyled(io, "Site $(i):"; bold=true, color=43)
 		print(io, IndexSet(state.sites[i]),"\n")
 	end
-	showStructure(io, state)
+	printstyled(io, "siteForQubit:"; bold=true, color=:blue)
+	println(io, state.map.siteForQubit)
+	printstyled(io, "qubitAtSite:"; bold=true, color=:blue)
+	println(io, state.map.qubitAtSite)
+	printstyled(io, "llim = $(state.llim), rlim = $(state.rlim)\n", bold=true, color=:blue)
 end
 
 function showData(io::IO,state::MPSState)
@@ -289,6 +310,5 @@ function showData(io::IO,state::MPSState)
 		printstyled(io, "Site $(i):\n"; bold=true, color=43)
 		print(io, state[i],"\n")
 	end
-	showStructure(io, state)
 end
 showData(state::MPSState) = showData(stdout, state)

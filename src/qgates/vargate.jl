@@ -1,13 +1,13 @@
 
 mutable struct VarGate <: QGate
 	kernel::GateKernel
-	param:: Vector{T} where {T}
-	VarGate(kernel::GateKernel, param::Vector{T} where {T}) = new(kernel, param)
+	param:: Vector
+	VarGate(kernel::GateKernel, param::Vector) = new(kernel, param)
 	VarGate(kernel::GateKernel) = new(kernel, zeros(paramCount(kernel)))
 end # struct
 
 VarGate(f::Function, paramCount::Int, name::String="Anonymous") = VarGate(GateKernel(f, paramCount,name))
-VarGate(f::Function, param::Vector{T} where {T}, name::String = "Anonymous") = VarGate(GateKernel(f, length(param), name), param)
+VarGate(f::Function, param::Vector, name::String = "Anonymous") = VarGate(GateKernel(f, length(param), name), param)
 
 name(gate::VarGate) = name(gate.kernel)
 param(gate::VarGate) = gate.param
@@ -15,7 +15,7 @@ paramCount(gate::VarGate) = paramCount(gate.kernel)
 copy(gate::VarGate) = VarGate(gate.kernel, copy(gate.param))
 data(gate::VarGate) = func(gate)(param(gate)...)
 func(gate::VarGate) = func(gate.kernel)
-setParam!(gate::VarGate, newParams::Vector{T} where {T}) = (gate.param = newParams)
+setParam!(gate::VarGate, newParams::Vector) = (gate.param = newParams)
 
 control(gate::VarGate) = VarGate(control(gate.kernel), copy(gate.param))
 ==(gate1::VarGate, gate2::VarGate)= (gate1.kernel==gate2.kernel && gate1.param ==gate2.param)

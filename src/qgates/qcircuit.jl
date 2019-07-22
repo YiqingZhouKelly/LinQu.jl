@@ -23,9 +23,11 @@ end
 inverse(circuit::QCircuit) = QCircuit(inverse(circuit.block), circuit.N)
 randomQCircuit(size::Int, depth::Int = rand(1:10)) = QCircuit(randomQGateBlock(size,depth), size)
 
-function show(io::IO, circuit::QCircuit)
+function showDetail(io::IO, circuit::QCircuit)
 	printstyled(io, "Circuit\n"; bold=true, color = 9)
 	print(io, circuit.block)
 end
 
-#TODO: add insert/extract param functions for circuits
+function show(io::IO, circuit::QCircuit)
+	print(io, "$(circuit.N) qubit circuit")
+end
