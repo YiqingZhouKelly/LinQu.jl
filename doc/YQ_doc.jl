@@ -1,3 +1,4 @@
 
 include("qstates/mpsstate.jl")
-export qubitAtSite
+export qubitAtSite,
+		measure!

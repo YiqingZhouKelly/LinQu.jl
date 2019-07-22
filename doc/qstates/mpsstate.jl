@@ -126,4 +126,48 @@ qubitsAtSites(state::MPSState, inds::Vector{Int})
 # """ ->
 # updateMap!(state::MPSState, tuple)
 
+@doc """
+	measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+Perform measurement to specified `qubits` in computatioal basis for `shots` times.
+
+# Arguments
+- `state`: MPSState
+- `qubits`: vector of qubits to be measured
+- `shots`: number of measurements to be performed
+- `binary`: keyword argument by default set to `true`. If `binary == true`, the function returns results in binary form in a 2D array. Otherwise, the function returns measurement results in decimal form.  
+
+# Example
+``` julia
+julia> state = MPSState(3) # generate 3-qubit |0> state
+3-qubit MPSState
+
+julia> apply!(state, H, ActPosition(1)) # apply Hadamard gate at qubit 1
+3-qubit MPSState
+
+julia> result = measure!(state, [1:3;], 5)
+5×3 Array{Int64,2}:
+ 0  0  0
+ 1  0  0
+ 0  0  0
+ 1  0  0
+ 0  0  0
+
+julia> result[4,1] # outcome of 1st qubit at 4th measurement
+1
+
+julia> measure!(state, [1:3;], 5; binary = false)
+5-element Array{Int64,1}:
+ 0
+ 0
+ 1
+ 1
+ 1
+
+``` 
+ # Note
+Calling this function will not physically change state, but the internal data structure (e.g. the position of gauge center) of the MPS may be changed.  
+See also: **collapse!**
+""" ->
+measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
+
 
