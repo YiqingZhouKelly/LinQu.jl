@@ -207,7 +207,8 @@ include("qgates/qcircuit.jl")
 export	add!,
 		QCircuit,
 		flatten,
-		randomQCircuit
+		randomQCircuit,
+		showDetail
 
 include("inter_qstate_qgate/exactstate_qgate.jl")
 include("inter_qstate_qgate/mpsstate_qgate.jl")
@@ -216,6 +217,9 @@ export  apply!
 
 include("interface.jl")
 export 	getindex
+
+include("stat/sampling.jl")
+export MCprobability!
 
 # Following files are documentations
 include("../doc/YQ_doc.jl")
