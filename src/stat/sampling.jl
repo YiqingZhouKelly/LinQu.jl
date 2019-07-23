@@ -4,11 +4,14 @@ Get probability distribution of qubit configurations by Monte Carlo sampling.
 
 # Argument
 - `state`: Any QState with **measure!** defined
-- `samplesize`: Keyword argument to specify sample size. By default samplesize = 1024.
-- `percentage`: Keyword argument. Return count of each configuration if set to `false`; return percentage frequency if set to `true`.
+- `samplesize`: Keyword argument to specify sample size. By default `samplesize = 1024`.
+- `percentage`: Keyword argument. By default `percentage = false`. Return counts of configurations if set to `false`; return percentage frequency if set to `true`.
+
 # Return Value
 Returns a dinctionary data structure. The key of each pair is the qubit configuration; the value of the pair is frequency of appearance in sampling. 
-#Example
+
+# Example
+``` julia
 julia> state = MPSState(2)
 2-qubit MPSState
 
@@ -27,7 +30,7 @@ julia> d =MCprobability!(state; samplesize=1000, percentage = true)
 Dict{Int64,Real} with 2 entries:
   0 => 0.47168
   1 => 0.504883
-
+```
 """
 function MCprobability!(state::QState; kwargs...)
 	samplesize = get(kwargs, :samplesize, 1024)

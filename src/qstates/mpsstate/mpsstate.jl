@@ -50,7 +50,6 @@ sitesForQubits(state::MPSState, inds::Vector{Int}) = sitesForQubits(state.map, i
 qubitAtSite(state::MPSState, i::Int) = qubitAtSite(state.map, i)
 qubitsAtSites(state::MPSState, inds::Vector{Int}) = qubitsAtSites(state.map, inds)
 
-# updateMap!(state::MPSState, tuple) = updateMap!(state.map, tuple)
 updateMap!(state::MPSState; kwargs...) = updateMap!(state.map; kwargs...)
 
 function updateLims!(state::MPSState, leftEnd::Int, rightEnd::Int)
@@ -65,6 +64,7 @@ getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ in
 siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
 siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds])
 
+# TODO: Contract in a binary tree order?
 toExactState(state::MPSState) = ExactState(prod(state.sites))
 
 function normalize!(state::MPSState; kwargs...)
@@ -247,15 +247,9 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	return sample
 end
 
-function collapse!(state::MPSState, qubits::Vector{Int}; reset=false)
-	results = zeros(Int, length(qubits))
-	for i = 1:length(qubits)
-		results[i] = collapse!(state, qubits[i]; reset = reset)
-	end
-	return results
-end
 
-function collapse!(state::MPSState, qubit::Int; reset=false)
+function collapse!(state::MPSState, qubit::Int; kwargs...)
+	reset = get(kwargs, :reset, false)
 	site = siteForQubit(state, qubit)
 	centerAtSite!(state, site)
 	ψ = state[site]
@@ -279,6 +273,15 @@ function collapse!(state::MPSState, qubit::Int; reset=false)
 	updateLims!(state, site)
 	return result
 end
+
+function collapse!(state::MPSState, qubits::Vector{Int}; kwargs...)
+	results = zeros(Int, length(qubits))
+	for i = 1:length(qubits)
+		results[i] = collapse!(state, qubits[i]; kwargs...)
+	end
+	return results
+end
+
 
 function dag(state::MPSState)
 	sites_dag = Vector{ITensor}(undef,0)
