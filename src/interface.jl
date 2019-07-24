@@ -15,3 +15,4 @@ getindex(kernel::GateKernel, param::Vector) = VarGate(kernel, param)
 getindex(gate::VarGate, params::Vector) = (gate.param = params; return gate)
 (gate::ConstGate)(qubit::Vector{Int}) = (gate, ActPosition(qubit))
 
+apply!(state::QState, tup:: Tuple{Union{QGate, QGateBlock}, ActPosition} ; kwargs...) = apply!(state, tup[1], tup[2]; kwargs...)

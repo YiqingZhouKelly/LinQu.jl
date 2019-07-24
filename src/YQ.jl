@@ -216,7 +216,8 @@ include("inter_qstate_qgate/qstate_block_circuit.jl")
 export  apply!
 
 include("interface.jl")
-export 	getindex
+export 	getindex,
+		apply!
 
 include("stat/sampling.jl")
 export MCprobability!
