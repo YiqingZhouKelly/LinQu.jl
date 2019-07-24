@@ -33,3 +33,6 @@ export  MPSState,
 		dag,
 		showStructure,
 		showData
+
+include("inter_qstate_qgate/exactstate_qgate.jl")
+export apply!
