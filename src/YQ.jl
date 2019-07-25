@@ -76,6 +76,7 @@ export  QState,
 		MPSState,
 		ExactState,
 		QGateblock
+include("extension.jl") 
 
 include("actpos.jl")
 export  ActPosition,
@@ -155,7 +156,8 @@ export 	I,
 		ROTATE
 
 include("qstates/qstate.jl")
-export 	QState
+export 	QState,
+		probability
 
 
 include("qstates/mpsstate/qubitsitemap.jl")
@@ -181,7 +183,8 @@ export MPSState,
 	   collapse!,
 	   showData,
 	   normalize!,
-	   dag
+	   dag,
+	   ρ
 
 include("qstates/exactstate.jl")
 export 	ExactState,

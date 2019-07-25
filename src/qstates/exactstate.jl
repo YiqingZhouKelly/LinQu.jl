@@ -22,6 +22,7 @@ end
 
 copy(state::ExactState) = ExactState(copy(state.site))
 isapprox(state1::ExactState, state2::ExactState) = isapprox(state1.site,state2.site)
+numQubits(state::ExactState) = order(state.site)
 
 function toMPSState(state::ExactState; kwargs...)
 	numQubits = length(IndexSet(state.site))
@@ -44,3 +45,14 @@ function toMPSState(state::ExactState; kwargs...)
 	push!(sites, remain)
 	return MPSState(sites,QubitSiteMap(numQubits), numQubits-1, numQubits+1)
 end
+function ρ(state::ExactState, config::Vector{Int})
+	# todo: check error input
+	pairs = Vector{Tuple{Index, Int}}()
+	for q = 1: length(config)
+		ind = findindex(state.site, "q=$q")
+		push!(pairs, (ind, config[q]+1))
+	end
+	return state.site[pairs]
+end
+
+	
