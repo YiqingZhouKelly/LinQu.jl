@@ -2,7 +2,7 @@
 mutable struct ExactState <: QState
 	site:: ITensor
 	ExactState(T::ITensor) = new(T)
-	function ExactState(N::Int, init::Vector{T}) where T
+	function ExactState(N::Int, init::Vector{T} where T<:Number)
 		norm(init) != 1 && error("initial state must have norm 1\n")
 		net = ITensor[]
 		for i =1: N
