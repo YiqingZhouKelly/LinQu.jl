@@ -58,3 +58,12 @@ end
         end
     end
 end
+
+@testset "MPSState probability() test" begin
+     state_m = MPSState(5)
+     state_e = ExactState(5)
+     apply!(state_m, H(3))
+     apply!(state_e, H(3))
+     config = rand(0:1, 5)
+     @test probability(state_m, config) ≈ probability(state_e, config)
+end

@@ -38,6 +38,7 @@ length(state::MPSState) = length(state.sites)
 size(state::MPSState) = size(state.sites)
 iterate(state::MPSState, itstate::Int=1) = iterate(state.sites,itstate)
 copy(state::MPSState) = MPSState(copy.(state.sites), copy(state.map), state.llim, state.rlim)
+numQubits(state::MPSState) = length(state)
 
 function isapprox(state1::MPSState, state2::MPSState)
 	exact1 = toExactState(state1)
@@ -289,6 +290,19 @@ function dag(state::MPSState)
 		push!(sites_dag, dag(state[i]))
 	end
 	return MPSState(sites_dag, copy(state.map), 0, length(state)+1) # llim, rlim may be optimized
+end
+
+function ρ(state::MPSState, config::Vector{Int})
+	if any(config .> 1) || any(config .<0)
+		error("Invalid configuration input.")
+	end
+	clampedMPS = Vector{ITensor}(undef,0)
+	for s = 1:length(config)
+		q = qubitAtSite(state, s)
+		siteindex = findindex(state[s], "Site")
+		push!(clampedMPS, clamp(state[s], siteindex, config[q]+1))
+	end
+	return scalar(prod(clampedMPS))
 end
 
 function show(io::IO, state::MPSState)

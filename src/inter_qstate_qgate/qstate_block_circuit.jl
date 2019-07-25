@@ -7,4 +7,4 @@ function apply!(state::QState, block::QGateBlock, pos::ActPosition; kwargs...)
 	end
 end
 
-apply!(state::QState, circuit::QCircuit; kwargs...) = apply!(state, circuit.block, ActPosition([1:circuit.N;]); kwargs...)
+apply!(state::QState, circuit::QCircuit, pos::ActPosition = ActPosition([1:circuit.N;]); kwargs...) = apply!(state, circuit.block, pos; kwargs...)

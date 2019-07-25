@@ -16,5 +16,5 @@ function updateMap!(map::QubitSiteMap; kwargs...)
 	q = get(kwargs, :q, -1)
 	s = get(kwargs, :s, -1)
 	map.siteForQubit[q] = s
-	map.siteForQubit[s] = q
+	map.qubitAtSite[s] = q
 end
