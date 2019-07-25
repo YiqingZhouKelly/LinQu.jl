@@ -1,5 +1,3 @@
-include("./../src/YQ.jl")
-using .YQ, LinearAlgebra, Test
 
 import Base.getindex,
 	   .YQ.ITensors.getindex,

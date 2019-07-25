@@ -1,5 +1,3 @@
-include("./../src/YQ.jl")
-using .YQ, Test
 
 @testset "block test" begin
     @testset "flatten test" begin

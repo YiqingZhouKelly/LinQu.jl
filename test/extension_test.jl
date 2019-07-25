@@ -1,5 +1,3 @@
-include("./../src/YQ.jl")
-using .YQ, Test
 
 @testset "extension.jl test" begin
     @testset "ITensor getindex extension test" begin

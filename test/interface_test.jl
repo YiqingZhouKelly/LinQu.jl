@@ -1,5 +1,3 @@
-include("./../src/YQ.jl")
-using .YQ, Test
 
 @testset "interface test" begin
     @testset "control gate" begin
