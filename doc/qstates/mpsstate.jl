@@ -460,3 +460,28 @@ See also: **showStructure**
 """ ->
 showData(io::IO,state::MPSState)
 
+@doc """
+	ρ(state::MPSState, config::Vector{Int})
+Return probability density of the given configuration. 
+
+# Example
+```julia
+julia> state = MPSState(5)
+5-qubit MPSState
+
+
+julia> apply!(state, H(1))
+5-qubit MPSState
+
+
+julia> ρ(state, [0,0,0,0,0])
+0.7071067811865475 + 0.0im
+
+julia> ρ(state, [1,0,0,0,0])
+0.7071067811865475 + 0.0im
+```
+# Note: 
+Length of `config` must match number of qubits in the state. 
+""" ->
+ρ(state::MPSState, config::Vector{Int})
+
