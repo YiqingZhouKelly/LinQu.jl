@@ -32,7 +32,15 @@ export  MPSState,
 		collapse!,
 		dag,
 		showStructure,
-		showData
+		showData,
+		ρ
 
+include("qstates/exactstate.jl")
+export  ExactState,
+		copy,
+		isapprox,
+		numQubits,
+		toMPSState,
+		ρ
 include("inter_qstate_qgate/exactstate_qgate.jl")
 export apply!

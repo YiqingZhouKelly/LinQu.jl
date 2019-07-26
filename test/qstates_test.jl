@@ -40,12 +40,31 @@
             @test sum(result) == 0
     	end
         @testset "measure multiple qubits test" begin
-            state = MPSState(2)
-            apply!(state, H, ActPosition(1))
-            apply!(state, CNOT, ActPosition(1,2))
-            result = measure!(state, [1,2], 20)
-            for i = 1:20
-                @test result[i,1] == result[i,2]
+            @testset "Throw away probability" for binary in [true, false]
+                state = MPSState(2)
+                apply!(state, H, ActPosition(1))
+                apply!(state, CNOT, ActPosition(1,2))
+                if binary
+                    result = measure!(state, [1,2], 20; binary = binary)
+                    for i = 1:20
+                        @test result[i,1] == result[i,2]
+                    end
+                else
+                    result = measure!(state, [1,2], 20; binary = binary)
+                    for i=1:20
+                        @test result[i]==0 || result[i]==3
+                    end
+                end
+            @testset "Keep probability as a by-product" begin
+                state = MPSState(2)
+                apply!(state, H, ActPosition(1))
+                apply!(state, CNOT, ActPosition(1,2))
+                    result, prob = measure!(state, [1,2], 20; probability=true)
+                for i = 1:20
+                    @test result[i,1] == result[i,2]
+                    @test prob[i] ≈ 0.5
+                end
+            end
             end
         end
         @testset "measure! multiple qubits test" begin

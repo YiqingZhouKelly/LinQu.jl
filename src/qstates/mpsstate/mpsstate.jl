@@ -78,23 +78,40 @@ end
 # apply!(state::MPSState, gate::MeasureGate) = collapseQubits!(state, qubits(gate); reset=reset(gate))
 function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 	binary = get(kwargs, :binary, true)
+	probability = get(kwargs, :probability, false)
 	if length(qubits) > 1
 		localizeQubitsInOrder!(state, qubits; kwargs...)
 	end
 	sites = sitesForQubits(state, qubits)
 	centerAtSite!(state, sites[1])
-	if binary
-		results = zeros(Int, shots, length(qubits))
-		for i = 1:shots
-			results[i,:] = oneShot(state, sites; kwargs...)
+	if !probability
+		if binary
+			results = zeros(Int, shots, length(qubits))
+			for i = 1:shots
+				results[i,:] = oneShot(state, sites; kwargs...)
+			end
+		else
+			results = zeros(Int, shots)
+			for i = 1:shots
+				results[i] = oneShot(state, sites; kwargs...)
+			end
 		end
-	else
-		results = zeros(Int, shots)
-		for i = 1:shots
-			results[i] = oneShot(state, sites; kwargs...)
+		return results
+	else 
+		prob = zeros(shots)
+		if binary
+			results = zeros(Int, shots, length(qubits))
+			for i = 1:shots
+				results[i,:], prob[i] = oneShot(state, sites; kwargs...)
+			end
+		else
+			results = zeros(Int, shots)
+			for i = 1:shots
+				results[i], prob[i] = oneShot(state, sites; kwargs...)
+			end
 		end
+		return results, prob
 	end
-	return results
 end
 
 function measure!(state::MPSState, qubit::Int, shots::Int; kwargs...)
@@ -220,12 +237,15 @@ end
 
 function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	binary = get(kwargs, :binary, true)
+	probability = get(kwargs, :probability, false)
 	if binary 
 		sample = zeros(Int, length(sites))
 	else 
 		sample = 0
 	end
+	prob = 1
 	clamped = nothing
+
 	for i =1:length(sites)
 		ψ = state[sites[i]]
 		clamped != nothing && (ψ *= clamped)
@@ -233,7 +253,9 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		prob0 = Real(scalar(ψ0 * dag(ψ0)))
 		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
 		prob1 = Real(scalar(ψ1 * dag(ψ1)))
-		prob0 /= (prob0+prob1)
+		total = (prob0+prob1)
+		prob0 /= total
+		prob1 /= total
 		if rand(0:10000)/10000 > prob0
 			if binary
 				sample[i] = 1
@@ -241,11 +263,19 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 				sample += 2^(i-1)
 			end
 			clamped = ψ1
+			prob *= prob1
 		else
 			clamped = ψ0
+			prob *= prob0
 		end
+
 	end
-	return sample
+
+	if probability
+		return sample, prob
+	else
+		return sample
+	end
 end
 
 

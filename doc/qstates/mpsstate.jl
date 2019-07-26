@@ -246,6 +246,7 @@ Perform measurement to specified `qubits` in computatioal basis for `shots` time
 - `qubits`: vector of qubits to be measured
 - `shots`: number of measurements to be performed
 - `binary`: [_keyword argument_] If `binary == true`, the function returns results in binary form in a 2D array. Otherwise, the function returns measurement results in decimal form. Default value: `false`.  
+- `probability`: [_keyword argument_] whether or not to keep probability as a by-product.
 
 # Example
 ``` julia
@@ -274,6 +275,8 @@ julia> measure!(state, [1:3;], 5; binary = false)
  1
  1
 
+julia> measure!(state, [1:3;], 3; binary = true, probability = true)
+([0 0 0; 0 0 0; 1 0 0], [0.5, 0.5, 0.5])
 ``` 
  # Note
 Calling this function will not physically change state, but the internal data structure (e.g. the position of gauge center) of the MPS may be changed.  
@@ -344,6 +347,7 @@ Doing one measurement on state.
 
 This is a helper function called by **measure!**. The state needs to be pretreated (localize qubits to be measured & canonicalize) before calling this funciton. 
 
+# Note: Internal function.
 """ ->
 oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 
@@ -459,4 +463,29 @@ Main.YQ.ITensors.Dense{Float64}
 See also: **showStructure**
 """ ->
 showData(io::IO,state::MPSState)
+
+@doc """
+	ρ(state::MPSState, config::Vector{Int})
+Return probability density of the given configuration. 
+
+# Example
+```julia
+julia> state = MPSState(5)
+5-qubit MPSState
+
+
+julia> apply!(state, H(1))
+5-qubit MPSState
+
+
+julia> ρ(state, [0,0,0,0,0])
+0.7071067811865475 + 0.0im
+
+julia> ρ(state, [1,0,0,0,0])
+0.7071067811865475 + 0.0im
+```
+# Note: 
+Length of `config` must match number of qubits in the state. 
+""" ->
+ρ(state::MPSState, config::Vector{Int})
 
