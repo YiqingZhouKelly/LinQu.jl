@@ -3,7 +3,7 @@ module YQ
 
 include("./../../ITensors/src/ITensors.jl")
 
-using .ITensors, LinearAlgebra
+using .ITensors, LinearAlgebra, Random
 
 import Base: length,
 			 copy,
@@ -83,10 +83,6 @@ include("extension.jl")
 export getindex, 
 		contract, 
 		clamp
-
-include("actpos.jl")
-export  ActPosition,
-		randomActPosition
 
 include("qgates/gatekernel.jl")
 export  GateKernel,

@@ -1,9 +1,9 @@
 
 mutable struct QGateBlock
 	gates::Vector{Union{QGate, QGateBlock}}
-	qubits::Vector{ActPosition}
-	QGateBlock() = new(Vector{T where {T<:Union{QGate,QGateBlock}}}(undef, 0), ActPosition[])
-	QGateBlock(gates::Vector{T} where {T<:Union{QGate,QGateBlock}}, qubits::Vector{ActPosition}) = new(gates, qubits)
+	qubits::Vector{Vector{Int}}
+	QGateBlock() = new(Vector{T where {T<:Union{QGate,QGateBlock}}}(undef, 0), Vector{Vector{Int}}(undef, 0))
+	QGateBlock(gates::Vector{T} where {T<:Union{QGate,QGateBlock}}, qubits::Vector{Vector{Int}}) = new(gates, qubits)
 end # struct
 
 const Operator = Union{QGate, QGateBlock}
@@ -23,7 +23,7 @@ function ==(block1::QGateBlock, block2::QGateBlock)
 	end
 	return true
 end
-function add!(block::QGateBlock, gate::Operator, pos::ActPosition)
+function add!(block::QGateBlock, gate::Operator, pos::Vector{Int})
 	if isa(gate, VarGate)
 		gate = copy(gate)
 	end
@@ -32,10 +32,10 @@ function add!(block::QGateBlock, gate::Operator, pos::ActPosition)
 	return block
 end
 
-add!(block::QGateBlock, gate::Operator, qubits::Int...) = add!(block, gate, ActPosition(qubits...))
-add!(block::QGateBlock, gate::Operator, qubits::Vector{Int}) = add!(block, gate, ActPosition(qubits))
+add!(block::QGateBlock, gate::Operator, qubits::Int...) = add!(block, gate, [qubits...])
 
-const GatePosTuple = Tuple{T, ActPosition} where {T <: Operator}
+const GatePosTuple = Tuple{T, Vector{Int}} where {T <: Operator}
+
 function add!(block::QGateBlock, tuples::GatePosTuple...)
 	for tuple ∈ tuples
 		add!(block, tuple[1], tuple[2])
@@ -43,22 +43,22 @@ function add!(block::QGateBlock, tuples::GatePosTuple...)
 	return block
 end
 
-addCopy!(block::QGateBlock, gate::Operator, pos::ActPosition) = add!(block, copy(gate), pos)
+addCopy!(block::QGateBlock, gate::Operator, pos::Vector{Int}) = add!(block, copy(gate), pos)
 function addCopy!(block::QGateBlock, tuples::GatePosTuple...)
 	for tuple ∈ tuples
 		add!(block, copy(tuple[1]), copy(tuple[2]))
 	end
 end
 
-function flatten(block::QGateBlock, pos::ActPosition, flatttened = nothing)
+function flatten(block::QGateBlock, pos::Vector{Int}, flatttened = nothing)
 	flatttened==nothing && (flatttened = QGateBlock())
 	for i = 1:length(block)
 		gateOrBlock = gates(block)[i]
 		gateOrBlockPos = qubits(block)[i]
 		if isa(gateOrBlock, QGateBlock)
-			flatten(gateOrBlock, ActPosition([pos[i] for i ∈ gateOrBlockPos]),flatttened)
+			flatten(gateOrBlock, [pos[i] for i ∈ gateOrBlockPos],flatttened)
 		else
-			add!(flatttened, gateOrBlock, ActPosition([pos[i] for i ∈ gateOrBlockPos]))
+			add!(flatttened, gateOrBlock, [pos[i] for i ∈ gateOrBlockPos])
 		end
 	end
 	return flatttened
@@ -112,9 +112,9 @@ function randomQGateBlock(size::Int, depth::Int=rand(1:10))
 			else
 				numqubits = 3
 			end
-			add!(block,randomConstGate(numqubits), randomActPosition(size, numqubits))
+			add!(block,randomConstGate(numqubits), Random.randperm(size)[1:numqubits])
 		else
-			add!(block, randomVarGate(), randomActPosition(size))
+			add!(block, randomVarGate(), rand(1:size))
 		end
 	end
 	return block
