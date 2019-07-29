@@ -115,6 +115,7 @@ function measure!(state::MPSState, qubits::Vector{Int}, shots::Int; kwargs...)
 end
 
 function measure!(state::MPSState, qubit::Int, shots::Int; kwargs...)
+	seed = get(kwargs, :seed, 1)
 	site = siteForQubit(state, qubit)
 	centerAtSite!(state, site)
 	results = zeros(Int, shots)
@@ -143,8 +144,8 @@ end
 
 moveQubit!(state::MPSState, q::Int, s::Int; kwargs...) = moveSite!(state, siteForQubit(state,q), s; kwargs...)
 
-function localizeQubits!(state::MPSState, actpos::ActPosition; kwargs...)
-	sortedSites = sort!(sitesForQubits(state, actpos.qubits))
+function localizeQubits!(state::MPSState, actpos::Vector{Int}; kwargs...)
+	sortedSites = sort!(sitesForQubits(state, actpos))
 
 	for i = 2: length(sortedSites)
 		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)
@@ -238,6 +239,7 @@ end
 function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	binary = get(kwargs, :binary, true)
 	probability = get(kwargs, :probability, false)
+	rng = get(kwargs, :rng, Random.GLOBAL_RNG)
 	if binary 
 		sample = zeros(Int, length(sites))
 	else 
@@ -256,7 +258,7 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		total = (prob0+prob1)
 		prob0 /= total
 		prob1 /= total
-		if rand(0:10000)/10000 > prob0
+		if rand(rng, 0:10000)/10000 > prob0
 			if binary
 				sample[i] = 1
 			else
@@ -281,6 +283,8 @@ end
 
 function collapse!(state::MPSState, qubit::Int; kwargs...)
 	reset = get(kwargs, :reset, false)
+	rng = get(kwargs, :rng, Random.GLOBAL_RNG)
+
 	site = siteForQubit(state, qubit)
 	centerAtSite!(state, site)
 	ψ = state[site]
@@ -290,7 +294,7 @@ function collapse!(state::MPSState, qubit::Int; kwargs...)
 	ψ1 = ψ*proj1
 	prob0 = Real(scalar(ψ0 * dag(ψ0)))
 	prob1 = Real(scalar(ψ1 * dag(ψ1)))
-	if rand(0:10000)/10000 < prob0
+	if rand(rng, 0:10000)/10000 < prob0
 		result = 0
 		state[site] = ψ1*proj0
 	else

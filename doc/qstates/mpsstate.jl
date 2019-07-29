@@ -253,7 +253,7 @@ Perform measurement to specified `qubits` in computatioal basis for `shots` time
 julia> state = MPSState(3) # generate 3-qubit |0> state
 3-qubit MPSState
 
-julia> apply!(state, H, ActPosition(1)) # apply Hadamard gate at qubit 1
+julia> apply!(state, H, 1) # apply Hadamard gate at qubit 1
 3-qubit MPSState
 
 julia> result = measure!(state, [1:3;], 5)
@@ -366,7 +366,7 @@ julia> state = MPSState(1)
 1-qubit MPSState
 
 
-julia> apply!(state, H, ActPosition(1))
+julia> apply!(state, H, 1)
 1-qubit MPSState
 
 
