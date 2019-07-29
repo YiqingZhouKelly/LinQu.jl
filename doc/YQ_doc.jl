@@ -44,3 +44,6 @@ export  ExactState,
 		ρ
 include("inter_qstate_qgate/exactstate_qgate.jl")
 export apply!
+
+include("qgates/constgate.jl")
+export ConstGate
