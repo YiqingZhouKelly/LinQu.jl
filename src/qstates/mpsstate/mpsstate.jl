@@ -143,8 +143,8 @@ end
 
 moveQubit!(state::MPSState, q::Int, s::Int; kwargs...) = moveSite!(state, siteForQubit(state,q), s; kwargs...)
 
-function localizeQubits!(state::MPSState, actpos::ActPosition; kwargs...)
-	sortedSites = sort!(sitesForQubits(state, actpos.qubits))
+function localizeQubits!(state::MPSState, actpos::Vector{Int}; kwargs...)
+	sortedSites = sort!(sitesForQubits(state, actpos))
 
 	for i = 2: length(sortedSites)
 		moveSite!(state, sortedSites[i], sortedSites[i-1]+1; kwargs...)
