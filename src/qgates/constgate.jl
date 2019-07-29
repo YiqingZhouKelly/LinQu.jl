@@ -4,19 +4,19 @@ mutable struct ConstGate <: QGate
 	ConstGate(kernel::GateKernel) = new(kernel)
 end #struct
 
-function ConstGate(data::Vector{T} where {T<:Number}, name::String="Anonymous")
+function ConstGate(data::Array{T} where {T<:Number}, name::String="Anonymous")
+	shape = size(data)
+	for i ∈ shape
+		if i != 2
+			throw(ArgumentError("Given data array is not a valid gate."))
+		end
+	end
 	f() = data
 	kernel = GateKernel(f, name)
 	return ConstGate(kernel)
 end
 
 ConstGate(f::Function, name::String="Anonymous") = ConstGate(GateKernel(f, name))
-
-function ConstGate(; kwargs...)
-	f = get(kwargs, :f, error("function must be defined"))
-	name = get(kwargs, :name, "anonymous const gate")
-	return ConstGate(f, name)
-end
 
 name(gate::ConstGate) = name(gate.kernel)
 data(gate::ConstGate) = func(gate)()
