@@ -258,7 +258,7 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 		total = (prob0+prob1)
 		prob0 /= total
 		prob1 /= total
-		if rand(rng, 0:10000)/10000 > prob0
+		if rand(rng) > prob0
 			if binary
 				sample[i] = 1
 			else
@@ -294,7 +294,7 @@ function collapse!(state::MPSState, qubit::Int; kwargs...)
 	ψ1 = ψ*proj1
 	prob0 = Real(scalar(ψ0 * dag(ψ0)))
 	prob1 = Real(scalar(ψ1 * dag(ψ1)))
-	if rand(rng, 0:10000)/10000 < prob0
+	if rand(rng) < prob0
 		result = 0
 		state[site] = ψ1*proj0
 	else
