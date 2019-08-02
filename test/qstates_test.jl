@@ -55,6 +55,7 @@
                         @test result[i]==0 || result[i]==3
                     end
                 end
+            end
             @testset "Keep probability as a by-product" begin
                 state = MPSState(2)
                 apply!(state, H, 1)
@@ -64,7 +65,6 @@
                     @test result[i,1] == result[i,2]
                     @test prob[i] ≈ 0.5
                 end
-            end
             end
         end
         @testset "measure! multiple qubits test" begin
@@ -76,6 +76,18 @@
             for i = 1:100
                 @test result2[i,:] == result
             end
+        end
+        @testset "measure! with given rng" begin
+            state = MPSState(5)
+            for i =1: 5
+                apply!(state, H, rand(1:5))
+                apply!(state, Y, rand(1:5))
+            end
+            rng = Random.MersenneTwister(1234)
+            result = measure!(state, [1:5;], 5; rng = rng)
+            Random.seed!(rng, 1234)
+            result2 = measure!(state, [1:5;], 5; rng = rng)
+            @test result == result2
         end
     end
 
