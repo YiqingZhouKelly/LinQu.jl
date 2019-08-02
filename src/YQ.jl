@@ -1,7 +1,7 @@
 
 module YQ
 
-include("./../../ITensors/src/ITensors.jl")
+include("./../../ITensors_release/src/ITensors.jl")
 
 using .ITensors, LinearAlgebra, Random
 
