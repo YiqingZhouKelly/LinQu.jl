@@ -247,6 +247,8 @@ Perform measurement to specified `qubits` in computatioal basis for `shots` time
 - `shots`: number of measurements to be performed
 - `binary`: [_keyword argument_] If `binary == true`, the function returns results in binary form in a 2D array. Otherwise, the function returns measurement results in decimal form. Default value: `false`.  
 - `probability`: [_keyword argument_] whether or not to keep probability as a by-product.
+- `logprob`: [_keyword argument_] switch for getting log(prob) or direct prob (handy when probability is smal
+l for all configurations). Default value: `false`.
 
 # Example
 ``` julia
