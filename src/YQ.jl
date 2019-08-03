@@ -186,7 +186,8 @@ export MPSState,
 	   showData,
 	   normalize!,
 	   dag,
-	   ρ
+	   ρ,
+	   logprobability
 
 include("qstates/exactstate.jl")
 export 	ExactState,

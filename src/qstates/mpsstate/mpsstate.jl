@@ -240,12 +240,13 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	binary = get(kwargs, :binary, true)
 	probability = get(kwargs, :probability, false)
 	rng = get(kwargs, :rng, Random.GLOBAL_RNG)
+	logprob = get(kwargs, :logprob, false)
 	if binary 
 		sample = zeros(Int, length(sites))
 	else 
 		sample = 0
 	end
-	prob = 1
+	logprob ? prob = 0 : prob = 1
 	clamped = nothing
 
 	for i =1:length(sites)
@@ -265,10 +266,10 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 				sample += 2^(i-1)
 			end
 			clamped = ψ1
-			prob *= prob1
+			logprob ? prob += log(prob1) : prob *= prob1
 		else
 			clamped = ψ0
-			prob *= prob0
+			logprob ? prob += log(prob0) : prob *= prob0
 		end
 
 	end
@@ -337,6 +338,33 @@ function ρ(state::MPSState, config::Vector{Int})
 		push!(clampedMPS, clamp(state[s], siteindex, config[q]+1))
 	end
 	return scalar(prod(clampedMPS))
+end
+
+function logprobability(state::MPSState, config::Vector{Int})
+	if length(state) != length(config)
+		throw(ArgumentError("state and config has different lengths"))
+	end
+	clamped = nothing
+	logprob = 0
+	for i =1:length(config)
+		ψ = state[i]
+		clamped != nothing && (ψ *= clamped)
+		ψ0 = ψ*projector(1, findindex(ψ, "Site"))
+		prob0 = Real(scalar(ψ0 * dag(ψ0)))
+		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
+		prob1 = Real(scalar(ψ1 * dag(ψ1)))
+		total = (prob0+prob1)
+		prob0 /= total
+		prob1 /= total
+		if config[qubitAtSite(state,i)]== 1 
+			logprob+=log(prob1)
+			clamped = ψ1
+		else
+			logprob+=log(prob0)
+			clamped = ψ0
+		end
+	end
+	return logprob
 end
 
 function show(io::IO, state::MPSState)

@@ -407,6 +407,12 @@ Return complex conjugate of the MPSState.
 """ ->
 dag(state::MPSState)
 
+@doc """
+	logprobability(state::MPSState, config::Vector{Int})
+Return log of the probability to get given configuration.
+""" ->
+logprobability(state::MPSState, config::Vector{Int})
+
 
 @doc """
 	showStructure(io::IO, state::MPSState)
