@@ -340,6 +340,33 @@ function ρ(state::MPSState, config::Vector{Int})
 	return scalar(prod(clampedMPS))
 end
 
+function logprobability(state::MPSState, config::Vector{Int})
+	if length(state) != length(config)
+		throw(ArgumentError("state and config has different lengths"))
+	end
+	clamped = nothing
+	logprob = 0
+	for i =1:length(config)
+		ψ = state[i]
+		clamped != nothing && (ψ *= clamped)
+		ψ0 = ψ*projector(1, findindex(ψ, "Site"))
+		prob0 = Real(scalar(ψ0 * dag(ψ0)))
+		ψ1 = ψ*projector(2, findindex(ψ, "Site"))
+		prob1 = Real(scalar(ψ1 * dag(ψ1)))
+		total = (prob0+prob1)
+		prob0 /= total
+		prob1 /= total
+		if config[qubitAtSite(state,i)]== 1 
+			logprob+=log(prob1)
+			clamped = ψ1
+		else
+			logprob+=log(prob0)
+			clamped = ψ0
+		end
+	end
+	return logprob
+end
+
 function show(io::IO, state::MPSState)
 	println(io, "$(length(state))-qubit MPSState")
 end
