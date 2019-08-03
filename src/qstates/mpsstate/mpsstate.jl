@@ -240,12 +240,13 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 	binary = get(kwargs, :binary, true)
 	probability = get(kwargs, :probability, false)
 	rng = get(kwargs, :rng, Random.GLOBAL_RNG)
+	logprob = get(kwargs, :logprob, false)
 	if binary 
 		sample = zeros(Int, length(sites))
 	else 
 		sample = 0
 	end
-	prob = 1
+	logprob ? prob = 0 : prob = 1
 	clamped = nothing
 
 	for i =1:length(sites)
@@ -265,10 +266,10 @@ function oneShot(state::MPSState, sites::Vector{Int}; kwargs...)
 				sample += 2^(i-1)
 			end
 			clamped = ψ1
-			prob *= prob1
+			logprob ? prob += log(prob1) : prob *= prob1
 		else
 			clamped = ψ0
-			prob *= prob0
+			logprob ? prob += log(prob0) : prob *= prob0
 		end
 
 	end
