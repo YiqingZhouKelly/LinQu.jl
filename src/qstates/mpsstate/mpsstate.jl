@@ -346,6 +346,7 @@ function logprobability(state::MPSState, config::Vector{Int})
 	end
 	clamped = nothing
 	logprob = 0
+	centerAtSite!(state, 1)
 	for i =1:length(config)
 		ψ = state[i]
 		clamped != nothing && (ψ *= clamped)
