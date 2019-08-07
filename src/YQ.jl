@@ -1,9 +1,7 @@
 
 module YQ
 
-include("./../../ITensors_release/src/ITensors.jl")
-
-using .ITensors, LinearAlgebra, Random
+using ITensors, LinearAlgebra, Random
 
 import Base: length,
 			 copy,
