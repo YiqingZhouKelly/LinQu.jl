@@ -28,7 +28,7 @@ import Base: length,
 			 clamp
 import LinearAlgebra: norm,
 					  normalize!
-import .ITensors:getindex,
+import ITensors:getindex,
 				 noprime,
 				 noprime!,
 				 prime,

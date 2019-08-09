@@ -1,6 +1,6 @@
 include("../src/YQ.jl")
-using .YQ, Test, Random
-import .YQ.data # data() is extended
+using YQ, Test, Random
+import YQ.data # data() is extended
 
 # define customized QGate
 struct RandomSingleGate <: QGate
