@@ -25,16 +25,16 @@ state2 = ExactState(N) # use a tensor of order N to represent state of a quantum
 ```
 * Apply a gate  
   - Single qubit gate
-```Julia
-apply!(state, H, 1) # apply a Hadamard gate to qubit 1
-apply!(state, H(1)) # alternative interface
-```
- - Multiple qubit gate
- ```Julia
- # apply a CNOT gate to state, qubit 3 is control bit and qubit 5 is target bit
-apply!(state, CNOT, [3,5])
-apply!(state, CNOT(3,5))
- ```
+    ```Julia
+    apply!(state, H, 1) # apply a Hadamard gate to qubit 1
+    apply!(state, H(1)) # alternative interface
+    ```
+  - Multiple qubit gate
+    ```Julia
+    # apply a CNOT gate to state, qubit 3 is control bit and qubit 5 is target bit
+    apply!(state, CNOT, [3,5])
+    apply!(state, CNOT(3,5))
+    ```
 
 * Build a QCircuit
 ```julia
