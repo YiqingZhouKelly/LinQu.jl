@@ -47,3 +47,18 @@ add!(circuit, H(1),
               CNOT(1,2))
 apply!(state, circuit)
 ```
+* Allow SVD truncation for approximation
+```julia
+N = 10 # 10 quits
+state = MPSState(N)
+circuit = QCircuit(N)
+add!(circuit, H, 1)
+add!(circuit, H(1),
+              X(2),
+              CNOT(1,2))
+
+apply!(state, circuit; maxdim = 10) # use keyword arguments
+                                    # to specify truncation 
+                                    # mode
+# see doc string of apply! function for a complete set of supported keyword arguments
+```
