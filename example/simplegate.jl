@@ -1,5 +1,5 @@
-using YQ, Test, Random
-import YQ.data # data() is extended
+using LinQu, Test, Random
+import LinQu.data # data() is extended
 
 struct IdentityGate <: QGate
 	IdentityGate() = new()

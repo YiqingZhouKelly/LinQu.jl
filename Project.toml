@@ -1,6 +1,6 @@
-name = "YQ"
+name = "LinQu"
 uuid = "cf543d1a-5802-55de-ad82-b6eb3b9793d0"
-repo = "https://github.com/YiqingZhouKelly/YQ.git"
+repo = "https://github.com/YiqingZhouKelly/LinQu.jl.git"
 version = "0.0.0"
 
 [deps]

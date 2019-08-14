@@ -1,5 +1,5 @@
 
-module YQ
+module LinQu
 
 using ITensors, LinearAlgebra, Random
 
