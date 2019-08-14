@@ -9,14 +9,14 @@ To get started, run following commands:
 import Pkg
 # to install ITensors.jl
 ITensors = Pkg.PackageSpec(url="https://github.com/ITensor/ITensors.jl.git")
-# to install simulator
-YQ =  Pkg.PackageSpec(url="https://github.com/YiqingZhouKelly/YQ.git")
-Pkg.add([ITensors, YQ])
+# to install LinQu
+LinQu =  Pkg.PackageSpec(url="https://github.com/YiqingZhouKelly/LinQu.jl.git")
+Pkg.add([ITensors, LinQu])
 ```
 Then you should be ready to go!
 
 # Tutorial
- (For more detailed examples, checkout the [`example`](https://github.com/YiqingZhouKelly/YQ/tree/master/example) folder.)
+ (For more detailed examples, checkout the [`example`](https://github.com/YiqingZhouKelly/LinQu.jl/tree/master/example) folder.)
 * Construct a state
 ```Julia
 N = 5 # for 5 qubits
