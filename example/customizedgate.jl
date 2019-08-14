@@ -1,4 +1,3 @@
-include("../src/YQ.jl")
 using YQ, Test, Random
 import YQ.data # data() is extended
 
