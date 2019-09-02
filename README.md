@@ -62,3 +62,33 @@ apply!(state, circuit; maxdim = 10) # use keyword arguments
                                     # mode
 # see doc string of apply! function for a complete set of supported keyword arguments
 ```
+* Measurements
+There are two relevant functions:
+- `measure!`: This function does not change the current state physically, but may change the gauge center. 
+- `collapse!`: This function collapses measured qubits to measurement results (i.e. changes the physically meaning current state).
+```julia
+julia> state = MPSState(10)
+10-qubit MPSState
+
+
+julia> apply!(state, H, 1)
+10-qubit MPSState
+
+julia> measure!(state, 1, 3)
+3-element Array{Int64,1}:
+ 0
+ 1
+ 0
+
+ julia> measure!(state, 1, 3) 
+3-element Array{Int64,1}:
+ 1
+ 0
+ 0
+
+ julia> collapse!(state, 1)
+0
+
+julia> sum(measure!(state, 1, 100)) #always get zero after calling collapse!
+0
+```
