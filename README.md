@@ -64,8 +64,8 @@ apply!(state, circuit; maxdim = 10) # use keyword arguments
 ```
 * Measurements
 There are two relevant functions:
-- `measure!`: This function does not change the current state physically, but may change the gauge center. 
-- `collapse!`: This function collapses measured qubits to measurement results (i.e. changes the physically meaning current state).
+  - `measure!`: This function does not change the current state physically, but may change the gauge center. 
+  - `collapse!`: This function collapses measured qubits to measurement results (i.e. changes the physically meaning current state).
 ```julia
 julia> state = MPSState(10)
 10-qubit MPSState
