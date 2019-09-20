@@ -13,7 +13,7 @@ end #struct
 
 function MPSState(N::Int, init::Vector{T}) where {T <:Number}
 	sites = ITensor[]
-	rightlink,leftlink
+	rightlink,leftlink = nothing,nothing
 	for i =1:N
 		global rightlink, leftlink
 		if i ==1
