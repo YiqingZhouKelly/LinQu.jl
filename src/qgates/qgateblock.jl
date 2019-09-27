@@ -51,7 +51,7 @@ function addCopy!(block::QGateBlock, tuples::GatePosTuple...)
 end
 
 function flatten(block::QGateBlock, pos::Vector{Int}, flatttened = nothing)
-	flatttened==nothing && (flatttened = QGateBlock())
+	flatttened===nothing && (flatttened = QGateBlock())
 	for i = 1:length(block)
 		gateOrBlock = gates(block)[i]
 		gateOrBlockPos = qubits(block)[i]
@@ -65,7 +65,7 @@ function flatten(block::QGateBlock, pos::Vector{Int}, flatttened = nothing)
 end
 
 function extractParams(block::QGateBlock, params= nothing)
-	params==nothing && (params= Real[])
+	params===nothing && (params= Real[])
 	for gateOrBlock ∈ block 
 		if isa(gateOrBlock, QGateBlock)
 			extractParams(gateOrBlock, params)
