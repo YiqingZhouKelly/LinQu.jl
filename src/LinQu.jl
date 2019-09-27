@@ -1,7 +1,8 @@
 
 module LinQu
 
-using ITensors, LinearAlgebra, Random
+include("../../ITensors_release/src/ITensors.jl")
+using .ITensors, LinearAlgebra, Random
 
 import Base: length,
 			 copy,
@@ -28,7 +29,7 @@ import Base: length,
 			 clamp
 import LinearAlgebra: norm,
 					  normalize!
-import ITensors:getindex,
+import .ITensors:getindex,
 				 noprime,
 				 noprime!,
 				 prime,
@@ -184,7 +185,8 @@ export MPSState,
 	   normalize!,
 	   dag,
 	   ρ,
-	   logprobability
+	   logprobability,
+	   project
 
 include("qstates/exactstate.jl")
 export 	ExactState,

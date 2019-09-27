@@ -392,3 +392,16 @@ function showData(io::IO,state::MPSState)
 	end
 end
 showData(state::MPSState) = showData(stdout, state)
+
+
+function project(state1::MPSState, state2::MPSState)
+	if length(state1) != length(state2)
+		error("Two states do not have same length")
+	end
+	product = contract(state1[1], state2[1], findindex(state1[1], "Site"), findindex(state2[1], "Site"))
+	for location = 2: length(state1)
+		product = product* state1[location]
+		product = contract(product, state2[location], findindex(product, "Site"), findindex(state2[location], "Site"))
+	end
+	return scalar(product)
+end
