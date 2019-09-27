@@ -1,8 +1,7 @@
 
 module LinQu
 
-include("../../ITensors_release/src/ITensors.jl")
-using .ITensors, LinearAlgebra, Random
+using ITensors, LinearAlgebra, Random
 
 import Base: length,
 			 copy,
@@ -29,7 +28,7 @@ import Base: length,
 			 clamp
 import LinearAlgebra: norm,
 					  normalize!
-import .ITensors:getindex,
+import ITensors:getindex,
 				 noprime,
 				 noprime!,
 				 prime,
