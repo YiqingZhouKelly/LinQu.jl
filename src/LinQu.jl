@@ -181,7 +181,7 @@ export MPSState,
 	   dag,
 	   ρ,
 	   logprobability,
-	   project
+	   project!
 
 include("qstates/exactstate.jl")
 export 	ExactState,
