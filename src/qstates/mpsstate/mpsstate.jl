@@ -399,10 +399,10 @@ function project!(state1::MPSState, state2::MPSState)
 	end
 	normalize!(state1)
 	normalize!(state2)
-	product = contract(state1[1], state2[1], findindex(state1[1], "Site"), findindex(state2[1], "Site"))
+	product = contract(state1[1], dag(state2[1]), findindex(state1[1], "Site"), findindex(state2[1], "Site"))
 	for location = 2: length(state1)
 		product = product* state1[location]
-		product = contract(product, state2[location], findindex(product, "Site"), findindex(state2[location], "Site"))
+		product = contract(product, dag(state2[location]), findindex(product, "Site"), findindex(state2[location], "Site"))
 	end
 	return scalar(product)
 end
