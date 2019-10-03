@@ -13,9 +13,8 @@ end #struct
 
 function MPSState(N::Int, init::Vector{T}) where {T <:Number}
 	sites = ITensor[]
-	rightlink,leftlink = nothing,nothing
+	rightlink,leftlink = nothing, nothing
 	for i =1:N
-		global rightlink, leftlink
 		if i ==1
 			rightlink = Index(1, "Link, l=$(i)")
 			push!(sites, ITensor(init, rightlink,Index(2, "Site, q=$(i)")))
