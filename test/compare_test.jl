@@ -1,7 +1,7 @@
 
 import Base.getindex,
-	   YQ.ITensors.getindex,
-	   YQ.ITensors.IndexVal
+	   LinQu.ITensors.getindex,
+	   LinQu.ITensors.IndexVal
 
 function Rotate(θ,nx,ny,nz)
 	len = norm([nx,ny,nz])

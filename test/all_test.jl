@@ -1,5 +1,4 @@
-include("./../src/YQ.jl")
-using YQ, LinearAlgebra, Test, Random
+using LinQu, LinearAlgebra, Test, Random
 
 include("extension_test.jl")
 include("interface_test.jl")
