@@ -37,8 +37,6 @@ import ITensors:getindex,
 				 position!,
 				 setindex!,
 				 commonindex,
-				 leftLim,
-				 rightLim,
 				 iterate,
 				 ITensor,
 				 Index,
@@ -66,7 +64,8 @@ export linkindex,
 	   randomITensor,
 	   qr,
 	   IndexSet,
-	   order
+	   order,
+	   norm
 # Types
 export  QState,
 		QGate,

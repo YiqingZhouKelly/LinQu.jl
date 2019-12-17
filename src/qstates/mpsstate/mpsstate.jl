@@ -62,7 +62,7 @@ updateLims!(state::MPSState, touchedSite::Int) = updateLims!(state, touchedSite,
 getQubit(state::MPSState, i::Int) = state.sites[siteForQubit(state,i)]
 getQubits(state::MPSState, inds::Vector{Int}) = [getQubit(state, i) for i ∈ inds]
 siteIndex(state::MPSState, i::Int) = findindex(state[i], "Site")
-siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds])
+siteInds(state::MPSState, inds::Vector{Int}) = IndexSet([siteIndex(state, i) for i ∈ inds]...)
 
 # TODO: Contract in a binary tree order?
 toExactState(state::MPSState) = ExactState(prod(state.sites))
@@ -169,8 +169,8 @@ function centerAtSite!(state::MPSState, s::Int)
 		else
 			Q,R = qr(curr, findindex(curr,"Site"))
 		end
-		state[currIndex] = replacetags(Q, "u", "l=$(currIndex)")
-		state[currIndex+1] = replacetags(state[currIndex+1]*R , "u", "l=$(currIndex)")
+		state[currIndex] = replacetags!(Q, "qr", "l=$(currIndex)")
+		state[currIndex+1] = replacetags!(state[currIndex+1]*R , "qr", "l=$(currIndex)")
 		state.llim+=1
 	end
 
@@ -182,8 +182,8 @@ function centerAtSite!(state::MPSState, s::Int)
 		else
 			Q,R = qr(curr, findindex(curr, "Site"))
 		end
-		state[currIndex] = replacetags(Q, "u", "l=$(currIndex-1)")
-		state[currIndex-1] = replacetags(state[currIndex-1]*R , "u", "l=$(currIndex-1)")
+		state[currIndex] = replacetags!(Q, "qr", "l=$(currIndex-1)")
+		state[currIndex-1] = replacetags!(state[currIndex-1]*R , "qr", "l=$(currIndex-1)")
 		state.rlim-=1
 	end
 
