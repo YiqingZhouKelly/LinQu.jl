@@ -54,5 +54,3 @@ function ρ(state::ExactState, config::Vector{Int})
 	end
 	return state.site[pairs]
 end
-
-	

@@ -26,11 +26,11 @@ function applyLocalGate!(state::MPSState, gate::QGate, actpos::Vector{Int}; kwar
 	leftEnd >1 ? leftLink=findindex(product, "l=$(leftEnd-1)") : leftLink=nothing
 	for i =1:length(sites)-1
 		if leftLink != nothing
-			U,S,V,leftLink,v = svd(product,
+			U,S,V,spec,leftLink,v = svd(product,
 							IndexSet(leftLink, findindex(product, "q=$(actpos[i])"));
 							kwargs...)
 		else
-			U,S,V,leftLink,v = svd(product,
+			U,S,V,spec, leftLink,v = svd(product,
 							findindex(product, "q=$(actpos[i])");
 							kwargs...)
 		end
