@@ -1,17 +1,15 @@
 A quantum circuit simulator using tensor network methods.
 
 # Install
-First, you should have Julia installed. If you haven't done that yet, follow this link to [Julia](https://julialang.org) official site.
-
 To get started, run following commands:
 
 ```julia
 import Pkg
 # to install ITensors.jl
-ITensors = Pkg.PackageSpec(url="https://github.com/ITensor/ITensors.jl.git")
+ITensorsPkg = Pkg.PackageSpec(url="https://github.com/ITensor/ITensors.jl.git")
 # to install LinQu
-LinQu =  Pkg.PackageSpec(url="https://github.com/YiqingZhouKelly/LinQu.jl.git")
-Pkg.add([ITensors, LinQu])
+LinQuPkg =  Pkg.PackageSpec(url="https://github.com/YiqingZhouKelly/LinQu.jl.git")
+Pkg.add([ITensorsPkg, LinQuPkg])
 ```
 Then you should be ready to go!
 
