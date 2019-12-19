@@ -82,3 +82,10 @@ for i =1:2
 end
 const FREDKIN_DATA = fredkin
 const CSWAP_DATA = fredkin
+
+cz = zeros(ComplexF64, 2,2,2,2)
+cz[1,1,1,1] = 1
+cz[1,2,1,2] = 1
+cz[2,1,2,1] = 1
+cz[2,2,2,2] = -1
+const CZ_DATA = cz

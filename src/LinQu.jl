@@ -99,7 +99,8 @@ export  IntFloat,
 		SWAP_DATA,
 		TOFFOLI_DATA,
 		FREDKIN_DATA,
-		CSWAP_DATA
+		CSWAP_DATA,
+		CZ_DATA
 include("qgates/commongates/commonkernel.jl")
 
 include("qgates/qgate.jl")
@@ -145,6 +146,7 @@ export 	I,
 		SWAP,
 		TOFFOLI,
 		FREDKIN,
+		CZ,
 		Rx,
 		Ry,
 		Rz,

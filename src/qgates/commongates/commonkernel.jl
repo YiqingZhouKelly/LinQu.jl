@@ -12,6 +12,7 @@ SWAP_func() = SWAP_DATA
 CNOT_func() = CNOT_DATA
 TOFFOLI_func() = TOFFOLI_DATA
 FREDKIN_func() = FREDKIN_DATA
+CZ_func() = CZ_DATA
 
 Rx_func(θ::Real) = cos(θ/2)I_DATA - sin(θ/2)im* X_DATA
 Ry_func(θ::Real) = cos(θ/2)I_DATA - sin(θ/2)im* Y_DATA
@@ -42,6 +43,7 @@ const SWAP_kernel = GateKernel(SWAP_func, "SWAP")
 const CNOT_kernel = GateKernel(CNOT_func, "CNOT")
 const TOFFOLI_kernel = GateKernel(TOFFOLI_func, "TOFFOLI")
 const FREDKIN_kernel = GateKernel(FREDKIN_func, "FREDKIN")
+const CZ_kernel = GateKernel(CZ_func, "CZ")
 const Rx = GateKernel(Rx_func, 1, "Rx")
 const Ry = GateKernel(Ry_func, 1, "Ry")
 const Rz = GateKernel(Rz_func, 1, "Rz")
